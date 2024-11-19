@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thread</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif, sans-serif;
+            margin: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>{{.Title}}</th>
+                <th>{{.Author}}</th>
+                <th>{{.Created}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{.Content}}</td>
+            </tr>
+            <tr>
+                <td>{{.Categories}}</td>
+            </tr>
+            <tr>
+                <td>{{.Likes}}</td>
+                <td>{{.Dislikes}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    {{range .Replies}}
+    <table>
+        <thead>
+            <tr>
+                <th>{{.Author}}</th>
+                <th>{{.Created}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{.Content}}</td>
+            </tr>
+            <tr>
+                <td>{{.Likes}}</td>
+                <td>{{.Dislikes}}</td>
+            </tr>
+        </tbody>
+    </table>
+    {{end}}
+
+
+    <a href="/">Back to Front Page</a>
+</body>
+
+</html>
