@@ -263,6 +263,9 @@ func main() {
 	http.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
 		deletePostHandler(db, w, r)
 	})
+	http.HandleFunc("/static/styles.css", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/styles.css")
+	})
 
 	// Start the server
 	fmt.Println("Server running on http://localhost:8080")
