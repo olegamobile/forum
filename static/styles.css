@@ -17,18 +17,16 @@ td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 th {
     background-color: #f4f4f4;
 }
 
-.left-text {
-    float: left;
-}
-
-.right-text {
-    float: right;
+td {
+    background-color: #fafafa;
 }
 
 /* Link styles */
@@ -44,6 +42,11 @@ a:hover {
 /* Form styles */
 form {
     margin-bottom: 1rem;
+}
+
+input[type="text"] {
+    width: 70%;
+    max-width: 400px;
 }
 
 textarea {

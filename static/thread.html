@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thread</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th colspan="3">{{.Title}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.Created}}</td>
+                <td colspan="2">{{.Content}}</td>
+            </tr>
+            <tr>
+                <td style="width: 12rem; font-size: 0.8em">{{.Likes}} likes, {{.Dislikes}} dislikes</td>
+                <td style="font-size: 0.8em">Categories: {{.Categories}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    {{range .Replies}}
+    <table>
+        <tbody>
+            <tr>
+                <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.Created}}</td>
+                <td colspan="2">{{.Content}}</td>
+            </tr>
+            <tr>
+                <td style="width: 12rem; font-size: 0.8em">{{.Likes}} likes, {{.Dislikes}} dislikes</td>
+                <td><button class="reply-button" type="button">Reply</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="reply-form-container" style="display: none; margin-left: 5rem;">
+        <form action="/replytoreply" method="post">
+            <textarea name="content" rows="4" placeholder="Message"></textarea><br>
+            <input type="hidden" name="parentId" value="{{.ID}}">
+            <input type="hidden" name="baseId" value="{{$.ID}}">
+            <button type="submit">Submit Reply</button>
+        </form>
+    </div>
+
+    {{end}}
+
+    <h3>Add a reply</h3>
+    <form method="POST" action="/reply">
+        <textarea name="content" placeholder="Message" rows="3"></textarea><br>
+        <input type="hidden" name="parentId" value="{{.ID}}">
+        <input type="hidden" name="baseId" value="{{.ID}}">
+        <p><button type="submit">Reply</button></p>
+    </form>
+
+
+    <a href="/">Back to Front Page</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const buttons = document.querySelectorAll(".reply-button");
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    const formContainer = this.closest("table").nextElementSibling;
+                    if (formContainer.style.display === "none") {
+                        formContainer.style.display = "block";
+                    } else {
+                        formContainer.style.display = "none";
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

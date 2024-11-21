@@ -11,15 +11,6 @@
 <body>
     <h1>Forum of Communication</h1>
 
-    <h2>Start a thread</h2>
-    <form method="POST" action="/add">
-        <input type="text" name="title" placeholder="Post title" required><br>
-        <textarea name="content" placeholder="Message" rows="3"></textarea><br>
-        <textarea name="categories" placeholder="List categories" rows="2"></textarea><br>
-        <p><button type="submit">Start Thread</button></p>
-    </form>
-    
-
     <h2>Threads</h2>
     <table>
         <thead>
@@ -31,16 +22,24 @@
             </tr>
         </thead>
         <tbody>
-            {{range .Posts}}
+            {{range .Threads}}
             <tr>
                 <td>{{.ID}}</td>
-                <td><a href="/post/{{.ID}}">{{.Title}}</a></td>
+                <td><a href="/thread/{{.ID}}">{{.Title}}</a></td>
                 <td>{{.Created}}</td>
                 <td>{{.RepliesN}}</td>
             </tr>
             {{end}}
         </tbody>
     </table>
+
+    <h3>Start a new thread</h3>
+    <form method="POST" action="/add">
+        <input type="text" name="title" placeholder="Thread title" required><br>
+        <textarea name="content" placeholder="Message" rows="3"></textarea><br>
+        <textarea name="categories" placeholder="List categories" rows="2"></textarea><br>
+        <p><button type="submit">Start Thread</button></p>
+    </form>
 </body>
 
 </html>

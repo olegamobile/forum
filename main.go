@@ -14,7 +14,7 @@ import (
 	//_ "modernc.org/sqlite"
 )
 
-type Post struct {
+type Thread struct {
 	ID         int
 	Author     string
 	Title      string
@@ -29,23 +29,25 @@ type Post struct {
 }
 
 type Reply struct {
-	ID       int
-	Author   string
-	Content  string
-	Created  string
-	Likes    int
-	Dislikes int
-	ParentID int
+	ID         int
+	Author     string
+	Content    string
+	Created    string
+	Likes      int
+	Dislikes   int
+	ParentID   int
+	ParentType string
+	Replies    []Reply
 }
 
 type PageData struct {
-	Posts []Post
+	Threads []Thread
 }
 
 func makeTables(db *sql.DB) {
-	// Create posts table if it doesn't exist
-	createPostsTableQuery := `
-	CREATE TABLE IF NOT EXISTS posts (
+	// Create threads table if it doesn't exist
+	createThreadsTableQuery := `
+	CREATE TABLE IF NOT EXISTS threads (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		author TEXT NOT NULL,
 		title TEXT NOT NULL,
@@ -55,8 +57,8 @@ func makeTables(db *sql.DB) {
 		likes INTEGER DEFAULT 0,
 		dislikes INTEGER DEFAULT 0
 	);`
-	if _, err := db.Exec(createPostsTableQuery); err != nil {
-		fmt.Println("Error creating posts table:", err)
+	if _, err := db.Exec(createThreadsTableQuery); err != nil {
+		fmt.Println("Error creating threads table:", err)
 		return
 	}
 
@@ -69,7 +71,8 @@ func makeTables(db *sql.DB) {
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			likes INTEGER DEFAULT 0,
 			dislikes INTEGER DEFAULT 0,
-			parent_id INTEGER NOT NULL
+			parent_id INTEGER NOT NULL,
+			parent_type TEXT
 		);`
 	if _, err := db.Exec(createRepliesTableQuery); err != nil {
 		fmt.Println("Error creating replies table:", err)
@@ -77,32 +80,31 @@ func makeTables(db *sql.DB) {
 	}
 }
 
-func fetchPosts(db *sql.DB) ([]Post, error) {
-	selectQuery := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM posts;`
+func fetchThreads(db *sql.DB) ([]Thread, error) {
+	selectQuery := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM threads;`
 	rows, err := db.Query(selectQuery)
 	if err != nil {
-		fmt.Println("fetchPosts selectQuery failed", err.Error())
+		fmt.Println("fetchThreads selectQuery failed", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
-	//fmt.Println(rows)
 
-	var posts []Post
+	var threads []Thread
 	for rows.Next() {
-		var po Post
+		var th Thread
 
-		err := rows.Scan(&po.ID, &po.Author, &po.Title, &po.Content, &po.Created, &po.Categories, &po.Likes, &po.Dislikes)
+		err := rows.Scan(&th.ID, &th.Author, &th.Title, &th.Content, &th.Created, &th.Categories, &th.Likes, &th.Dislikes)
 		if err != nil {
-			fmt.Println("fetchPosts rows scanning:", err.Error())
+			fmt.Println("fetchThreads rows scanning:", err.Error())
 			return nil, err
 		}
-		posts = append(posts, po)
+		threads = append(threads, th)
 	}
-	return posts, nil
+	return threads, nil
 }
 
 func fetchReplies(db *sql.DB) ([]Reply, error) {
-	selectQuery := `SELECT id, author, content, created_at, likes, dislikes, parent_id FROM replies;`
+	selectQuery := `SELECT id, author, content, created_at, likes, dislikes, parent_id, parent_type FROM replies;`
 	rows, err := db.Query(selectQuery)
 	if err != nil {
 		return nil, err
@@ -112,7 +114,7 @@ func fetchReplies(db *sql.DB) ([]Reply, error) {
 	var replies []Reply
 	for rows.Next() {
 		var re Reply
-		err := rows.Scan(&re.ID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes, &re.ParentID)
+		err := rows.Scan(&re.ID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes, &re.ParentID, &re.ParentType)
 		if err != nil {
 			return nil, err
 		}
@@ -121,12 +123,12 @@ func fetchReplies(db *sql.DB) ([]Reply, error) {
 	return replies, nil
 }
 
-func addPostHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func addThreadHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		author := "Auteur"
-		title := r.FormValue("title")
-		content := r.FormValue("content")
-		rawCats := r.FormValue("categories")
+		title := strings.TrimSpace(r.FormValue("title"))
+		content := strings.TrimSpace(r.FormValue("content"))
+		rawCats := strings.ToLower(r.FormValue("categories"))
 
 		cleanCats := ""
 		for _, char := range strings.TrimSpace(rawCats) {
@@ -135,27 +137,46 @@ func addPostHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		catsJson, _ := json.Marshal(strings.Fields(cleanCats))
-		//fmt.Println(string(catsJson))
 
-		_, err := db.Exec(`INSERT INTO posts (author, title, content, categories) VALUES (?, ?, ?, ?);`, author, title, content, string(catsJson)) //categories <=> catsJson, Ongelma JSOnin kanssa
-		if err != nil {
-			fmt.Println("Adding:", err.Error())
-			http.Error(w, "Error adding post", http.StatusInternalServerError)
-			return
+		if content != "" {
+			_, err := db.Exec(`INSERT INTO threads (author, title, content, categories) VALUES (?, ?, ?, ?);`, author, title, content, string(catsJson)) //categories <=> catsJson, Ongelma JSOnin kanssa
+			if err != nil {
+				fmt.Println("Adding:", err.Error())
+				http.Error(w, "Error adding thread", http.StatusInternalServerError)
+				return
+			}
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
-func findPost(db *sql.DB, id int) (Post, error) {
-	var post Post
-	selectQueryPost := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM posts WHERE id = ?;`
-	err1 := db.QueryRow(selectQueryPost, id).Scan(&post.ID, &post.Author, &post.Title, &post.Content, &post.Created, &post.Categories, &post.Likes, &post.Dislikes)
+func addReplyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request, parentType string) {
+	if r.Method == http.MethodPost {
+		author := "Auteur"
+		content := strings.TrimSpace(r.FormValue("content"))
+		parId := r.FormValue("parentId")
 
-	selectQueryReplies := `SELECT id, author, content, created_at, likes, dislikes FROM replies WHERE parent_id = ?;`
-	rows, err2 := db.Query(selectQueryReplies, post.ID)
+		if content != "" {
+			_, err := db.Exec(`INSERT INTO replies (author, content, parent_id, parent_type) VALUES (?, ?, ?, ?);`, author, content, parId, parentType)
+			if err != nil {
+				fmt.Println("Replying:", err.Error())
+				http.Error(w, "Error adding reply", http.StatusInternalServerError)
+				return
+			}
+		}
+		http.Redirect(w, r, "/thread/"+r.FormValue("baseId"), http.StatusSeeOther)
+	}
+}
+
+func findThread(db *sql.DB, id int) (Thread, error) {
+	var thread Thread
+	selectQueryThread := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM threads WHERE id = ?;`
+	err1 := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories, &thread.Likes, &thread.Dislikes)
+
+	selectQueryReplies := `SELECT id, author, content, created_at, likes, dislikes FROM replies WHERE parent_id = ? AND parent_type = ?;`
+	rows, err2 := db.Query(selectQueryReplies, thread.ID, "thread")
 	if err2 != nil {
-		return post, err2
+		return thread, err2
 	}
 	defer rows.Close()
 
@@ -164,38 +185,39 @@ func findPost(db *sql.DB, id int) (Post, error) {
 		var re Reply
 		err3 := rows.Scan(&re.ID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes)
 		if err3 != nil {
-			return post, err3
+			return thread, err3
 		}
 		replies = append(replies, re)
 	}
-	post.Replies = replies
+	thread.Replies = replies
 
-	return post, err1
+	return thread, err1
 }
 
-func postPageHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/post/"):]
-	postID, err := strconv.Atoi(id)
+func threadPageHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Path[len("/thread/"):]
+	threadID, err := strconv.Atoi(id)
 	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		fmt.Println("Error parsing id:", id)
+		http.Error(w, "Invalid thread ID", http.StatusBadRequest)
 		return
 	}
 
-	post, err := findPost(db, postID)
+	thread, err := findThread(db, threadID)
 	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
+		http.Error(w, "Thread not found", http.StatusNotFound)
 		return
 	}
 
-	tmpl.Execute(w, post)
+	tmpl.Execute(w, thread)
 }
 
-func deletePostHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func deleteThreadHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		id := r.FormValue("id")
-		_, err := db.Exec(`DELETE FROM todos WHERE id = ?;`, id)
+		_, err := db.Exec(`DELETE FROM threads WHERE id = ?;`, id)
 		if err != nil {
-			http.Error(w, "Error deleting task", http.StatusInternalServerError)
+			http.Error(w, "Error deleting thread", http.StatusInternalServerError)
 			return
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -203,27 +225,28 @@ func deletePostHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 func indexHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
-	posts, err := fetchPosts(db)
+	threads, err := fetchThreads(db)
 	if err != nil {
-		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
+		http.Error(w, "Error fetching threads", http.StatusInternalServerError)
 		return
 	}
 
 	replies, err := fetchReplies(db)
 	if err != nil {
+		fmt.Println("Error fetching replies:", err.Error())
 		http.Error(w, "Error fetching replies", http.StatusInternalServerError)
 		return
 	}
 
-	for i, po := range posts {
+	for i, po := range threads {
 		for _, re := range replies {
 			if po.ID == re.ParentID {
-				posts[i].RepliesN++
+				threads[i].RepliesN++
 			}
 		}
 	}
 
-	data := PageData{Posts: posts}
+	data := PageData{Threads: threads}
 	tmpl.Execute(w, data)
 }
 
@@ -244,7 +267,7 @@ func main() {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	postTmpl, err := template.ParseFiles("static/post.html")
+	threadTmpl, err := template.ParseFiles("static/thread.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
@@ -255,13 +278,19 @@ func main() {
 		indexHandler(db, indexTmpl, w, r)
 	})
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
-		addPostHandler(db, w, r)
+		addThreadHandler(db, w, r)
 	})
-	http.HandleFunc("/post/", func(w http.ResponseWriter, r *http.Request) {
-		postPageHandler(db, postTmpl, w, r)
+	http.HandleFunc("/reply", func(w http.ResponseWriter, r *http.Request) {
+		addReplyHandler(db, w, r, "thread")
+	})
+	http.HandleFunc("/replytoreply", func(w http.ResponseWriter, r *http.Request) {
+		addReplyHandler(db, w, r, "reply")
+	})
+	http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
+		threadPageHandler(db, threadTmpl, w, r)
 	})
 	http.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
-		deletePostHandler(db, w, r)
+		deleteThreadHandler(db, w, r)
 	})
 	http.HandleFunc("/static/styles.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/styles.css")
