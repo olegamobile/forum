@@ -1,0 +1,42 @@
+{{ define "reply" }}
+<div class="reply">
+
+    {{ if .Replies }}
+    <ul>
+        {{ range .Replies }}
+        <li>
+
+            <!-- Content of reply -->
+            <table>
+                <tbody>
+                    <tr>
+                        <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.Created}}</td>
+                        <td colspan="2">{{.Content}}</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 12rem; font-size: 0.8em">{{.Likes}} likes, {{.Dislikes}} dislikes</td>
+                        <td><button class="reply-button" type="button">Reply</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Reply submission form -->
+            <div class="reply-form-container" style="display: none; margin-left: 5rem;">
+                <form action="/replytoreply" method="post">
+                    <textarea name="content" rows="4" placeholder="Message"></textarea><br>
+                    <input type="hidden" name="parentId" value="{{.ID}}">
+                    <input type="hidden" name="baseId" value="{{.BaseID}}">
+                    <button type="submit">Submit Reply</button>
+                </form>
+            </div>
+
+            <!-- Add child replies like defined in this file -->
+            {{ if .Replies }}
+            {{ template "reply" . }}
+            {{ end }}
+        </li>
+        {{ end }}
+    </ul>
+    {{ end }}
+</div>
+{{ end }}

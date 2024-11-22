@@ -9,6 +9,8 @@
 </head>
 
 <body>
+
+    <!-- Thread starter -->
     <table>
         <thead>
             <tr>
@@ -27,7 +29,8 @@
         </tbody>
     </table>
 
-    {{range .Replies}}
+    {{ range .Replies }}
+    <!-- Content of reply -->
     <table>
         <tbody>
             <tr>
@@ -41,22 +44,30 @@
         </tbody>
     </table>
 
+    <!-- Form to submit reply to reply -->
     <div class="reply-form-container" style="display: none; margin-left: 5rem;">
         <form action="/replytoreply" method="post">
             <textarea name="content" rows="4" placeholder="Message"></textarea><br>
             <input type="hidden" name="parentId" value="{{.ID}}">
-            <input type="hidden" name="baseId" value="{{$.ID}}">
+            <input type="hidden" name="baseId" value="{{.BaseID}}">
             <button type="submit">Submit Reply</button>
         </form>
     </div>
 
-    {{end}}
+    {{ if .Replies }}
+    {{ template "reply" . }}
+    {{ end }}
 
+    {{ end }}
+
+
+
+    <!-- Form to reply to OP -->
     <h3>Add a reply</h3>
     <form method="POST" action="/reply">
         <textarea name="content" placeholder="Message" rows="3"></textarea><br>
         <input type="hidden" name="parentId" value="{{.ID}}">
-        <input type="hidden" name="baseId" value="{{.ID}}">
+        <input type="hidden" name="baseId" value="{{.BaseID}}">
         <p><button type="submit">Reply</button></p>
     </form>
 
@@ -64,6 +75,8 @@
     <a href="/">Back to Front Page</a>
 
     <script>
+
+        // Open and close reply-to-reply form with "Reply" button
         document.addEventListener("DOMContentLoaded", function () {
             const buttons = document.querySelectorAll(".reply-button");
             buttons.forEach(button => {

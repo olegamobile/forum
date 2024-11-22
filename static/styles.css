@@ -29,6 +29,12 @@ td {
     background-color: #fafafa;
 }
 
+/* No bullets to list*/
+ul
+{
+    list-style-type:none;
+}
+
 /* Link styles */
 a {
     color: #007bff;
