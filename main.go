@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/mail"
 	"strconv"
 	"strings"
 	"text/template"
 	"unicode"
 
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/bcrypt"
 	//_ "modernc.org/sqlite"
 )
 
@@ -45,6 +47,13 @@ type Reply struct {
 type PageData struct {
 	Threads []Thread
 }
+
+type SignData struct {
+	Message1 string
+	Message2 string
+}
+
+var signData SignData
 
 func makeTables(db *sql.DB) {
 	// Create threads table if it doesn't exist
@@ -81,6 +90,21 @@ func makeTables(db *sql.DB) {
 		fmt.Println("Error creating replies table:", err)
 		return
 	}
+
+	// Create users table if it doesn't exist
+	createUsersTableQuery := `
+		CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email TEXT UNIQUE NOT NULL,
+		username TEXT UNIQUE NOT NULL,
+		password TEXT NOT NULL,  -- Store hashed passwords (bonus task)
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+	if _, err := db.Exec(createUsersTableQuery); err != nil {
+		fmt.Println("Error creating replies table:", err)
+		return
+	}
+
 }
 
 func fetchThreads(db *sql.DB) ([]Thread, error) {
@@ -208,6 +232,9 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 	var thread Thread
 	selectQueryThread := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM threads WHERE id = ?;`
 	err1 := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories, &thread.Likes, &thread.Dislikes)
+	if err1 != nil {
+		return thread, err1
+	}
 
 	selectQueryReplies := `SELECT id, base_id, author, content, created_at, likes, dislikes FROM replies WHERE parent_id = ? AND parent_type = ?;`
 	rows, err2 := db.Query(selectQueryReplies, thread.ID, "thread")
@@ -257,18 +284,6 @@ func threadPageHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWrite
 	tmpl.Execute(w, thread)
 }
 
-func deleteThreadHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		id := r.FormValue("id")
-		_, err := db.Exec(`DELETE FROM threads WHERE id = ?;`, id)
-		if err != nil {
-			http.Error(w, "Error deleting thread", http.StatusInternalServerError)
-			return
-		}
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	}
-}
-
 func indexHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
 	threads, err := fetchThreads(db)
 	if err != nil {
@@ -291,8 +306,95 @@ func indexHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r 
 		}
 	}
 
+	signData.Message1 = ""
+	signData.Message2 = ""
 	data := PageData{Threads: threads}
 	tmpl.Execute(w, data)
+}
+
+func checkString(s string) bool {
+	if len(s) < 5 {
+		return false
+	}
+	for _, ch := range s {
+		if !unicode.IsLetter(ch) && !unicode.IsDigit(ch) && !unicode.IsSymbol(ch) {
+			fmt.Println("Only letters, numbers and symbols allowed:", string(ch))
+			return false
+		}
+	}
+	return true
+}
+
+func userExists(db *sql.DB, username string, mail string) bool {
+	selectQueryName := `SELECT username FROM users WHERE username = ?`
+	err1 := db.QueryRow(selectQueryName, username).Scan(&username)
+	if err1 == nil {
+		return true
+	}
+
+	selectQueryMail := `SELECT email FROM users WHERE email = ?`
+	err2 := db.QueryRow(selectQueryMail, mail).Scan(&mail)
+	if err2 == nil {
+		return true
+	}
+
+	return false
+}
+
+func addUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		name := r.FormValue("username")
+		email := r.FormValue("email")
+		pass := r.FormValue("password")
+
+		n, p := checkString(name), checkString(pass)
+		_, e := mail.ParseAddress(email)
+
+		if !n || !p {
+			fmt.Println("Minimum 5 chars, limited chars")
+			signData.Message2 = "Minimum 5 characters in usename and password. Only letters, numbers and symbols allowed."
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+
+		if e != nil {
+			fmt.Println("Invalid email address")
+			signData.Message2 = "Invalid email address"
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+
+		if userExists(db, name, email) {
+			fmt.Println("Name or email already taken")
+			signData.Message2 = "Name or email already taken"
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+
+		hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+
+		_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
+		if err != nil {
+			fmt.Println("Adding:", err.Error())
+			http.Error(w, "Error adding user", http.StatusInternalServerError)
+			return
+		}
+
+		signData.Message2 = ""
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		author := "Auteur"
+		title := strings.TrimSpace(r.FormValue("title"))
+
+		fmt.Println(author, title)
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
 }
 
 func main() {
@@ -307,12 +409,17 @@ func main() {
 	makeTables(db)
 
 	// Initialize templates
-	indexTmpl, err := template.ParseFiles("static/index.html")
+	indexTmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	threadTmpl, err := template.ParseFiles("static/thread.html", "static/reply.html")
+	threadTmpl, err := template.ParseFiles("templates/thread.html", "templates/reply.html")
+	if err != nil {
+		fmt.Println("Error parsing template:", err)
+		return
+	}
+	signTmpl, err := template.ParseFiles("templates/signin.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
@@ -334,11 +441,17 @@ func main() {
 	http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
 		threadPageHandler(db, threadTmpl, w, r)
 	})
-	http.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
-		deleteThreadHandler(db, w, r)
-	})
 	http.HandleFunc("/static/styles.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/styles.css")
+	})
+	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
+		signTmpl.Execute(w, signData)
+	})
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		logUserHandler(db, w, r)
+	})
+	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		addUserHandler(db, w, r)
 	})
 
 	// Start the server

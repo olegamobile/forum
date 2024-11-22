@@ -1,0 +1,11 @@
+
+- spell time and date better, maybe two rows
+- implement:
+    x register user
+    - login
+    - logout
+- reply only if logged in (name and id to message or reply)
+- implement like and dislike
+- cookies to limit length and track sessions
+- filter by category
+- filter by liked and disliked

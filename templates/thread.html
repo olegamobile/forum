@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thread</title>
+    <title>{{.Title}}</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -40,9 +40,13 @@
         <textarea name="content" placeholder="Message" rows="3"></textarea><br>
         <input type="hidden" name="parentId" value="{{.ID}}">
         <input type="hidden" name="baseId" value="{{.BaseID}}">
-        <p><button type="submit">Reply</button></p>
+        <p>
+            <button type="submit">Reply</button>
+            <input type="reset" value="Clear">
+        </p>
     </form>
 
+    <!-- Link back home -->
     <a href="/">Back to Front Page</a>
 
     <script>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Sign-In</title>
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <style>
+        #username {
+            width: 50ch;
+        }
+        #email {
+            width: 50ch;
+        }
+        #pwd {
+            width: 50ch;
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <h2>Sign-in with your username or email</h2>
+    <form method="POST" action="/login">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username"/><br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email"/><br>
+        <label for="pwd">Password:</label><br>
+        <input type="password" id="pwd" name="password" required /><br>
+        <button type="submit" style="margin-top: 1rem;">Login</button>
+        <p style="color:darkred;">{{.Message1}}</p>
+    </form>
+
+    <h2>Register new user</h2>
+    <form method="POST" action="/register">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required /><br>
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required /><br>
+        <label for="pwd">Password:</label><br>
+        <input type="password" id="pwd" name="password" required /><br>
+        <button type="submit" style="margin-top: 1rem;">Register</button>
+        <p style="color:darkred;">{{.Message2}}</p>
+    </form>
+
+    <br>
+    <a href="/">Back to Front Page</a>
+</body>
+
+</html>
