@@ -29,38 +29,10 @@
         </tbody>
     </table>
 
-    {{ range .Replies }}
-    <!-- Content of reply -->
-    <table>
-        <tbody>
-            <tr>
-                <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.Created}}</td>
-                <td colspan="2">{{.Content}}</td>
-            </tr>
-            <tr>
-                <td style="width: 12rem; font-size: 0.8em">{{.Likes}} likes, {{.Dislikes}} dislikes</td>
-                <td><button class="reply-button" type="button">Reply</button></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- Form to submit reply to reply -->
-    <div class="reply-form-container" style="display: none; margin-left: 5rem;">
-        <form action="/replytoreply" method="post">
-            <textarea name="content" rows="4" placeholder="Message"></textarea><br>
-            <input type="hidden" name="parentId" value="{{.ID}}">
-            <input type="hidden" name="baseId" value="{{.BaseID}}">
-            <button type="submit">Submit Reply</button>
-        </form>
-    </div>
-
+    <!-- Generate tree of replies recursively -->
     {{ if .Replies }}
     {{ template "reply" . }}
     {{ end }}
-
-    {{ end }}
-
-
 
     <!-- Form to reply to OP -->
     <h3>Add a reply</h3>
@@ -71,11 +43,9 @@
         <p><button type="submit">Reply</button></p>
     </form>
 
-
     <a href="/">Back to Front Page</a>
 
     <script>
-
         // Open and close reply-to-reply form with "Reply" button
         document.addEventListener("DOMContentLoaded", function () {
             const buttons = document.querySelectorAll(".reply-button");
