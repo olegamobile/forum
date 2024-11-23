@@ -325,19 +325,21 @@ func checkString(s string) bool {
 	return true
 }
 
-func userExists(db *sql.DB, username string, mail string) bool {
+func nameExists(db *sql.DB, username string) bool {
 	selectQueryName := `SELECT username FROM users WHERE username = ?`
 	err1 := db.QueryRow(selectQueryName, username).Scan(&username)
 	if err1 == nil {
 		return true
 	}
+	return false
+}
 
+func emailExists(db *sql.DB, mail string) bool {
 	selectQueryMail := `SELECT email FROM users WHERE email = ?`
 	err2 := db.QueryRow(selectQueryMail, mail).Scan(&mail)
 	if err2 == nil {
 		return true
 	}
-
 	return false
 }
 
@@ -364,9 +366,16 @@ func addUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if userExists(db, name, email) {
-			fmt.Println("Name or email already taken")
-			signData.Message2 = "Name or email already taken"
+		if nameExists(db, name) {
+			fmt.Println("Name already taken")
+			signData.Message2 = "Name already taken"
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+
+		if emailExists(db, email) {
+			fmt.Println("Email already taken")
+			signData.Message2 = "Email already taken"
 			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
 		}
@@ -388,10 +397,37 @@ func addUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		author := "Auteur"
-		title := strings.TrimSpace(r.FormValue("title"))
+		name := r.FormValue("username")
+		email := r.FormValue("email")
+		pass := r.FormValue("password")
 
-		fmt.Println(author, title)
+		if !nameExists(db, name) && !emailExists(db, email) {
+			fmt.Println("User not found")
+			signData.Message1 = "User not found"
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+
+		storedHashedPassword := ""
+		if nameExists(db, name) {
+			// retrieve hashed pass with name
+		} else {
+			// retrieve hashed pass with email
+		}
+
+		err := bcrypt.CompareHashAndPassword([]byte(storedHashedPassword), []byte(pass))
+
+		if err != nil {
+			fmt.Println("Password incorrect")
+			signData.Message1 = "Password incorrect"
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
+
+		// sign in
+		// set a cookie
+		// Check session token on every request
+		// Log out: delete the cookie and remove it from the database
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
