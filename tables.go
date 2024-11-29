@@ -47,7 +47,7 @@ func makeTables(db *sql.DB) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		email TEXT UNIQUE NOT NULL,
 		username TEXT UNIQUE NOT NULL,
-		password TEXT NOT NULL,  -- Store hashed passwords (bonus task)
+		password TEXT NOT NULL,  -- Hashed passwords
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 	if _, err := db.Exec(createUsersTableQuery); err != nil {
@@ -55,4 +55,17 @@ func makeTables(db *sql.DB) {
 		return
 	}
 
+	// Create sessions table if it doesn't exist
+	creatSessionsTableQuery := `
+		CREATE TABLE IF NOT EXISTS sessions (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		session_token TEXT UNIQUE NOT NULL,
+		expires_at DATETIME NOT NULL,
+		FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+	);`
+	if _, err := db.Exec(creatSessionsTableQuery); err != nil {
+		fmt.Println("Error creating replies table:", err)
+		return
+	}
 }

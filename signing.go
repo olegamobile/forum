@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/mail"
+	"time"
 	"unicode"
 
+	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -33,13 +35,13 @@ func checkString(s string) bool {
 func nameExists(db *sql.DB, username string) bool {
 	selectQueryName := `SELECT username FROM users WHERE username = ?`
 	err := db.QueryRow(selectQueryName, username).Scan(&username)
-	return err == nil // nil if name found
+	return err == nil // no error if name found
 }
 
 func emailExists(db *sql.DB, mail string) bool {
 	selectQueryMail := `SELECT email FROM users WHERE email = ?`
 	err := db.QueryRow(selectQueryMail, mail).Scan(&mail)
-	return err == nil // nil if email found
+	return err == nil // no error if email found
 }
 
 func addUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
@@ -94,12 +96,27 @@ func addUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func createSession() (string, error) {
+	sessionUUID, err := uuid.NewV4() // Generate a new UUID
+	if err != nil {
+		return "", err
+	}
+	return sessionUUID.String(), nil
+}
+
+func saveSession(db *sql.DB, userID int, sessionToken string, expiresAt time.Time) error {
+	query := `INSERT INTO sessions (user_id, session_token, expires_at) VALUES (?, ?, ?)`
+	_, err := db.Exec(query, userID, sessionToken, expiresAt)
+	return err
+}
+
 func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		name := r.FormValue("username")
 		email := r.FormValue("email")
 		pass := r.FormValue("password")
 
+		// Checking usesr
 		if !nameExists(db, name) && !emailExists(db, email) {
 			fmt.Println("User not found")
 			signData.Message1 = "User not found"
@@ -107,26 +124,53 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		storedHashedPassword := ""
+		// Checking password
+		storedHashedPass, userID := "", 0
 		if nameExists(db, name) {
-			// retrieve hashed pass with name
+			query := `SELECT password, id FROM users WHERE username = ?`
+			db.QueryRow(query, name).Scan(&storedHashedPass, &userID)
 		} else {
-			// retrieve hashed pass with email
+			query := `SELECT password, id FROM users WHERE email = ?`
+			db.QueryRow(query, email).Scan(&storedHashedPass, &userID)
 		}
 
-		err := bcrypt.CompareHashAndPassword([]byte(storedHashedPassword), []byte(pass))
+		err := bcrypt.CompareHashAndPassword([]byte(storedHashedPass), []byte(pass))
 
 		if err != nil {
 			fmt.Println("Password incorrect")
 			signData.Message1 = "Password incorrect"
 			http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			return
+		} else {
+			fmt.Println("Correct password")
 		}
 
-		// sign in
-		// set a cookie
-		// Check session token on every request
-		// Log out: delete the cookie and remove it from the database
+		// Cookie and session
+		sessionToken, err := createSession()
+		if err != nil {
+			http.Error(w, "Unable to create session", http.StatusInternalServerError)
+			return
+		}
+
+		expiresAt := time.Now().Add(2 * time.Hour) // 2-hour expiration
+
+		err = saveSession(db, userID, sessionToken, expiresAt)
+		if err != nil {
+			http.Error(w, "Unable to save session", http.StatusInternalServerError)
+			return
+		}
+
+		http.SetCookie(w, &http.Cookie{ // Set the session token as a cookie
+			Name:     "session_token",
+			Value:    sessionToken,
+			Expires:  expiresAt,
+			HttpOnly: true,
+		})
+
+		// x sign in
+		// x set a cookie
+		//   Check session token on every request
+		//   Log out: delete the cookie and remove it from the database
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
