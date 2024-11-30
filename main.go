@@ -29,8 +29,14 @@ func setHandlers(db *sql.DB) {
 	}
 
 	// Set up routes
+	http.HandleFunc("/static/styles.css", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/styles.css")
+	})
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		indexHandler(db, indexTmpl, w, r)
+	})
+	http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
+		threadPageHandler(db, threadTmpl, w, r)
 	})
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 		addThreadHandler(db, w, r)
@@ -40,12 +46,6 @@ func setHandlers(db *sql.DB) {
 	})
 	http.HandleFunc("/replytoreply", func(w http.ResponseWriter, r *http.Request) {
 		addReplyHandler(db, w, r, "reply")
-	})
-	http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
-		threadPageHandler(db, threadTmpl, w, r)
-	})
-	http.HandleFunc("/static/styles.css", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/styles.css")
 	})
 	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		signTmpl.Execute(w, signData)

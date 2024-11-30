@@ -2,10 +2,15 @@
 - spell time and date better, maybe two rows
 - implement:
     x register user
-    - login
+    x login
     - logout
+- 
 - reply only if logged in (name and id to message or reply)
+    - show reply button if session is valid
+    - reply button only works if session is valid
 - implement like and dislike
 - cookies to limit length and track sessions
 - filter by category
 - filter by liked and disliked
+    - only show if session is valid
+    - only works if session is valid

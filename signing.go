@@ -176,6 +176,7 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// return user id if session is (still) valid
 func validateSession(db *sql.DB, sessionToken string) (int, error) {
 	var userID int
 	query := `SELECT user_id FROM sessions WHERE session_token = ? AND expires_at > ?`
