@@ -151,7 +151,6 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Unable to create session", http.StatusInternalServerError)
 			return
 		}
-
 		expiresAt := time.Now().Add(2 * time.Hour) // 2-hour expiration
 
 		err = saveSession(db, userID, sessionToken, expiresAt)
@@ -160,7 +159,8 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.SetCookie(w, &http.Cookie{ // Set the session token as a cookie
+		// Set the session token as a cookie. Cookie is added to the writer's header.
+		http.SetCookie(w, &http.Cookie{
 			Name:     "session_token",
 			Value:    sessionToken,
 			Expires:  expiresAt,
@@ -174,4 +174,31 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
+}
+
+func validateSession(db *sql.DB, sessionToken string) (int, error) {
+	var userID int
+	query := `SELECT user_id FROM sessions WHERE session_token = ? AND expires_at > ?`
+	err := db.QueryRow(query, sessionToken, time.Now()).Scan(&userID)
+	if err != nil {
+		return 0, err // Invalid session or expired
+	}
+	return userID, nil
+}
+
+func restrictedHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userID, err := validateSession(db, cookie.Value)
+	if err != nil {
+		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
+		return
+	}
+
+	// Proceed with authorized access
+	fmt.Fprintf(w, "Welcome, user %d!", userID)
 }
