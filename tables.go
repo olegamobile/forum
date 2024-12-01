@@ -60,6 +60,7 @@ func makeTables(db *sql.DB) {
 		CREATE TABLE IF NOT EXISTS sessions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER NOT NULL,
+		username TEXT,
 		session_token TEXT UNIQUE NOT NULL,
 		expires_at DATETIME NOT NULL,
 		FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE

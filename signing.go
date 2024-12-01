@@ -104,9 +104,9 @@ func createSession() (string, error) {
 	return sessionUUID.String(), nil
 }
 
-func saveSession(db *sql.DB, userID int, sessionToken string, expiresAt time.Time) error {
-	query := `INSERT INTO sessions (user_id, session_token, expires_at) VALUES (?, ?, ?)`
-	_, err := db.Exec(query, userID, sessionToken, expiresAt)
+func saveSession(db *sql.DB, userID int, usname, sessionToken string, expiresAt time.Time) error {
+	query := `INSERT INTO sessions (user_id, username, session_token, expires_at) VALUES (?, ?, ?, ?)`
+	_, err := db.Exec(query, userID, usname, sessionToken, expiresAt)
 	return err
 }
 
@@ -153,8 +153,9 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 		}
 		expiresAt := time.Now().Add(2 * time.Hour) // 2-hour expiration
 
-		err = saveSession(db, userID, sessionToken, expiresAt)
+		err = saveSession(db, userID, name, sessionToken, expiresAt)
 		if err != nil {
+			fmt.Println("Error saving session", err.Error())
 			http.Error(w, "Unable to save session", http.StatusInternalServerError)
 			return
 		}
@@ -177,14 +178,16 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 }
 
 // return user id if session is (still) valid
-func validateSession(db *sql.DB, sessionToken string) (int, error) {
+func validateSession(db *sql.DB, sessionToken string) (int, string, error) {
 	var userID int
-	query := `SELECT user_id FROM sessions WHERE session_token = ? AND expires_at > ?`
-	err := db.QueryRow(query, sessionToken, time.Now()).Scan(&userID)
+	var userName string
+
+	query := `SELECT user_id, username FROM sessions WHERE session_token = ? AND expires_at > ?`
+	err := db.QueryRow(query, sessionToken, time.Now()).Scan(&userID, &userName)
 	if err != nil {
-		return 0, err // Invalid session or expired
+		return 0, "", err // Invalid session or expired
 	}
-	return userID, nil
+	return userID, userName, nil
 }
 
 func restrictedHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
@@ -194,12 +197,12 @@ func restrictedHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	userID, err := validateSession(db, cookie.Value)
+	userID, userName, err := validateSession(db, cookie.Value)
 	if err != nil {
 		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
 		return
 	}
 
 	// Proceed with authorized access
-	fmt.Fprintf(w, "Welcome, user %d!", userID)
+	fmt.Fprintf(w, "Welcome, user %d %s!", userID, userName)
 }

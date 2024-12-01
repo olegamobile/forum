@@ -23,7 +23,10 @@ type Thread struct {
 }
 
 type PageData struct {
-	Threads []Thread
+	Threads  []Thread
+	ValidSes bool
+	UsrId    int
+	UsrNm    string
 }
 
 func fetchThreads(db *sql.DB) ([]Thread, error) {
@@ -94,6 +97,30 @@ func indexHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r 
 
 	signData.Message1 = ""
 	signData.Message2 = ""
-	data := PageData{Threads: threads}
+
+	cookie, _ := r.Cookie("session_token")
+	/* 	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	} */
+
+	valSes := true
+	usId, usName := 0, ""
+
+	if cookie != nil {
+		var errVS error
+		usId, usName, errVS = validateSession(db, cookie.Value)
+		if errVS != nil {
+			// invalid session
+			fmt.Println(errVS.Error())
+			valSes = false
+		}
+	} else {
+		valSes = false
+	}
+
+	fmt.Println("cookie:", cookie, "ses:", valSes)
+
+	data := PageData{Threads: threads, ValidSes: valSes, UsrId: usId, UsrNm: usName}
 	tmpl.Execute(w, data)
 }
