@@ -190,6 +190,7 @@ func validateSession(db *sql.DB, sessionToken string) (int, string, error) {
 	return userID, userName, nil
 }
 
+// Mostly as an example on how to use stuff
 func restrictedHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
@@ -205,4 +206,30 @@ func restrictedHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 
 	// Proceed with authorized access
 	fmt.Fprintf(w, "Welcome, user %d %s!", userID, userName)
+}
+
+func logoutHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		http.Error(w, "No session found", http.StatusBadRequest)
+		return
+	}
+
+	// Delete the session from the database
+	query := `DELETE FROM sessions WHERE session_token = ?`
+	_, err = db.Exec(query, cookie.Value)
+	if err != nil {
+		http.Error(w, "Failed to log out", http.StatusInternalServerError)
+		return
+	}
+
+	// Clear the cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    "",
+		Expires:  time.Now().Add(-1 * time.Hour), // Expire immediately
+		HttpOnly: true,
+	})
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

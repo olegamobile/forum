@@ -56,6 +56,9 @@ func setHandlers(db *sql.DB) {
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
 		addUserHandler(db, w, r)
 	})
+	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		logoutHandler(db, w, r)
+	})
 }
 
 func main() {
