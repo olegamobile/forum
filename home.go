@@ -98,29 +98,8 @@ func indexHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r 
 	signData.Message1 = ""
 	signData.Message2 = ""
 
-	cookie, _ := r.Cookie("session_token")
-	/* 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	} */
+	usId, usName, validSes := validateSession(db, r)
 
-	valSes := true
-	usId, usName := 0, ""
-
-	if cookie != nil {
-		var errVS error
-		usId, usName, errVS = validateSession(db, cookie.Value)
-		if errVS != nil {
-			// invalid session
-			fmt.Println(errVS.Error())
-			valSes = false
-		}
-	} else {
-		valSes = false
-	}
-
-	fmt.Println("cookie:", cookie, "ses:", valSes)
-
-	data := PageData{Threads: threads, ValidSes: valSes, UsrId: usId, UsrNm: usName}
+	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName}
 	tmpl.Execute(w, data)
 }

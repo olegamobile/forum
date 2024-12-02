@@ -38,8 +38,8 @@
     <h3>Add a reply</h3>
     <form method="POST" action="/reply">
         <textarea name="content" placeholder="Message" rows="3"></textarea><br>
-        <input type="hidden" name="parentId" value="{{.ID}}">
-        <input type="hidden" name="baseId" value="{{.BaseID}}">
+        <input type="hidden" name="parentId" value="{{.Thread.ID}}">
+        <input type="hidden" name="baseId" value="{{.Thread.BaseID}}">
         <p>
             <button type="submit">Reply</button>
             <input type="reset" value="Clear">

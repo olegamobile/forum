@@ -24,6 +24,13 @@ type Reply struct {
 	BaseID     int
 }
 
+type threadPageData struct {
+	Thread   Thread
+	ValidSes bool
+	UsrId    int
+	UsrNm    string
+}
+
 func addThreadHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		author := "Auteur"
@@ -154,5 +161,10 @@ func threadPageHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWrite
 		return
 	}
 
+	/* 	usId, usName, validSes := validateSession(db, r)
+	   	tpd := threadPageData{thread, validSes, usId, usName}
+	   	fmt.Println(tpd) */
+
 	tmpl.Execute(w, thread)
+	//tmpl.Execute(w, tpd)
 }

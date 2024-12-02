@@ -177,35 +177,25 @@ func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// return user id if session is (still) valid
-func validateSession(db *sql.DB, sessionToken string) (int, string, error) {
+// validateSession returns user id, name and if session is (still) valid
+func validateSession(db *sql.DB, r *http.Request) (int, string, bool) {
+	validSes := true
 	var userID int
 	var userName string
 
-	query := `SELECT user_id, username FROM sessions WHERE session_token = ? AND expires_at > ?`
-	err := db.QueryRow(query, sessionToken, time.Now()).Scan(&userID, &userName)
-	if err != nil {
-		return 0, "", err // Invalid session or expired
-	}
-	return userID, userName, nil
-}
-
-// Mostly as an example on how to use stuff
-func restrictedHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
+	cookie, _ := r.Cookie("session_token")
+	if cookie != nil {
+		query := `SELECT user_id, username FROM sessions WHERE session_token = ? AND expires_at > ?`
+		err := db.QueryRow(query, cookie.Value, time.Now()).Scan(&userID, &userName)
+		if err != nil { // invalid session
+			fmt.Println(err.Error())
+			validSes = false
+		}
+	} else {
+		validSes = false
 	}
 
-	userID, userName, err := validateSession(db, cookie.Value)
-	if err != nil {
-		http.Error(w, "Invalid or expired session", http.StatusUnauthorized)
-		return
-	}
-
-	// Proceed with authorized access
-	fmt.Fprintf(w, "Welcome, user %d %s!", userID, userName)
+	return userID, userName, validSes
 }
 
 func logoutHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {

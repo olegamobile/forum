@@ -1,4 +1,4 @@
-module todo
+module forum
 
 go 1.22.0
 
