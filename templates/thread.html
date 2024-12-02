@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}}</title>
+    <title>{{.Thread.Title}}</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -14,27 +14,37 @@
     <table>
         <thead>
             <tr>
-                <th colspan="3">{{.Title}}</th>
+                <th colspan="3">{{.Thread.Title}}</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.Created}}</td>
-                <td colspan="2">{{.Content}}</td>
+                <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Thread.Author}}<br>{{.Thread.CreatedDay}}<br>{{.Thread.CreatedTime}}
+                </td>
+                <td colspan="2">{{.Thread.Content}}</td>
             </tr>
             <tr>
-                <td style="width: 12rem; font-size: 0.8em">{{.Likes}} likes, {{.Dislikes}} dislikes</td>
-                <td style="font-size: 0.8em">Categories: {{.Categories}}</td>
+                <td style="width: 12rem; font-size: 0.8em">{{.Thread.Likes}} likes, {{.Thread.Dislikes}} dislikes</td>
+                <td style="font-size: 0.8em">Categories: {{.Thread.Categories}}</td>
             </tr>
         </tbody>
     </table>
 
+    
+
     <!-- Generate tree of replies recursively -->
-    {{ if .Replies }}
-    {{ template "reply" . }}
+    {{ if .Thread.Replies }}
+    <div class="reply">
+        <ul>
+            {{ range .Thread.Replies }}
+            {{ template "reply" . }}
+            {{ end }}
+        </ul>
+    </div>
     {{ end }}
 
     <!-- Form to reply to OP -->
+    {{if .ValidSes}}
     <h3>Add a reply</h3>
     <form method="POST" action="/reply">
         <textarea name="content" placeholder="Message" rows="3"></textarea><br>
@@ -45,6 +55,9 @@
             <input type="reset" value="Clear">
         </p>
     </form>
+    {{else}}
+    <h3>Sign in to join the conversation</h3>
+    {{end}}
 
     <!-- Link back home -->
     <a href="/">Back to Front Page</a>

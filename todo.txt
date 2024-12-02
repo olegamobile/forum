@@ -1,15 +1,22 @@
 
 - spell time and date better, maybe two rows
-- implement:
+x implement:
     x register user
     x login
-    - logout
-- 
-- reply only if logged in (name and id to message or reply)
-    - show reply button if session is valid
-    - reply button only works if session is valid
+    x logout
+x start thread only if logged in
+    x shows if session is valid
+    x works if session is valid
+x reply only if logged in (name and id to message or reply)
+    x show reply button if session is valid
+    x reply button only works if session is valid
+- check session validity:
+    - load sign in
+    - log in
+    - register
+    - log out too?
 - implement like and dislike
-- cookies to limit length and track sessions
+ cookies to limit length and track sessions
 - filter by category
 - filter by liked and disliked
     - only show if session is valid

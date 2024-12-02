@@ -11,6 +11,7 @@ func makeTables(db *sql.DB) {
 	CREATE TABLE IF NOT EXISTS threads (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,		
 		author TEXT NOT NULL,
+		authorID INTEGER NOT NULL,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -29,6 +30,7 @@ func makeTables(db *sql.DB) {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			base_id INTEGER DEFAULT 0,
 			author TEXT NOT NULL,
+			authorID INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 			likes INTEGER DEFAULT 0,

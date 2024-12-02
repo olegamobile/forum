@@ -47,10 +47,10 @@ func setHandlers(db *sql.DB) {
 	http.HandleFunc("/replytoreply", func(w http.ResponseWriter, r *http.Request) {
 		addReplyHandler(db, w, r, "reply")
 	})
-	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) { // Load page to sign in
 		signTmpl.Execute(w, signData)
 	})
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) { // log in to page
 		logUserHandler(db, w, r)
 	})
 	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {

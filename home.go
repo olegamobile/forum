@@ -5,21 +5,24 @@ import (
 	"fmt"
 	"net/http"
 	"text/template"
+	"time"
 )
 
 type Thread struct {
-	ID         int
-	Author     string
-	Title      string
-	Content    string
-	Created    string
-	Categories string
-	CatsSlice  []string
-	Likes      int
-	Dislikes   int
-	RepliesN   int
-	Replies    []Reply
-	BaseID     int
+	ID          int
+	Author      string
+	Title       string
+	Content     string
+	Created     string
+	CreatedDay  string
+	CreatedTime string
+	Categories  string
+	CatsSlice   []string
+	Likes       int
+	Dislikes    int
+	RepliesN    int
+	Replies     []Reply
+	BaseID      int
 }
 
 type PageData struct {
@@ -68,6 +71,22 @@ func fetchReplies(db *sql.DB) ([]Reply, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		createdGoTime, err := time.Parse(time.RFC3339, re.Created) // 2024-12-02T15:44:52Z
+		if err != nil {
+			return nil, err
+		}
+
+		// Convert to Finnish timezone (UTC+2)
+		location, err := time.LoadLocation("Europe/Helsinki")
+		if err != nil {
+			return nil, err
+		}
+		createdGoTime = createdGoTime.In(location)
+
+		re.CreatedDay = createdGoTime.Format("2.1.2006")
+		re.CreatedTime = createdGoTime.Format("15.04.05")
+
 		replies = append(replies, re)
 	}
 	return replies, nil
