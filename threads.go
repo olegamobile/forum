@@ -93,6 +93,25 @@ func addReplyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request, parentT
 	}
 }
 
+func timeStrings(created string) (string, string, error) {
+	createdGoTime, err := time.Parse(time.RFC3339, created) // "created" looks something like this: 2024-12-02T15:44:52Z
+	if err != nil {
+		return "", "", err
+	}
+
+	// Convert to Finnish timezone (UTC+2)
+	location, err := time.LoadLocation("Europe/Helsinki")
+	if err != nil {
+		return "", "", err
+	}
+	createdGoTime = createdGoTime.In(location)
+
+	day := createdGoTime.Format("2.1.2006")
+	time := createdGoTime.Format("15.04.05")
+
+	return day, time, nil
+}
+
 func recurseReplies(db *sql.DB, this *Reply) {
 	selectQueryReplies := `SELECT id, base_id, author, content, created_at, likes, dislikes FROM replies WHERE parent_id = ? AND parent_type = ?;`
 	rows, err := db.Query(selectQueryReplies, this.ID, "reply")
@@ -113,29 +132,16 @@ func recurseReplies(db *sql.DB, this *Reply) {
 		re.ParentID = this.ID
 		re.ParentType = "reply"
 
-		createdGoTime, err := time.Parse(time.RFC3339, re.Created) // 2024-12-02T15:44:52Z
+		re.CreatedDay, re.CreatedTime, err = timeStrings(re.Created)
 		if err != nil {
 			return
 		}
-
-		// Convert to Finnish timezone (UTC+2)
-		location, err := time.LoadLocation("Europe/Helsinki")
-		if err != nil {
-			return
-		}
-		createdGoTime = createdGoTime.In(location)
-
-		re.CreatedDay = createdGoTime.Format("2.1.2006")
-		re.CreatedTime = createdGoTime.Format("15.04.05")
 
 		replies = append(replies, re)
 	}
 
 	if len(replies) != 0 {
 		this.Replies = replies
-
-		fmt.Println(this.Replies)
-
 		for i := 0; i < len(this.Replies); i++ {
 			recurseReplies(db, &this.Replies[i])
 		}
@@ -145,9 +151,14 @@ func recurseReplies(db *sql.DB, this *Reply) {
 func findThread(db *sql.DB, id int) (Thread, error) {
 	var thread Thread
 	selectQueryThread := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM threads WHERE id = ?;`
-	err1 := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories, &thread.Likes, &thread.Dislikes)
-	if err1 != nil {
-		return thread, err1
+	err := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories, &thread.Likes, &thread.Dislikes)
+	if err != nil {
+		return thread, err
+	}
+
+	thread.CreatedDay, thread.CreatedTime, err = timeStrings(thread.Created)
+	if err != nil {
+		return thread, err
 	}
 
 	selectQueryReplies := `SELECT id, base_id, author, content, created_at, likes, dislikes FROM replies WHERE parent_id = ? AND parent_type = ?;`
@@ -160,12 +171,18 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 	var replies []Reply
 	for rows.Next() {
 		var re Reply
-		err3 := rows.Scan(&re.ID, &re.BaseID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes)
-		if err3 != nil {
-			return thread, err3
+		err := rows.Scan(&re.ID, &re.BaseID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes)
+		if err != nil {
+			return thread, err
 		}
 		re.ParentID = thread.ID
 		re.ParentType = "thread"
+
+		re.CreatedDay, re.CreatedTime, err = timeStrings(re.Created)
+		if err != nil {
+			return thread, err
+		}
+
 		replies = append(replies, re)
 	}
 
@@ -174,11 +191,9 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 		recurseReplies(db, &(replies[i]))
 	}
 
-	fmt.Println("Replies 0 times:", replies[0].CreatedDay, replies[0].CreatedTime)
-
 	thread.Replies = replies
 	thread.BaseID = thread.ID
-	return thread, err1
+	return thread, err
 }
 
 // markValidity writes to each reply if the session is valid, to show reply button or not

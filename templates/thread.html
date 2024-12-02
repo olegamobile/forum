@@ -19,8 +19,7 @@
         </thead>
         <tbody>
             <tr>
-                <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Thread.Author}}<br>{{.Thread.CreatedDay}}<br>{{.Thread.CreatedTime}}
-                </td>
+                <td rowspan="2" style="width: 10rem; color:rgb(122, 122, 122)">{{.Thread.Author}}<br>{{.Thread.CreatedDay}}<br>{{.Thread.CreatedTime}}</td>
                 <td colspan="2">{{.Thread.Content}}</td>
             </tr>
             <tr>
@@ -30,7 +29,7 @@
         </tbody>
     </table>
 
-    
+
 
     <!-- Generate tree of replies recursively -->
     {{ if .Thread.Replies }}
@@ -56,7 +55,7 @@
         </p>
     </form>
     {{else}}
-    <h3>Sign in to join the conversation</h3>
+    <h3><a href="/signin">Sign in</a> to join the conversation</h3>
     {{end}}
 
     <!-- Link back home -->

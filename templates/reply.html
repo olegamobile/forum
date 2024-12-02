@@ -4,11 +4,11 @@
     <table>
         <tbody>
             <tr>
-                <td rowspan="2" style="width: 12rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.Thread.CreatedDay}}<br>{{.Thread.CreatedTime}}
+                <td rowspan="2" style="width: 10rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.CreatedDay}}<br>{{.CreatedTime}}</td>
                 <td colspan="2">{{.Content}}</td>
             </tr>
             <tr>
-                <td style="width: 12rem; font-size: 0.8em">{{.Likes}} likes, {{.Dislikes}} dislikes</td>
+                <td style="font-size: 0.8em">{{.Likes}} likes, {{.Dislikes}} dislikes</td>
                 {{if .ValidSes}}
                 <td><button class="reply-button" type="button">Reply</button></td>
                 {{end}}

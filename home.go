@@ -49,6 +49,12 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 			fmt.Println("fetchThreads rows scanning:", err.Error())
 			return nil, err
 		}
+
+		th.CreatedDay, th.CreatedTime, err = timeStrings(th.Created)
+		if err != nil {
+			return nil, err
+		}
+
 		th.BaseID = th.ID
 		threads = append(threads, th)
 	}
