@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 	"unicode"
 )
@@ -35,7 +34,7 @@ type threadPageData struct {
 	UsrNm    string
 }
 
-func addThreadHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 	authID, author, valid := validateSession(db, r)
 
 	if valid && r.Method == http.MethodPost {
@@ -68,7 +67,7 @@ func addThreadHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func addReplyHandler(db *sql.DB, w http.ResponseWriter, r *http.Request, parentType string) {
+func addReplyHandler(w http.ResponseWriter, r *http.Request, parentType string) {
 	authID, author, valid := validateSession(db, r)
 
 	if valid && r.Method == http.MethodPost {
@@ -149,6 +148,8 @@ func recurseReplies(db *sql.DB, this *Reply) {
 }
 
 func findThread(db *sql.DB, id int) (Thread, error) {
+
+	// Some repetition here with fetchThreads()
 	var thread Thread
 	selectQueryThread := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM threads WHERE id = ?;`
 	err := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories, &thread.Likes, &thread.Dislikes)
@@ -158,6 +159,12 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 
 	thread.CreatedDay, thread.CreatedTime, err = timeStrings(thread.Created)
 	if err != nil {
+		return thread, err
+	}
+
+	err = json.Unmarshal([]byte(thread.Categories), &thread.CatsSlice)
+	if err != nil {
+		fmt.Println(err.Error())
 		return thread, err
 	}
 
@@ -204,7 +211,7 @@ func markValidity(rep *Reply, valid bool) {
 	}
 }
 
-func threadPageHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/thread/"):]
 	threadID, err := strconv.Atoi(id)
 	if err != nil {
@@ -226,5 +233,5 @@ func threadPageHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWrite
 	}
 
 	tpd := threadPageData{thread, validSes, usId, usName}
-	tmpl.Execute(w, tpd)
+	threadTmpl.Execute(w, tpd)
 }

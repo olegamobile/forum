@@ -10,19 +10,27 @@ import (
 	//_ "modernc.org/sqlite"
 )
 
+var (
+	db         *sql.DB
+	indexTmpl  *template.Template
+	threadTmpl *template.Template
+	signTmpl   *template.Template
+)
+
 func setHandlers(db *sql.DB) {
 	// Initialize templates
-	indexTmpl, err := template.ParseFiles("templates/index.html")
+	var err error
+	indexTmpl, err = template.ParseFiles("templates/index.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	threadTmpl, err := template.ParseFiles("templates/thread.html", "templates/reply.html")
+	threadTmpl, err = template.ParseFiles("templates/thread.html", "templates/reply.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	signTmpl, err := template.ParseFiles("templates/signin.html")
+	signTmpl, err = template.ParseFiles("templates/signin.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
@@ -32,38 +40,28 @@ func setHandlers(db *sql.DB) {
 	http.HandleFunc("/static/styles.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/styles.css")
 	})
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		indexHandler(db, indexTmpl, w, r)
-	})
-	http.HandleFunc("/thread/", func(w http.ResponseWriter, r *http.Request) {
-		threadPageHandler(db, threadTmpl, w, r)
-	})
-	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
-		addThreadHandler(db, w, r)
-	})
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/thread/", threadPageHandler)
+	http.HandleFunc("/add", addThreadHandler)
 	http.HandleFunc("/reply", func(w http.ResponseWriter, r *http.Request) {
-		addReplyHandler(db, w, r, "thread")
+		addReplyHandler(w, r, "thread")
 	})
 	http.HandleFunc("/replytoreply", func(w http.ResponseWriter, r *http.Request) {
-		addReplyHandler(db, w, r, "reply")
+		addReplyHandler(w, r, "reply")
 	})
 	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) { // Load page to sign in
 		signTmpl.Execute(w, signData)
 	})
-	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) { // log in to page
-		logUserHandler(db, w, r)
-	})
-	http.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
-		addUserHandler(db, w, r)
-	})
-	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
-		logoutHandler(db, w, r)
-	})
+	http.HandleFunc("/login", logUserHandler)
+	http.HandleFunc("/register", addUserHandler)
+	http.HandleFunc("/logout", logoutHandler)
+
 }
 
 func main() {
 	// Open database connection
-	db, err := sql.Open("sqlite3", "forum.db")
+	var err error
+	db, err = sql.Open("sqlite3", "forum.db")
 	if err != nil {
 		fmt.Println("Error opening database:", err)
 		return

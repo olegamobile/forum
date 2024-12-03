@@ -24,12 +24,10 @@
             </tr>
             <tr>
                 <td style="width: 12rem; font-size: 0.8em">{{.Thread.Likes}} likes, {{.Thread.Dislikes}} dislikes</td>
-                <td style="font-size: 0.8em">Categories: {{.Thread.Categories}}</td>
+                <td style="font-size: 0.8em">Categories: {{ range .Thread.CatsSlice }}{{.}} {{ end }}</td>
             </tr>
         </tbody>
     </table>
-
-
 
     <!-- Generate tree of replies recursively -->
     {{ if .Thread.Replies }}

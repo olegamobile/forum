@@ -2,9 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"text/template"
 	"time"
 )
 
@@ -55,6 +55,12 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 			return nil, err
 		}
 
+		err = json.Unmarshal([]byte(th.Categories), &th.CatsSlice)
+		if err != nil {
+			fmt.Println(err.Error())
+			return nil, err
+		}
+
 		th.BaseID = th.ID
 		threads = append(threads, th)
 	}
@@ -98,7 +104,7 @@ func fetchReplies(db *sql.DB) ([]Reply, error) {
 	return replies, nil
 }
 
-func indexHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r *http.Request) {
+func indexHandler(w http.ResponseWriter, r *http.Request) {
 	threads, err := fetchThreads(db)
 	if err != nil {
 		http.Error(w, "Error fetching threads", http.StatusInternalServerError)
@@ -126,5 +132,5 @@ func indexHandler(db *sql.DB, tmpl *template.Template, w http.ResponseWriter, r 
 	usId, usName, validSes := validateSession(db, r)
 
 	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName}
-	tmpl.Execute(w, data)
+	indexTmpl.Execute(w, data)
 }

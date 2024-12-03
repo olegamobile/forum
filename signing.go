@@ -44,7 +44,7 @@ func emailExists(db *sql.DB, mail string) bool {
 	return err == nil // no error if email found
 }
 
-func addUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func addUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		name := r.FormValue("username")
 		email := r.FormValue("email")
@@ -110,7 +110,7 @@ func saveSession(db *sql.DB, userID int, usname, sessionToken string, expiresAt 
 	return err
 }
 
-func logUserHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func logUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		name := r.FormValue("username")
 		email := r.FormValue("email")
@@ -198,7 +198,7 @@ func validateSession(db *sql.DB, r *http.Request) (int, string, bool) {
 	return userID, userName, validSes
 }
 
-func logoutHandler(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		http.Error(w, "No session found", http.StatusBadRequest)
