@@ -23,7 +23,8 @@
                 <td colspan="2">{{.Thread.Content}}</td>
             </tr>
             <tr>
-                <td style="width: 12rem; font-size: 0.8em">{{.Thread.Likes}} likes, {{.Thread.Dislikes}} dislikes</td>
+                <!-- &#9651; &#9206; &#128077; &#9661; &#9207; &#128078; -->
+                <td style="width: 12rem; font-size: 0.8em">&#9650; {{.Thread.Likes}} &#9660; {{.Thread.Dislikes}}</td>
                 <td style="font-size: 0.8em">Categories: {{ range .Thread.CatsSlice }}{{.}} {{ end }}</td>
             </tr>
         </tbody>
