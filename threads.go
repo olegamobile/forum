@@ -147,6 +147,14 @@ func recurseReplies(db *sql.DB, this *Reply) {
 	}
 }
 
+func likeHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func dislikeHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func findThread(db *sql.DB, id int) (Thread, error) {
 
 	// Some repetition here with fetchThreads()

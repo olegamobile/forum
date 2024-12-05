@@ -8,7 +8,22 @@
                 <td colspan="2">{{.Content}}</td>
             </tr>
             <tr>
-                <td style="font-size: 0.8em">&#9650; {{.Likes}} &#9660; {{.Dislikes}}</td>
+
+                {{if .ValidSes}}
+                <td class="like-dislike-cell">
+                    <form action="/like" method="POST" class="like-form">
+                        <input type="hidden" name="reply_id" value="{{.ID}}">
+                        <button type="submit" title="Like" class="like-button"> &#9650; {{.Likes}}</button>
+                    </form>
+                    <form action="/dislike" method="POST" class="dislike-form">
+                        <input type="hidden" name="reply_id" value="{{.ID}}">
+                        <button type="submit" title="Dislike" class="dislike-button">&#9660; {{.Dislikes}}</button>
+                    </form>
+                </td>
+                {{else}}
+                <td>&#9650; {{.Likes}} &#9660; {{.Dislikes}}</td>
+                {{end}}
+
                 {{if .ValidSes}}
                 <td><button class="reply-button" type="button">Reply</button></td>
                 {{end}}

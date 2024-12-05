@@ -17,7 +17,7 @@ var (
 	signTmpl   *template.Template
 )
 
-func setHandlers(db *sql.DB) {
+func setHandlers() {
 	// Initialize templates
 	var err error
 	indexTmpl, err = template.ParseFiles("templates/index.html")
@@ -55,7 +55,8 @@ func setHandlers(db *sql.DB) {
 	http.HandleFunc("/login", logUserHandler)
 	http.HandleFunc("/register", addUserHandler)
 	http.HandleFunc("/logout", logoutHandler)
-
+	http.HandleFunc("/like", likeHandler)
+	http.HandleFunc("/dislike", dislikeHandler)
 }
 
 func main() {
@@ -68,8 +69,8 @@ func main() {
 	}
 	defer db.Close()
 
-	makeTables(db)
-	setHandlers(db)
+	makeTables()
+	setHandlers()
 
 	// Start the server
 	fmt.Println("Server running on http://localhost:8080")

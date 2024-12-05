@@ -1,11 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 )
 
-func makeTables(db *sql.DB) {
+func makeTables() {
 	// Create threads table if it doesn't exist
 	createThreadsTableQuery := `
 	CREATE TABLE IF NOT EXISTS threads (
