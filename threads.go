@@ -158,14 +158,6 @@ func recurseReplies(db *sql.DB, this *Reply) {
 }
 
 func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
-	/*
-		x validate session
-		x make reactions table
-		x check if user already liked it:
-		x Either add or remove:
-			. like to/from post
-			. post id to/from users liked
-	*/
 
 	threadId := r.FormValue("base_id")
 	postId := r.FormValue("post_id")
@@ -186,7 +178,7 @@ func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
 		fmt.Println("Affected rows checking failed:", err.Error())
 	}
 
-	// Add opinion: Update with current value on conflict
+	// Add like/dislike: Update with current value on conflict
 	if rowsAffected == 0 {
 		_, err2 := db.Exec(`INSERT INTO post_reactions (user_id, post_id, post_type, reaction_type) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, post_id, post_type) DO UPDATE SET reaction_type = excluded.reaction_type;`, userID, postId, postType, opinion)
 		if err2 != nil {
