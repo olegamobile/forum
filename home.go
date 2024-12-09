@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 type Thread struct {
@@ -32,19 +31,54 @@ type PageData struct {
 	UsrNm    string
 }
 
+func countReactions(id int, postType string) (int, int) {
+
+	reactionsQuery := `SELECT reaction_type, COUNT(*) AS count FROM post_reactions WHERE post_id = ? AND post_type = ? GROUP BY reaction_type;`
+	rows, err := db.Query(reactionsQuery, id, postType)
+	if err != nil {
+		fmt.Println("Fetching reactions query failed", err.Error())
+		return 0, 0
+	}
+	defer rows.Close()
+
+	var likes, dislikes int
+	for rows.Next() {
+		var reactionType string
+		var count int
+		if err := rows.Scan(&reactionType, &count); err != nil {
+			fmt.Printf("Failed to scan row: %v\n", err)
+		}
+
+		// Assign counts based on reaction type
+		switch reactionType {
+		case "like":
+			likes = count
+		case "dislike":
+			dislikes = count
+		}
+	}
+
+	// Check for errors from iterating over rows
+	if err := rows.Err(); err != nil {
+		fmt.Printf("Error iterating rows: %v\n", err)
+	}
+
+	return likes, dislikes
+}
+
 func fetchThreads(db *sql.DB) ([]Thread, error) {
-	selectQuery := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM threads;`
-	rows, err := db.Query(selectQuery)
+	selectQuery := `SELECT id, author, title, content, created_at, categories FROM threads;`
+	rowsThreads, err := db.Query(selectQuery)
 	if err != nil {
 		fmt.Println("fetchThreads selectQuery failed", err.Error())
 		return nil, err
 	}
-	defer rows.Close()
+	defer rowsThreads.Close()
 
 	var threads []Thread
-	for rows.Next() {
+	for rowsThreads.Next() {
 		var th Thread
-		err := rows.Scan(&th.ID, &th.Author, &th.Title, &th.Content, &th.Created, &th.Categories, &th.Likes, &th.Dislikes)
+		err := rowsThreads.Scan(&th.ID, &th.Author, &th.Title, &th.Content, &th.Created, &th.Categories)
 		if err != nil {
 			fmt.Println("fetchThreads rows scanning:", err.Error())
 			return nil, err
@@ -61,6 +95,8 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 			return nil, err
 		}
 
+		th.Likes, th.Dislikes = countReactions(th.ID, "thread")
+
 		th.BaseID = th.ID
 		threads = append(threads, th)
 	}
@@ -68,39 +104,16 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 	return threads, nil
 }
 
-func fetchReplies(db *sql.DB) ([]Reply, error) {
-	selectQuery := `SELECT id, base_id, author, content, created_at, likes, dislikes, parent_id, parent_type FROM replies;`
-	rows, err := db.Query(selectQuery)
+func fetchReplies(db *sql.DB, thisID int) ([]Reply, error) {
+
+	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE parent_id = ?;`
+	rows, err := db.Query(selectQueryReplies, thisID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var replies []Reply
-	for rows.Next() {
-		var re Reply
-		err := rows.Scan(&re.ID, &re.BaseID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes, &re.ParentID, &re.ParentType)
-		if err != nil {
-			return nil, err
-		}
-
-		createdGoTime, err := time.Parse(time.RFC3339, re.Created) // 2024-12-02T15:44:52Z
-		if err != nil {
-			return nil, err
-		}
-
-		// Convert to Finnish timezone (UTC+2)
-		location, err := time.LoadLocation("Europe/Helsinki")
-		if err != nil {
-			return nil, err
-		}
-		createdGoTime = createdGoTime.In(location)
-
-		re.CreatedDay = createdGoTime.Format("2.1.2006")
-		re.CreatedTime = createdGoTime.Format("15.04.05")
-
-		replies = append(replies, re)
-	}
+	replies := getReplies(rows, thisID)
 	return replies, nil
 }
 
@@ -111,25 +124,20 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	replies, err := fetchReplies(db)
-	if err != nil {
-		fmt.Println("Error fetching replies:", err.Error())
-		http.Error(w, "Error fetching replies", http.StatusInternalServerError)
-		return
-	}
-
-	for i, po := range threads {
-		for _, re := range replies {
-			if po.ID == re.ParentID {
-				threads[i].RepliesN++
-			}
+	for i, th := range threads {
+		replies, err := fetchReplies(db, th.ID)
+		if err != nil {
+			fmt.Println("Error fetching replies:", err.Error())
+			http.Error(w, "Error fetching replies", http.StatusInternalServerError)
+			return
 		}
+		threads[i].RepliesN = len(replies)
 	}
 
 	signData.Message1 = ""
 	signData.Message2 = ""
 
-	usId, usName, validSes := validateSession(db, r)
+	usId, usName, validSes := validateSession(r)
 
 	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName}
 	indexTmpl.Execute(w, data)

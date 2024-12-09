@@ -14,9 +14,7 @@ func makeTables() {
 		title TEXT NOT NULL,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		categories JSON,
-		likes INTEGER DEFAULT 0,
-		dislikes INTEGER DEFAULT 0
+		categories JSON
 	);`
 	if _, err := db.Exec(createThreadsTableQuery); err != nil {
 		fmt.Println("Error creating threads table:", err)
@@ -32,8 +30,6 @@ func makeTables() {
 			authorID INTEGER NOT NULL,
 			content TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			likes INTEGER DEFAULT 0,
-			dislikes INTEGER DEFAULT 0,
 			parent_id INTEGER NOT NULL,
 			parent_type TEXT
 		);`
@@ -52,7 +48,7 @@ func makeTables() {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 	if _, err := db.Exec(createUsersTableQuery); err != nil {
-		fmt.Println("Error creating replies table:", err)
+		fmt.Println("Error creating users table:", err)
 		return
 	}
 
@@ -67,7 +63,25 @@ func makeTables() {
 		FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 	);`
 	if _, err := db.Exec(creatSessionsTableQuery); err != nil {
-		fmt.Println("Error creating replies table:", err)
+		fmt.Println("Error creating sessions table:", err)
 		return
 	}
+
+	// Create reactions table if it doesn't exist
+	createReactionsTableQuery := `
+	CREATE TABLE IF NOT EXISTS post_reactions (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,          -- User who reacted
+		post_id INTEGER NOT NULL,          -- ID of the thread or reply
+		post_type TEXT NOT NULL,           -- 'thread' or 'reply'
+		reaction_type TEXT NOT NULL,       -- 'like' or 'dislike'
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		UNIQUE (user_id, post_id, post_type)  -- Prevents duplicate reactions for the same post type (no simultaneous like and dislike)
+	);`
+	if _, err := db.Exec(createReactionsTableQuery); err != nil {
+		fmt.Println("Error creating reactions table:", err)
+		return
+	}
+
 }

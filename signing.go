@@ -178,7 +178,7 @@ func logUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // validateSession returns user id, name and if session is (still) valid
-func validateSession(db *sql.DB, r *http.Request) (int, string, bool) {
+func validateSession(r *http.Request) (int, string, bool) {
 	validSes := true
 	var userID int
 	var userName string

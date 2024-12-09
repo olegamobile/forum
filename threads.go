@@ -35,7 +35,7 @@ type threadPageData struct {
 }
 
 func addThreadHandler(w http.ResponseWriter, r *http.Request) {
-	authID, author, valid := validateSession(db, r)
+	authID, author, valid := validateSession(r)
 
 	if valid && r.Method == http.MethodPost {
 		title := strings.TrimSpace(r.FormValue("title"))
@@ -68,7 +68,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func addReplyHandler(w http.ResponseWriter, r *http.Request, parentType string) {
-	authID, author, valid := validateSession(db, r)
+	authID, author, valid := validateSession(r)
 
 	if valid && r.Method == http.MethodPost {
 		content := strings.TrimSpace(r.FormValue("content"))
@@ -111,8 +111,35 @@ func timeStrings(created string) (string, string, error) {
 	return day, time, nil
 }
 
+func getReplies(rows *sql.Rows, thisID int) []Reply {
+	var err error
+	var replies []Reply
+
+	for rows.Next() {
+		var re Reply
+		err2 := rows.Scan(&re.ID, &re.BaseID, &re.Author, &re.Content, &re.Created)
+		if err2 != nil {
+			fmt.Println("Error reading reply rows for reply:", err2.Error())
+			return replies
+		}
+		re.ParentID = thisID
+		re.ParentType = "reply"
+
+		re.CreatedDay, re.CreatedTime, err = timeStrings(re.Created)
+		if err != nil {
+			return replies
+		}
+
+		re.Likes, re.Dislikes = countReactions(re.ID, "reply")
+
+		replies = append(replies, re)
+	}
+
+	return replies
+}
+
 func recurseReplies(db *sql.DB, this *Reply) {
-	selectQueryReplies := `SELECT id, base_id, author, content, created_at, likes, dislikes FROM replies WHERE parent_id = ? AND parent_type = ?;`
+	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE parent_id = ? AND parent_type = ?;`
 	rows, err := db.Query(selectQueryReplies, this.ID, "reply")
 	if err != nil {
 		fmt.Println("Error getting replies for reply:", err.Error())
@@ -120,24 +147,7 @@ func recurseReplies(db *sql.DB, this *Reply) {
 	}
 	defer rows.Close()
 
-	var replies []Reply
-	for rows.Next() {
-		var re Reply
-		err2 := rows.Scan(&re.ID, &re.BaseID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes)
-		if err2 != nil {
-			fmt.Println("Error rading reply rows for reply:", err2.Error())
-			return
-		}
-		re.ParentID = this.ID
-		re.ParentType = "reply"
-
-		re.CreatedDay, re.CreatedTime, err = timeStrings(re.Created)
-		if err != nil {
-			return
-		}
-
-		replies = append(replies, re)
-	}
+	replies := getReplies(rows, this.ID)
 
 	if len(replies) != 0 {
 		this.Replies = replies
@@ -147,20 +157,51 @@ func recurseReplies(db *sql.DB, this *Reply) {
 	}
 }
 
-func likeHandler(w http.ResponseWriter, r *http.Request) {
+func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
+	/*
+		x validate session
+		x make reactions table
+		x check if user already liked it:
+		x Either add or remove:
+			. like to/from post
+			. post id to/from users liked
+	*/
 
+	threadId := r.FormValue("base_id")
+	postId := r.FormValue("post_id")
+	postType := r.FormValue("post_type")
+	userID, _, valid := validateSession(r)
+
+	if !valid {
+		http.Redirect(w, r, "/thread/"+threadId, http.StatusSeeOther)
+		return
+	}
+
+	// Add opinion: if like or dislike exists, update with current value
+	_, err := db.Exec(`INSERT INTO post_reactions (user_id, post_id, post_type, reaction_type) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, post_id, post_type) DO UPDATE SET reaction_type = excluded.reaction_type;`, userID, postId, postType, opinion)
+	if err != nil {
+		fmt.Println("Adding like or dislike:", err.Error())
+		http.Error(w, "Error adding like or dislike", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/thread/"+threadId, http.StatusSeeOther)
+}
+
+func likeHandler(w http.ResponseWriter, r *http.Request) {
+	likeOrDislike(w, r, "like")
 }
 
 func dislikeHandler(w http.ResponseWriter, r *http.Request) {
-
+	likeOrDislike(w, r, "dislike")
 }
 
 func findThread(db *sql.DB, id int) (Thread, error) {
 
-	// Some repetition here with fetchThreads()
+	// Some repetition here with fetchThreads(), but this is for spacific id
 	var thread Thread
-	selectQueryThread := `SELECT id, author, title, content, created_at, categories, likes, dislikes FROM threads WHERE id = ?;`
-	err := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories, &thread.Likes, &thread.Dislikes)
+	selectQueryThread := `SELECT id, author, title, content, created_at, categories FROM threads WHERE id = ?;`
+	err := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories)
 	if err != nil {
 		return thread, err
 	}
@@ -176,30 +217,14 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 		return thread, err
 	}
 
-	selectQueryReplies := `SELECT id, base_id, author, content, created_at, likes, dislikes FROM replies WHERE parent_id = ? AND parent_type = ?;`
+	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE parent_id = ? AND parent_type = ?;`
 	rows, err2 := db.Query(selectQueryReplies, thread.ID, "thread")
 	if err2 != nil {
 		return thread, err2
 	}
 	defer rows.Close()
 
-	var replies []Reply
-	for rows.Next() {
-		var re Reply
-		err := rows.Scan(&re.ID, &re.BaseID, &re.Author, &re.Content, &re.Created, &re.Likes, &re.Dislikes)
-		if err != nil {
-			return thread, err
-		}
-		re.ParentID = thread.ID
-		re.ParentType = "thread"
-
-		re.CreatedDay, re.CreatedTime, err = timeStrings(re.Created)
-		if err != nil {
-			return thread, err
-		}
-
-		replies = append(replies, re)
-	}
+	replies := getReplies(rows, thread.ID)
 
 	// Add replies to replies recursively
 	for i := 0; i < len(replies); i++ {
@@ -208,6 +233,7 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 
 	thread.Replies = replies
 	thread.BaseID = thread.ID
+	thread.Likes, thread.Dislikes = countReactions(thread.ID, "thread")
 	return thread, err
 }
 
@@ -221,6 +247,9 @@ func markValidity(rep *Reply, valid bool) {
 
 func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/thread/"):]
+
+	fmt.Println("Difficult id:", id)
+
 	threadID, err := strconv.Atoi(id)
 	if err != nil {
 		fmt.Println("Error parsing id:", id)
@@ -235,7 +264,7 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usId, usName, validSes := validateSession(db, r)
+	usId, usName, validSes := validateSession(r)
 	for i := range thread.Replies {
 		markValidity(&thread.Replies[i], validSes)
 	}

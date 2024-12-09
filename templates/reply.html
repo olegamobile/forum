@@ -12,11 +12,15 @@
                 {{if .ValidSes}}
                 <td class="like-dislike-cell">
                     <form action="/like" method="POST" class="like-form">
-                        <input type="hidden" name="reply_id" value="{{.ID}}">
+                        <input type="hidden" name="base_id" value="{{.BaseID}}">
+                        <input type="hidden" name="post_id" value="{{.ID}}">
+                        <input type="hidden" name="post_type" value="reply">
                         <button type="submit" title="Like" class="like-button"> &#9650; {{.Likes}}</button>
                     </form>
                     <form action="/dislike" method="POST" class="dislike-form">
-                        <input type="hidden" name="reply_id" value="{{.ID}}">
+                        <input type="hidden" name="base_id" value="{{.BaseID}}">
+                        <input type="hidden" name="post_id" value="{{.ID}}">
+                        <input type="hidden" name="post_type" value="reply">
                         <button type="submit" title="Dislike" class="dislike-button">&#9660; {{.Dislikes}}</button>
                     </form>
                 </td>
