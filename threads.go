@@ -177,12 +177,23 @@ func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
 		return
 	}
 
-	// Add opinion: if like or dislike exists, update with current value
-	_, err := db.Exec(`INSERT INTO post_reactions (user_id, post_id, post_type, reaction_type) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, post_id, post_type) DO UPDATE SET reaction_type = excluded.reaction_type;`, userID, postId, postType, opinion)
+	// Try to delete the exact same row from the table (when already liked/disliked)
+	res, _ := db.Exec(`DELETE FROM post_reactions WHERE user_id = ? AND post_id = ? AND post_type = ? AND reaction_type = ?;`, userID, postId, postType, opinion)
+
+	// Check if any row was deleted
+	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		fmt.Println("Adding like or dislike:", err.Error())
-		http.Error(w, "Error adding like or dislike", http.StatusInternalServerError)
-		return
+		fmt.Println("Affected rows checking failed:", err.Error())
+	}
+
+	// Add opinion: Update with current value on conflict
+	if rowsAffected == 0 {
+		_, err2 := db.Exec(`INSERT INTO post_reactions (user_id, post_id, post_type, reaction_type) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, post_id, post_type) DO UPDATE SET reaction_type = excluded.reaction_type;`, userID, postId, postType, opinion)
+		if err2 != nil {
+			fmt.Println("Adding like or dislike:", err2.Error())
+			http.Error(w, "Error adding like or dislike", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	http.Redirect(w, r, "/thread/"+threadId, http.StatusSeeOther)
@@ -247,8 +258,6 @@ func markValidity(rep *Reply, valid bool) {
 
 func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/thread/"):]
-
-	fmt.Println("Difficult id:", id)
 
 	threadID, err := strconv.Atoi(id)
 	if err != nil {
