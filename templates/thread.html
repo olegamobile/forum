@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="/static/styles.css">
     <style>
         .like-dislike-cell {
-            padding: 0px; 
+            padding: 0px;
+            padding-left: 5px;
             white-space: nowrap;
         }
 
@@ -25,90 +26,102 @@
 </head>
 
 <body>
+    {{ template "header" . }}
 
     <!-- Thread starter -->
-    <table>
-        <thead>
-            <tr>
-                <th colspan="3">{{.Thread.Title}}</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td rowspan="2" style="width: 10rem; color:rgb(122, 122, 122)">{{.Thread.Author}}<br>{{.Thread.CreatedDay}}<br>{{.Thread.CreatedTime}}</td>
-                <td colspan="2">{{.Thread.Content}}</td>
-            </tr>
-            <tr>
-                {{if .ValidSes}}
-                <td class="like-dislike-cell">
-                    <form action="/like" method="POST" class="like-form">
-                        <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
-                        <input type="hidden" name="post_id" value="{{.Thread.ID}}">
-                        <input type="hidden" name="post_type" value="thread">
-                        <button type="submit" title="Like" class="like-button"> &#9650; {{.Thread.Likes}}</button>
-                    </form>
-                    <form action="/dislike" method="POST" class="dislike-form">
-                        <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
-                        <input type="hidden" name="post_id" value="{{.Thread.ID}}">
-                        <input type="hidden" name="post_type" value="thread">
-                        <button type="submit" title="Dislike" class="dislike-button">&#9660; {{.Thread.Dislikes}}</button>
-                    </form>
-                </td>
-                {{else}}
-                <td>&#9650; {{.Thread.Likes}} &#9660; {{.Thread.Dislikes}}</td>
-                {{end}}
-                <td style="font-size: 0.8em">Categories: {{ range .Thread.CatsSlice }}{{.}} {{ end }}</td>                
-            </tr>
-        </tbody>
-    </table>
+    <div class="content">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="3">{{.Thread.Title}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="2" style="width: 10rem; color:rgb(122, 122, 122)">{{.Thread.Author}}<br>{{.Thread.CreatedDay}}<br>{{.Thread.CreatedTime}}</td>
+                    <td colspan="2">{{.Thread.Content}}</td>
+                </tr>
+                <tr>
+                    {{if .ValidSes}}
+                    <td class="like-dislike-cell">
+                        <form action="/like" method="POST" class="like-form">
+                            <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
+                            <input type="hidden" name="post_id" value="{{.Thread.ID}}">
+                            <input type="hidden" name="post_type" value="thread">
 
-    <!-- Generate tree of replies recursively -->
-    {{ if .Thread.Replies }}
-    <div class="reply">
-        <ul>
-            {{ range .Thread.Replies }}
-            {{ template "reply" . }}
-            {{ end }}
-        </ul>
-    </div>
-    {{ end }}
+                            {{if .Thread.LikedNow}}
+                            <button type="submit" title="Like" class="like-button" style="color: darkgreen"> &#9650; {{.Thread.Likes}}</button>
+                            {{else}}
+                            <button type="submit" title="Like" class="like-button"> &#9650; {{.Thread.Likes}}</button>
+                            {{end}}
+                        </form>
+                        <form action="/dislike" method="POST" class="dislike-form">
+                            <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
+                            <input type="hidden" name="post_id" value="{{.Thread.ID}}">
+                            <input type="hidden" name="post_type" value="thread">
 
-    <!-- Form to reply to OP -->
-    {{if .ValidSes}}
-    <h3>Add a reply</h3>
-    <form method="POST" action="/reply">
-        <textarea name="content" placeholder="Message" rows="3"></textarea><br>
-        <input type="hidden" name="parentId" value="{{.Thread.ID}}">
-        <input type="hidden" name="baseId" value="{{.Thread.BaseID}}">
-        <p>
-            <button type="submit">Reply</button>
-            <input type="reset" value="Clear">
-        </p>
-    </form>
-    {{else}}
-    <h3><a href="/signin">Sign in</a> to join the conversation</h3>
-    {{end}}
+                            {{if .Thread.DislikedNow}}
+                            <button type="submit" title="Dislike" class="dislike-button" style="color:darkred"> &#9660; {{.Thread.Dislikes}}</button>
+                            {{else}}
+                            <button type="submit" title="Dislike" class="dislike-button"> &#9660; {{.Thread.Dislikes}}</button>
+                            {{end}}
+                        </form>
+                    </td>
+                    {{else}}
+                    <td>&#9650; {{.Thread.Likes}} &#9660; {{.Thread.Dislikes}}</td>
+                    {{end}}
+                    <td style="font-size: 0.8em">Categories: {{ range .Thread.CatsSlice }}{{.}} {{ end }}</td>
+                </tr>
+            </tbody>
+        </table>
 
-    <!-- Link back home -->
-    <a href="/">Back to Front Page</a>
+        <!-- Generate tree of replies recursively -->
+        {{ if .Thread.Replies }}
+        <div class="reply">
+            <ul>
+                {{ range .Thread.Replies }}
+                {{ template "reply" . }}
+                {{ end }}
+            </ul>
+        </div>
+        {{ end }}
 
-    <script>
-        // Open and close reply-to-reply form with "Reply" button
-        document.addEventListener("DOMContentLoaded", function () {
-            const buttons = document.querySelectorAll(".reply-button");
-            buttons.forEach(button => {
-                button.addEventListener("click", function () {
-                    const formContainer = this.closest("table").nextElementSibling;
-                    if (formContainer.style.display === "none") {
-                        formContainer.style.display = "block";
-                    } else {
-                        formContainer.style.display = "none";
-                    }
+        <!-- Form to reply to OP -->
+        {{if .ValidSes}}
+        <h3>Add a reply</h3>
+        <form method="POST" action="/reply">
+            <textarea name="content" placeholder="Message" rows="3"></textarea><br>
+            <input type="hidden" name="parentId" value="{{.Thread.ID}}">
+            <input type="hidden" name="baseId" value="{{.Thread.BaseID}}">
+            <p>
+                <button type="submit">Reply</button>
+                <input type="reset" value="Clear">
+            </p>
+        </form>
+        {{else}}
+        <h3><a href="/signin">Sign in</a> to join the conversation</h3>
+        {{end}}
+
+        <!-- Link back home -->
+        <a href="/">Back to Front Page</a>
+
+        <script>
+            // Open and close reply-to-reply form with "Reply" button
+            document.addEventListener("DOMContentLoaded", function () {
+                const buttons = document.querySelectorAll(".reply-button");
+                buttons.forEach(button => {
+                    button.addEventListener("click", function () {
+                        const formContainer = this.closest("table").nextElementSibling;
+                        if (formContainer.style.display === "none") {
+                            formContainer.style.display = "block";
+                        } else {
+                            formContainer.style.display = "none";
+                        }
+                    });
                 });
             });
-        });
-    </script>
-
+        </script>
+    </div>
 </body>
 
 </html>

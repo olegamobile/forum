@@ -25,6 +25,14 @@ type Reply struct {
 	Replies     []Reply
 	BaseID      int
 	ValidSes    bool
+	LikedNow    bool
+	DislikedNow bool
+}
+
+type reaction struct {
+	userID   int
+	opinion  string
+	postType string
 }
 
 type threadPageData struct {
@@ -106,7 +114,7 @@ func timeStrings(created string) (string, string, error) {
 	createdGoTime = createdGoTime.In(location)
 
 	day := createdGoTime.Format("2.1.2006")
-	time := createdGoTime.Format("15.04.05")
+	time := createdGoTime.Format("15.04") //"15.04.05"
 
 	return day, time, nil
 }
@@ -158,7 +166,6 @@ func recurseReplies(db *sql.DB, this *Reply) {
 }
 
 func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
-
 	threadId := r.FormValue("base_id")
 	postId := r.FormValue("post_id")
 	postType := r.FormValue("post_type")
@@ -199,9 +206,23 @@ func dislikeHandler(w http.ResponseWriter, r *http.Request) {
 	likeOrDislike(w, r, "dislike")
 }
 
-func findThread(db *sql.DB, id int) (Thread, error) {
+func dataToThread(thread Thread) (Thread, error) {
+	var err error
+	thread.CreatedDay, thread.CreatedTime, err = timeStrings(thread.Created)
+	if err != nil {
+		return thread, err
+	}
+	err = json.Unmarshal([]byte(thread.Categories), &thread.CatsSlice)
+	if err != nil {
+		fmt.Println(err.Error())
+		return thread, err
+	}
+	thread.Likes, thread.Dislikes = countReactions(thread.ID, "thread")
+	thread.BaseID = thread.ID
+	return thread, nil
+}
 
-	// Some repetition here with fetchThreads(), but this is for spacific id
+func findThread(db *sql.DB, id int) (Thread, error) {
 	var thread Thread
 	selectQueryThread := `SELECT id, author, title, content, created_at, categories FROM threads WHERE id = ?;`
 	err := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories)
@@ -209,16 +230,7 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 		return thread, err
 	}
 
-	thread.CreatedDay, thread.CreatedTime, err = timeStrings(thread.Created)
-	if err != nil {
-		return thread, err
-	}
-
-	err = json.Unmarshal([]byte(thread.Categories), &thread.CatsSlice)
-	if err != nil {
-		fmt.Println(err.Error())
-		return thread, err
-	}
+	thread, err = dataToThread(thread)
 
 	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE parent_id = ? AND parent_type = ?;`
 	rows, err2 := db.Query(selectQueryReplies, thread.ID, "thread")
@@ -235,16 +247,25 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 	}
 
 	thread.Replies = replies
-	thread.BaseID = thread.ID
-	thread.Likes, thread.Dislikes = countReactions(thread.ID, "thread")
 	return thread, err
 }
 
 // markValidity writes to each reply if the session is valid, to show reply button or not
-func markValidity(rep *Reply, valid bool) {
+func markValidity(rep *Reply, valid bool, reactMap map[string]reaction) {
 	rep.ValidSes = valid
+
+	id := fmt.Sprintf("reply%d", rep.ID)
+	if reactMap[id].postType == "reply" {
+		if reactMap[id].opinion == "like" {
+			rep.LikedNow = true
+		}
+		if reactMap[id].opinion == "dislike" {
+			rep.DislikedNow = true
+		}
+	}
+
 	for i := range rep.Replies {
-		markValidity(&rep.Replies[i], valid)
+		markValidity(&rep.Replies[i], valid, reactMap)
 	}
 }
 
@@ -266,8 +287,44 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	usId, usName, validSes := validateSession(r)
+
+	// List liked and disliked posts. Only to colour the buttons.
+	selectQueryReplies := `SELECT post_id, post_type, reaction_type FROM post_reactions WHERE user_id = ?;`
+	rows, err2 := db.Query(selectQueryReplies, usId)
+	if err2 != nil {
+		fmt.Println("Error querying reactions:", err2.Error())
+		return
+	}
+
+	reactionMap := make(map[string]reaction)
+	for rows.Next() {
+		postID := 0
+		postType := ""
+		opinion := ""
+
+		err2 := rows.Scan(&postID, &postType, &opinion)
+		if err2 != nil {
+			fmt.Println("Error reading reaction rows:", err2.Error())
+			return
+		}
+
+		id := fmt.Sprintf("%s%d", postType, postID)
+		reactionMap[id] = reaction{usId, opinion, postType}
+	}
+
 	for i := range thread.Replies {
-		markValidity(&thread.Replies[i], validSes)
+		markValidity(&thread.Replies[i], validSes, reactionMap)
+	}
+
+	// Markers for coloring the thread buttons too
+	id = fmt.Sprintf("thread%d", thread.ID)
+	if reactionMap[id].postType == "thread" {
+		if reactionMap[id].opinion == "like" {
+			thread.LikedNow = true
+		}
+		if reactionMap[id].opinion == "dislike" {
+			thread.DislikedNow = true
+		}
 	}
 
 	tpd := threadPageData{thread, validSes, usId, usName}

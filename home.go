@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -22,6 +21,8 @@ type Thread struct {
 	RepliesN    int
 	Replies     []Reply
 	BaseID      int
+	LikedNow    bool
+	DislikedNow bool
 }
 
 type PageData struct {
@@ -84,20 +85,11 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 			return nil, err
 		}
 
-		th.CreatedDay, th.CreatedTime, err = timeStrings(th.Created)
+		th, err = dataToThread(th)
 		if err != nil {
 			return nil, err
 		}
 
-		err = json.Unmarshal([]byte(th.Categories), &th.CatsSlice)
-		if err != nil {
-			fmt.Println(err.Error())
-			return nil, err
-		}
-
-		th.Likes, th.Dislikes = countReactions(th.ID, "thread")
-
-		th.BaseID = th.ID
 		threads = append(threads, th)
 	}
 
@@ -106,7 +98,9 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 
 func fetchReplies(db *sql.DB, thisID int) ([]Reply, error) {
 
-	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE parent_id = ?;`
+	//selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE parent_id = ? AND parent_type = ?;`
+	//rows, err := db.Query(selectQueryReplies, thisID, "thread")
+	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE base_id = ?;` // All or direct replies?
 	rows, err := db.Query(selectQueryReplies, thisID)
 	if err != nil {
 		return nil, err

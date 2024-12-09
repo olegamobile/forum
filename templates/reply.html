@@ -15,13 +15,25 @@
                         <input type="hidden" name="base_id" value="{{.BaseID}}">
                         <input type="hidden" name="post_id" value="{{.ID}}">
                         <input type="hidden" name="post_type" value="reply">
+
+                        {{if .LikedNow}}
+                        <button type="submit" title="Like" class="like-button" style="color: darkgreen"> &#9650; {{.Likes}}</button>
+                        {{else}}
                         <button type="submit" title="Like" class="like-button"> &#9650; {{.Likes}}</button>
+                        {{end}}
+
                     </form>
                     <form action="/dislike" method="POST" class="dislike-form">
                         <input type="hidden" name="base_id" value="{{.BaseID}}">
                         <input type="hidden" name="post_id" value="{{.ID}}">
                         <input type="hidden" name="post_type" value="reply">
-                        <button type="submit" title="Dislike" class="dislike-button">&#9660; {{.Dislikes}}</button>
+
+                        {{if .DislikedNow}}
+                        <button type="submit" title="Dislike" class="dislike-button" style="color:darkred"> &#9660; {{.Dislikes}}</button>
+                        {{else}}
+                        <button type="submit" title="Dislike" class="dislike-button"> &#9660; {{.Dislikes}}</button>
+                        {{end}}
+
                     </form>
                 </td>
                 {{else}}

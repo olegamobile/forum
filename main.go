@@ -20,12 +20,12 @@ var (
 func setHandlers() {
 	// Initialize templates
 	var err error
-	indexTmpl, err = template.ParseFiles("templates/index.html")
+	indexTmpl, err = template.ParseFiles("templates/index.html", "templates/header.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	threadTmpl, err = template.ParseFiles("templates/thread.html", "templates/reply.html")
+	threadTmpl, err = template.ParseFiles("templates/thread.html", "templates/header.html", "templates/reply.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
@@ -37,9 +37,9 @@ func setHandlers() {
 	}
 
 	// Set up routes
-	http.HandleFunc("/static/styles.css", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/styles.css")
-	})
+	fileServer := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/styles.css", http.StripPrefix("/static/", fileServer))
+
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/thread/", threadPageHandler)
 	http.HandleFunc("/add", addThreadHandler)
