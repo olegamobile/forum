@@ -78,7 +78,7 @@
         <!-- Generate tree of replies recursively -->
         {{ if .Thread.Replies }}
         <div class="reply">
-            <ul>
+            <ul style="padding-left: 0px;">
                 {{ range .Thread.Replies }}
                 {{ template "reply" . }}
                 {{ end }}

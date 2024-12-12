@@ -1,5 +1,6 @@
 
 x spell time and date better, maybe two rows
+x align first level replies to left
 x implement:
     x register user
     x login
@@ -10,18 +11,18 @@ x start thread only if logged in
 x reply only if logged in (name and id to message or reply)
     x show reply button if session is valid
     x reply button only works if session is valid
-- header to display "logged in as <Name>" and maybe logout/login link
+x header to display "logged in as <Name>" and maybe logout/login link
 - check session validity at:
     - load sign in
     - log in
     - register
     - log out too?
-- implement like and dislike
+x implement like and dislike
     x increment/decrement thread/reply likes/dislikes by one
     x If thread/reply is not on liked/disliked increment, otherwise decrement
-    - some coloring to see if post is already liked by user
+    x some coloring to see if post is already liked by user
 x cookies to limit length and track sessions
-- for filtering, create a bar on the front page:
+- for filtering, create a bar or something on the front page:
     . if session is valid: checkboxes for created, liked and disliked
     . text input for categories
 - category items to links
