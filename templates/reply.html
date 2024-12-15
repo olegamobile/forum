@@ -49,7 +49,7 @@
 
     <!-- Reply submission form -->
     <div class="reply-form-container" style="display: none; margin-left: 5rem;">
-        <form action="/replytoreply" method="post">
+        <form action="/reply" method="post">
             <textarea name="content" rows="4" placeholder="Message"></textarea><br>
             <input type="hidden" name="parentId" value="{{.ID}}">
             <input type="hidden" name="baseId" value="{{.BaseID}}">

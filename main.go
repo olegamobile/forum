@@ -44,10 +44,7 @@ func setHandlers() {
 	http.HandleFunc("/thread/", threadPageHandler)
 	http.HandleFunc("/add", addThreadHandler)
 	http.HandleFunc("/reply", func(w http.ResponseWriter, r *http.Request) {
-		addReplyHandler(w, r, "thread")
-	})
-	http.HandleFunc("/replytoreply", func(w http.ResponseWriter, r *http.Request) {
-		addReplyHandler(w, r, "reply")
+		addReplyHandler(w, r)
 	})
 	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) { // Load page to sign in
 		signTmpl.Execute(w, signData)

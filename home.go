@@ -32,10 +32,9 @@ type PageData struct {
 	UsrNm    string
 }
 
-func countReactions(id int, postType string) (int, int) {
-
-	reactionsQuery := `SELECT reaction_type, COUNT(*) AS count FROM post_reactions WHERE post_id = ? AND post_type = ? GROUP BY reaction_type;`
-	rows, err := db.Query(reactionsQuery, id, postType)
+func countReactions(id int) (int, int) {
+	reactionsQuery := `SELECT reaction_type, COUNT(*) AS count FROM post_reactions WHERE post_id = ? GROUP BY reaction_type;`
+	rows, err := db.Query(reactionsQuery, id)
 	if err != nil {
 		fmt.Println("Fetching reactions query failed", err.Error())
 		return 0, 0
@@ -68,7 +67,7 @@ func countReactions(id int, postType string) (int, int) {
 }
 
 func fetchThreads(db *sql.DB) ([]Thread, error) {
-	selectQuery := `SELECT id, author, title, content, created_at, categories FROM threads;`
+	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
 	rowsThreads, err := db.Query(selectQuery)
 	if err != nil {
 		fmt.Println("fetchThreads selectQuery failed", err.Error())
@@ -97,10 +96,7 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 }
 
 func fetchReplies(db *sql.DB, thisID int) ([]Reply, error) {
-
-	//selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE parent_id = ? AND parent_type = ?;`
-	//rows, err := db.Query(selectQueryReplies, thisID, "thread")
-	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM replies WHERE base_id = ?;` // All or direct replies?
+	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM posts WHERE base_id = ? AND title = '';` // All replies
 	rows, err := db.Query(selectQueryReplies, thisID)
 	if err != nil {
 		return nil, err

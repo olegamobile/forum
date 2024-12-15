@@ -5,36 +5,22 @@ import (
 )
 
 func makeTables() {
-	// Create threads table if it doesn't exist
-	createThreadsTableQuery := `
-	CREATE TABLE IF NOT EXISTS threads (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,		
-		author TEXT NOT NULL,
-		authorID INTEGER NOT NULL,
-		title TEXT NOT NULL,
-		content TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		categories JSON
-	);`
-	if _, err := db.Exec(createThreadsTableQuery); err != nil {
-		fmt.Println("Error creating threads table:", err)
-		return
-	}
 
-	// Create replies table if it doesn't exist
-	createRepliesTableQuery := `
-		CREATE TABLE IF NOT EXISTS replies (
+	// Create posts table if it doesn't exist
+	createPostsTableQuery := `
+		CREATE TABLE IF NOT EXISTS posts (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			base_id INTEGER DEFAULT 0,
 			author TEXT NOT NULL,
 			authorID INTEGER NOT NULL,
+			title TEXT DEFAULT '',
 			content TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			parent_id INTEGER NOT NULL,
-			parent_type TEXT
+			categories JSON,
+			parent_id INTEGER DEFAULT 0
 		);`
-	if _, err := db.Exec(createRepliesTableQuery); err != nil {
-		fmt.Println("Error creating replies table:", err)
+	if _, err := db.Exec(createPostsTableQuery); err != nil {
+		fmt.Println("Error creating posts table:", err)
 		return
 	}
 
@@ -73,11 +59,10 @@ func makeTables() {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id INTEGER NOT NULL,          -- User who reacted
 		post_id INTEGER NOT NULL,          -- ID of the thread or reply
-		post_type TEXT NOT NULL,           -- 'thread' or 'reply'
 		reaction_type TEXT NOT NULL,       -- 'like' or 'dislike'
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id),
-		UNIQUE (user_id, post_id, post_type)  -- Prevents duplicate reactions for the same post type (no simultaneous like and dislike)
+		UNIQUE (user_id, post_id)  -- Prevents duplicate reactions for the same post type (no simultaneous like and dislike)
 	);`
 	if _, err := db.Exec(createReactionsTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
