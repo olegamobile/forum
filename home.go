@@ -26,11 +26,13 @@ type Thread struct {
 }
 
 type PageData struct {
-	Threads  []Thread
-	ValidSes bool
-	UsrId    int
-	UsrNm    string
-	Message  string
+	Threads   []Thread
+	ValidSes  bool
+	UsrId     int
+	UsrNm     string
+	Message   string
+	Selection string
+	Search    string
 }
 
 func countReactions(id int) (int, int) {
@@ -134,6 +136,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 
 	usId, usName, validSes := validateSession(r)
 
-	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg}
+	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg, Selection: "liked", Search: "jokes"}
 	indexTmpl.Execute(w, data)
 }

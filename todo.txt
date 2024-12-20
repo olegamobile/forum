@@ -22,8 +22,23 @@ x implement like and dislike
     x If thread/reply is not on liked/disliked increment, otherwise decrement
     x some coloring to see if post is already liked by user
 x cookies to limit length and track sessions
-- look for allowed method
+- Should expired sessions be cleared from db? How and when?
+- Encrypt session token aswell? Someone could fake a session if they can catch the token
+x Look for allowed method
 - for filtering, create a bar or something on the front page:
-    . if session is valid: checkboxes for created, liked and disliked
-    . text input for categories
-- category items to links
+    x if session is valid: radio buttons for created, liked and disliked
+    x text input for categories
+    - queries that work
+- category items to (search?) links
+
+
+Advanced features:
+- activities page
+    - own posts
+    - all own likes and dislikes
+    - own comments
+- edit and delete posts
+    - on activities page or normal view?
+- notifications for:
+    - likes and dislikes
+    - comments

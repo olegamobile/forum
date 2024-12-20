@@ -18,9 +18,39 @@
         <table>
             <thead>
                 <tr>
+                    <th colspan="2">Filter</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <form method="POST" action="/">
+                        <td>
+                            {{if .ValidSes}}
+                            <input type="radio" id="standard" name="selection" value="created" {{if eq .Selection "created" }}checked="created" {{end}}>
+                            <label for="standard">Created</label><br>
+                            <input type="radio" id="shadow" name="selection" value="liked" {{if eq .Selection "liked" }}checked="checked" {{end}}>
+                            <label for="liked">Liked</label><br>
+                            <input type="radio" id="thinkertoy" name="selection" value="disliked" {{if eq .Selection "disliked" }}checked="checked" {{end}}>
+                            <label for="disliked">Disliked</label>
+                            {{end}}
+                        </td>
+                        <td>
+                            <label for="search-categories">Categories:</label><br>
+                            <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"><br>
+                            <button>Search</button>
+                        </td>
+                    </form>
+                </tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead>
+                <tr>
                     <th>Author</th>
                     <th>Title</th>
                     <th>Started</th>
+                    <th style="width: 8rem">Categories</th>
                     <th>Replies</th>
                 </tr>
             </thead>
@@ -30,6 +60,7 @@
                     <td>{{.Author}}</td>
                     <td><a href="/thread/{{.ID}}">{{.Title}}</a></td>
                     <td>{{.CreatedDay}} {{.CreatedTime}}</td>
+                    <td style="font-size: 0.8em">{{ range .CatsSlice }}{{.}} {{ end }}</td>
                     <td>{{.RepliesN}}</td>
                 </tr>
                 {{end}}
