@@ -81,136 +81,152 @@ func saveSession(db *sql.DB, userID int, usname, sessionToken string, expiresAt 
 }
 
 func addUserHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		name := r.FormValue("username")
-		email := r.FormValue("email")
-		pass := r.FormValue("password")
-		var signData SignData
-		signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
 
-		if signData.ValidSes {
-			fmt.Println(signData.UsrNm + "trying to create a new user while signed-in")
-			signData.Message1 = "Signed in as " + signData.UsrNm + ". Log out first."
-			signTmpl.Execute(w, signData)
-			return
-		}
-
-		nameOk, passOk := checkString(name), checkString(pass)
-		_, emailErr := mail.ParseAddress(email)
-
-		if !nameOk || !passOk {
-			fmt.Println("Minimum 5 chars, limited chars")
-			signData.Message2 = "Minimum 5 characters in usename and password. Only letters, numbers and symbols allowed."
-			signTmpl.Execute(w, signData)
-			return
-		}
-
-		if emailErr != nil {
-			fmt.Println("Invalid email address")
-			signData.Message2 = "Invalid email address"
-			signTmpl.Execute(w, signData)
-			return
-		}
-
-		if nameExists(db, name) {
-			fmt.Println("Name already taken")
-			signData.Message2 = "Name already taken"
-			signTmpl.Execute(w, signData)
-			return
-		}
-
-		if emailExists(db, email) {
-			fmt.Println("Email already taken")
-			signData.Message2 = "Email already taken"
-			signTmpl.Execute(w, signData)
-			return
-		}
-
-		hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-
-		_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
-		if err != nil {
-			fmt.Println("Adding:", err.Error())
-			http.Error(w, "Error adding user", http.StatusInternalServerError)
-			return
-		}
-
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
 	}
+
+	name := r.FormValue("username")
+	email := r.FormValue("email")
+	pass := r.FormValue("password")
+	var signData SignData
+	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
+
+	if signData.ValidSes {
+		fmt.Println(signData.UsrNm + "trying to create a new user while signed-in")
+		signData.Message1 = "Signed in as " + signData.UsrNm + ". Log out first."
+		signTmpl.Execute(w, signData)
+		return
+	}
+
+	nameOk, passOk := checkString(name), checkString(pass)
+	_, emailErr := mail.ParseAddress(email)
+
+	if !nameOk || !passOk {
+		fmt.Println("Minimum 5 chars, limited chars")
+		signData.Message2 = "Minimum 5 characters in usename and password. Only letters, numbers and symbols allowed."
+		signTmpl.Execute(w, signData)
+		return
+	}
+
+	if emailErr != nil {
+		fmt.Println("Invalid email address")
+		signData.Message2 = "Invalid email address"
+		signTmpl.Execute(w, signData)
+		return
+	}
+
+	if nameExists(db, name) {
+		fmt.Println("Name already taken")
+		signData.Message2 = "Name already taken"
+		signTmpl.Execute(w, signData)
+		return
+	}
+
+	if emailExists(db, email) {
+		fmt.Println("Email already taken")
+		signData.Message2 = "Email already taken"
+		signTmpl.Execute(w, signData)
+		return
+	}
+
+	hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+
+	_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
+	if err != nil {
+		fmt.Println("Adding:", err.Error())
+		http.Error(w, "Error adding user", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
 }
 
 func logUserInHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		name := r.FormValue("username")
-		email := r.FormValue("email")
-		pass := r.FormValue("password")
-		var signData SignData
-		signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
 
-		if signData.ValidSes {
-			fmt.Println(signData.UsrNm + "trying to sign in while already signed-in")
-			signData.Message1 = "Already signed in as " + signData.UsrNm + ". Log out first."
-			signTmpl.Execute(w, signData)
-			return
-		}
-
-		// Checking usesr
-		if !nameExists(db, name) && !emailExists(db, email) {
-			fmt.Println("User not found")
-			signData.Message1 = "User not found"
-			signTmpl.Execute(w, signData)
-			return
-		}
-
-		// Checking password, find with either name or email
-		storedHashedPass, userID := "", 0
-		if nameExists(db, name) {
-			query := `SELECT password, id FROM users WHERE username = ?`
-			db.QueryRow(query, name).Scan(&storedHashedPass, &userID)
-		} else {
-			query := `SELECT password, id FROM users WHERE email = ?`
-			db.QueryRow(query, email).Scan(&storedHashedPass, &userID)
-		}
-
-		err := bcrypt.CompareHashAndPassword([]byte(storedHashedPass), []byte(pass))
-
-		if err != nil {
-			fmt.Println("Password incorrect")
-			signData.Message1 = "Password incorrect"
-			signTmpl.Execute(w, signData)
-			return
-		} else {
-			fmt.Println("Correct password")
-		}
-
-		// Cookie and session
-		sessionToken, err := createSession()
-		if err != nil {
-			http.Error(w, "Unable to create session: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		expiresAt := time.Now().Add(30 * time.Minute) // Set session validity length
-
-		err = saveSession(db, userID, name, sessionToken, expiresAt)
-		if err != nil {
-			fmt.Println("Error saving session", err.Error())
-			http.Error(w, "Unable to save session", http.StatusInternalServerError)
-			return
-		}
-
-		// Set the session token as a cookie. Cookie is added to the writer's header.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "session_token",
-			Value:    sessionToken,
-			Expires:  expiresAt,
-			HttpOnly: true,
-		})
-
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
 	}
+
+	name := r.FormValue("username")
+	email := r.FormValue("email")
+	pass := r.FormValue("password")
+	var signData SignData
+	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
+
+	if signData.ValidSes {
+		fmt.Println(signData.UsrNm + "trying to sign in while already signed-in")
+		signData.Message1 = "Already signed in as " + signData.UsrNm + ". Log out first."
+		signTmpl.Execute(w, signData)
+		return
+	}
+
+	// Checking user
+	if !nameExists(db, name) && !emailExists(db, email) {
+		fmt.Println("User not found")
+		signData.Message1 = "User not found"
+		signTmpl.Execute(w, signData)
+		return
+	}
+
+	// Checking password, find with either name or email
+	storedHashedPass, userID := "", 0
+	if nameExists(db, name) {
+		query := `SELECT password, id FROM users WHERE username = ?`
+		db.QueryRow(query, name).Scan(&storedHashedPass, &userID)
+	} else {
+		query := `SELECT password, id FROM users WHERE email = ?`
+		db.QueryRow(query, email).Scan(&storedHashedPass, &userID)
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(storedHashedPass), []byte(pass))
+
+	if err != nil {
+		fmt.Println("Password incorrect")
+		signData.Message1 = "Password incorrect"
+		signTmpl.Execute(w, signData)
+		return
+	} else {
+		fmt.Println("Correct password")
+	}
+
+	// Cookie and session
+	sessionToken, err := createSession()
+	if err != nil {
+		http.Error(w, "Unable to create session: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	expiresAt := time.Now().Add(30 * time.Minute) // Set session validity length
+
+	err = saveSession(db, userID, name, sessionToken, expiresAt)
+	if err != nil {
+		fmt.Println("Error saving session", err.Error())
+		http.Error(w, "Unable to save session", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the session token as a cookie. Cookie is added to the writer's header.
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionToken,
+		Expires:  expiresAt,
+		HttpOnly: true,
+	})
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
+	}
+
 	_, _, validSes := validateSession(r)
 	if !validSes {
 		fmt.Println("Trying to log out while not signed-in")
@@ -244,6 +260,12 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func signInHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var signData SignData
 	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
 	signTmpl.Execute(w, signData)

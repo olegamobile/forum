@@ -109,6 +109,12 @@ func fetchReplies(db *sql.DB, thisID int) ([]Reply, error) {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
+
+	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
+	}
+
 	threads, err := fetchThreads(db)
 
 	if err != nil {

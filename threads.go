@@ -41,6 +41,12 @@ type threadPageData struct {
 }
 
 func addThreadHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
+	}
+
 	authID, author, valid := validateSession(r)
 
 	if valid && r.Method == http.MethodPost {
@@ -74,6 +80,12 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func addReplyHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
+	}
+
 	authID, author, valid := validateSession(r)
 
 	if valid && r.Method == http.MethodPost {
@@ -163,6 +175,12 @@ func recurseReplies(db *sql.DB, this *Reply) {
 }
 
 func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
+	}
+
 	threadId := r.FormValue("base_id")
 	postId := r.FormValue("post_id")
 	userID, _, valid := validateSession(r)
@@ -262,6 +280,11 @@ func markValidity(rep *Reply, valid bool, reactMap map[int]reaction) {
 }
 
 func threadPageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		return
+	}
+
 	id := r.URL.Path[len("/thread/"):]
 
 	threadID, err := strconv.Atoi(id)
