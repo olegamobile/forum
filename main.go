@@ -17,8 +17,7 @@ var (
 	signTmpl   *template.Template
 )
 
-func setHandlers() {
-	// Initialize templates
+func initTemplates() {
 	var err error
 	indexTmpl, err = template.ParseFiles("templates/index.html", "templates/header.html")
 	if err != nil {
@@ -30,30 +29,33 @@ func setHandlers() {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	signTmpl, err = template.ParseFiles("templates/signin.html")
+	signTmpl, err = template.ParseFiles("templates/signin.html", "templates/header.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
+}
 
-	// Set up routes
+func setHandlers() {
 	fileServer := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/styles.css", http.StripPrefix("/static/", fileServer))
 
-	http.HandleFunc("/", indexHandler)
+	//http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		indexHandler(w, r, "")
+	})
 	http.HandleFunc("/thread/", threadPageHandler)
 	http.HandleFunc("/add", addThreadHandler)
-	http.HandleFunc("/reply", func(w http.ResponseWriter, r *http.Request) {
-		addReplyHandler(w, r)
-	})
-	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) { // Load page to sign in
-		signTmpl.Execute(w, signData)
-	})
-	http.HandleFunc("/login", logUserHandler)
+	http.HandleFunc("/reply", addReplyHandler)
+	http.HandleFunc("/signin", signInHandler)
+	http.HandleFunc("/login", logUserInHandler)
 	http.HandleFunc("/register", addUserHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/like", likeHandler)
 	http.HandleFunc("/dislike", dislikeHandler)
+	http.HandleFunc("/expired", func(w http.ResponseWriter, r *http.Request) {
+		indexHandler(w, r, "Session expired")
+	})
 }
 
 func main() {
@@ -67,6 +69,7 @@ func main() {
 	defer db.Close()
 
 	makeTables()
+	initTemplates()
 	setHandlers()
 
 	// Start the server

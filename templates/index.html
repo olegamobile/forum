@@ -46,6 +46,7 @@
             <p><button type="submit">Start Thread</button></p>
         </form>
         {{else}}
+        <p style="color:darkred;">{{.Message}}</p>
         <h3><a href="/signin">Sign in</a> to start posting</h3>
         {{end}}
 

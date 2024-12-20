@@ -69,7 +69,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !valid {
 		// Session perhaps expired during writing
-		// Print message?
+		http.Redirect(w, r, "/expired", http.StatusSeeOther)
 	}
 }
 
@@ -94,7 +94,7 @@ func addReplyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !valid {
 		// Session maybe expired during writing
-		// Print message?
+		http.Redirect(w, r, "/expired", http.StatusSeeOther)
 	}
 }
 
@@ -112,7 +112,7 @@ func timeStrings(created string) (string, string, error) {
 	createdGoTime = createdGoTime.In(location)
 
 	day := createdGoTime.Format("2.1.2006")
-	time := createdGoTime.Format("15.04") //"15.04.05"
+	time := createdGoTime.Format("15:04") //"15.04.05"
 
 	return day, time, nil
 }

@@ -30,6 +30,7 @@ type PageData struct {
 	ValidSes bool
 	UsrId    int
 	UsrNm    string
+	Message  string
 }
 
 func countReactions(id int) (int, int) {
@@ -107,8 +108,9 @@ func fetchReplies(db *sql.DB, thisID int) ([]Reply, error) {
 	return replies, nil
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	threads, err := fetchThreads(db)
+
 	if err != nil {
 		http.Error(w, "Error fetching threads", http.StatusInternalServerError)
 		return
@@ -124,11 +126,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		threads[i].RepliesN = len(replies)
 	}
 
-	signData.Message1 = ""
-	signData.Message2 = ""
-
 	usId, usName, validSes := validateSession(r)
 
-	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName}
+	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg}
 	indexTmpl.Execute(w, data)
 }

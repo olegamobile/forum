@@ -15,9 +15,31 @@ import (
 type SignData struct {
 	Message1 string
 	Message2 string
+	ValidSes bool
+	UsrId    int
+	UsrNm    string
 }
 
-var signData SignData
+// validateSession returns user id, name and if session is (still) valid
+func validateSession(r *http.Request) (int, string, bool) {
+	validSes := true
+	var userID int
+	var userName string
+
+	cookie, _ := r.Cookie("session_token")
+	if cookie != nil {
+		query := `SELECT user_id, username FROM sessions WHERE session_token = ? AND expires_at > ?`
+		err := db.QueryRow(query, cookie.Value, time.Now()).Scan(&userID, &userName)
+		if err != nil { // invalid session
+			fmt.Println(err.Error())
+			validSes = false
+		}
+	} else {
+		validSes = false
+	}
+
+	return userID, userName, validSes
+}
 
 func checkString(s string) bool {
 	if len(s) < 5 {
@@ -44,58 +66,6 @@ func emailExists(db *sql.DB, mail string) bool {
 	return err == nil // no error if email found
 }
 
-func addUserHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
-		name := r.FormValue("username")
-		email := r.FormValue("email")
-		pass := r.FormValue("password")
-
-		n, p := checkString(name), checkString(pass)
-		_, e := mail.ParseAddress(email)
-
-		if !n || !p {
-			fmt.Println("Minimum 5 chars, limited chars")
-			signData.Message2 = "Minimum 5 characters in usename and password. Only letters, numbers and symbols allowed."
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
-			return
-		}
-
-		if e != nil {
-			fmt.Println("Invalid email address")
-			signData.Message2 = "Invalid email address"
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
-			return
-		}
-
-		if nameExists(db, name) {
-			fmt.Println("Name already taken")
-			signData.Message2 = "Name already taken"
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
-			return
-		}
-
-		if emailExists(db, email) {
-			fmt.Println("Email already taken")
-			signData.Message2 = "Email already taken"
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
-			return
-		}
-
-		hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-
-		_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
-		if err != nil {
-			fmt.Println("Adding:", err.Error())
-			http.Error(w, "Error adding user", http.StatusInternalServerError)
-			return
-		}
-
-		signData.Message2 = ""
-
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	}
-}
-
 func createSession() (string, error) {
 	sessionUUID, err := uuid.NewV4() // Generate a new UUID
 	if err != nil {
@@ -110,21 +80,89 @@ func saveSession(db *sql.DB, userID int, usname, sessionToken string, expiresAt 
 	return err
 }
 
-func logUserHandler(w http.ResponseWriter, r *http.Request) {
+func addUserHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		name := r.FormValue("username")
 		email := r.FormValue("email")
 		pass := r.FormValue("password")
+		var signData SignData
+		signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
+
+		if signData.ValidSes {
+			fmt.Println(signData.UsrNm + "trying to create a new user while signed-in")
+			signData.Message1 = "Signed in as " + signData.UsrNm + ". Log out first."
+			signTmpl.Execute(w, signData)
+			return
+		}
+
+		nameOk, passOk := checkString(name), checkString(pass)
+		_, emailErr := mail.ParseAddress(email)
+
+		if !nameOk || !passOk {
+			fmt.Println("Minimum 5 chars, limited chars")
+			signData.Message2 = "Minimum 5 characters in usename and password. Only letters, numbers and symbols allowed."
+			signTmpl.Execute(w, signData)
+			return
+		}
+
+		if emailErr != nil {
+			fmt.Println("Invalid email address")
+			signData.Message2 = "Invalid email address"
+			signTmpl.Execute(w, signData)
+			return
+		}
+
+		if nameExists(db, name) {
+			fmt.Println("Name already taken")
+			signData.Message2 = "Name already taken"
+			signTmpl.Execute(w, signData)
+			return
+		}
+
+		if emailExists(db, email) {
+			fmt.Println("Email already taken")
+			signData.Message2 = "Email already taken"
+			signTmpl.Execute(w, signData)
+			return
+		}
+
+		hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+
+		_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
+		if err != nil {
+			fmt.Println("Adding:", err.Error())
+			http.Error(w, "Error adding user", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+func logUserInHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		name := r.FormValue("username")
+		email := r.FormValue("email")
+		pass := r.FormValue("password")
+		var signData SignData
+		signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
+
+		if signData.ValidSes {
+			fmt.Println(signData.UsrNm + "trying to sign in while already signed-in")
+			signData.Message1 = "Already signed in as " + signData.UsrNm + ". Log out first."
+			signTmpl.Execute(w, signData)
+			return
+		}
 
 		// Checking usesr
 		if !nameExists(db, name) && !emailExists(db, email) {
 			fmt.Println("User not found")
 			signData.Message1 = "User not found"
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			signTmpl.Execute(w, signData)
 			return
 		}
 
-		// Checking password
+		// Checking password, find with either name or email
 		storedHashedPass, userID := "", 0
 		if nameExists(db, name) {
 			query := `SELECT password, id FROM users WHERE username = ?`
@@ -139,7 +177,7 @@ func logUserHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			fmt.Println("Password incorrect")
 			signData.Message1 = "Password incorrect"
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			signTmpl.Execute(w, signData)
 			return
 		} else {
 			fmt.Println("Correct password")
@@ -148,10 +186,10 @@ func logUserHandler(w http.ResponseWriter, r *http.Request) {
 		// Cookie and session
 		sessionToken, err := createSession()
 		if err != nil {
-			http.Error(w, "Unable to create session", http.StatusInternalServerError)
+			http.Error(w, "Unable to create session: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		expiresAt := time.Now().Add(2 * time.Hour) // 2-hour expiration
+		expiresAt := time.Now().Add(30 * time.Minute) // Set session validity length
 
 		err = saveSession(db, userID, name, sessionToken, expiresAt)
 		if err != nil {
@@ -168,37 +206,18 @@ func logUserHandler(w http.ResponseWriter, r *http.Request) {
 			HttpOnly: true,
 		})
 
-		// x sign in
-		// x set a cookie
-		//   Check session token on every request
-		//   Log out: delete the cookie and remove it from the database
-
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
-// validateSession returns user id, name and if session is (still) valid
-func validateSession(r *http.Request) (int, string, bool) {
-	validSes := true
-	var userID int
-	var userName string
-
-	cookie, _ := r.Cookie("session_token")
-	if cookie != nil {
-		query := `SELECT user_id, username FROM sessions WHERE session_token = ? AND expires_at > ?`
-		err := db.QueryRow(query, cookie.Value, time.Now()).Scan(&userID, &userName)
-		if err != nil { // invalid session
-			fmt.Println(err.Error())
-			validSes = false
-		}
-	} else {
-		validSes = false
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	_, _, validSes := validateSession(r)
+	if !validSes {
+		fmt.Println("Trying to log out while not signed-in")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
 
-	return userID, userName, validSes
-}
-
-func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		http.Error(w, "No session found", http.StatusBadRequest)
@@ -222,4 +241,10 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func signInHandler(w http.ResponseWriter, r *http.Request) {
+	var signData SignData
+	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
+	signTmpl.Execute(w, signData)
 }
