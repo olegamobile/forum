@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 )
@@ -68,15 +69,15 @@ func countReactions(id int) (int, int) {
 	return likes, dislikes
 }
 
-func fetchThreads(selectQuery string) ([]Thread, error) {
+func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 
 	// Find all posts without an empty title
-	rowsThreads, err := db.Query(selectQuery)
-	if err != nil {
-		fmt.Println("fetchThreads selectQuery failed", err.Error())
-		return nil, err
-	}
-	defer rowsThreads.Close()
+	/* 	rowsThreads, err := db.Query(selectQuery)
+	   	if err != nil {
+	   		fmt.Println("fetchThreads selectQuery failed", err.Error())
+	   		return nil, err
+	   	}
+	   	defer rowsThreads.Close() */
 
 	var threads []Thread
 	for rowsThreads.Next() {
@@ -98,9 +99,39 @@ func fetchThreads(selectQuery string) ([]Thread, error) {
 	return threads, nil
 }
 
-func findThreads(filter string) ([]Thread, error) {
-	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
-	return fetchThreads(selectQuery)
+func findThreads(filter string, authId int) ([]Thread, error) {
+
+	var selectQuery string
+	var rowsThreads *sql.Rows
+	var err error
+
+	if filter == "" || filter == "all" {
+		selectQuery = `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
+		rowsThreads, err = db.Query(selectQuery)
+		if err != nil {
+			fmt.Println("findThreads selectQuery failed", err.Error())
+			return nil, err
+		}
+		defer rowsThreads.Close()
+	}
+
+	if filter == "created" {
+		selectQuery = `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "" AND authorID = ?;`
+		rowsThreads, err = db.Query(selectQuery, authId)
+		if err != nil {
+			fmt.Println("findThreads selectQuery failed", err.Error())
+			return nil, err
+		}
+		defer rowsThreads.Close()
+	}
+	if filter == "liked" {
+		// Find all threads and filter them otherwise?
+	}
+	if filter == "disliked" {
+		// Find all threads and filter them otherwise?
+	}
+
+	return fetchThreads(rowsThreads)
 }
 
 func fetchReplies(thisID int) ([]Reply, error) {
@@ -129,7 +160,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	var threads []Thread
 	var err error
 	if r.Method == http.MethodGet || !validSes {
-		threads, err = findThreads("")
+		threads, err = findThreads("", usId)
 	} else {
 
 		// If user did a POST, session should be valid
@@ -137,19 +168,19 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		if r.FormValue("updatesel") == "update" {
 			switch r.FormValue("todisplay") {
 			case "created":
-				threads, err = findThreads("")
+				threads, err = findThreads("created", usId)
 			case "liked":
-				threads, err = findThreads("")
+				threads, err = findThreads("liked", usId)
 			case "disliked":
-				threads, err = findThreads("")
+				threads, err = findThreads("disliked", usId)
 			default:
-				threads, err = findThreads("")
+				threads, err = findThreads("", usId)
 			}
 			search = ""
 		}
 		if r.FormValue("serchcat") == "search" {
 			// filter threads by category
-			threads, err = findThreads("")
+			threads, err = findThreads("", usId)
 			selection = ""
 		}
 	}
