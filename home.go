@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 )
@@ -69,8 +68,9 @@ func countReactions(id int) (int, int) {
 	return likes, dislikes
 }
 
-func fetchThreads(db *sql.DB) ([]Thread, error) {
-	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
+func fetchThreads(selectQuery string) ([]Thread, error) {
+
+	// Find all posts without an empty title
 	rowsThreads, err := db.Query(selectQuery)
 	if err != nil {
 		fmt.Println("fetchThreads selectQuery failed", err.Error())
@@ -98,7 +98,12 @@ func fetchThreads(db *sql.DB) ([]Thread, error) {
 	return threads, nil
 }
 
-func fetchReplies(db *sql.DB, thisID int) ([]Reply, error) {
+func findThreads(filter string) ([]Thread, error) {
+	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
+	return fetchThreads(selectQuery)
+}
+
+func fetchReplies(thisID int) ([]Reply, error) {
 	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM posts WHERE base_id = ? AND title = '';` // All replies
 	rows, err := db.Query(selectQueryReplies, thisID)
 	if err != nil {
@@ -117,7 +122,37 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		return
 	}
 
-	threads, err := fetchThreads(db)
+	usId, usName, validSes := validateSession(r)
+	selection := r.FormValue("todisplay")
+	search := r.FormValue("usersearch")
+
+	var threads []Thread
+	var err error
+	if r.Method == http.MethodGet || !validSes {
+		threads, err = findThreads("")
+	} else {
+
+		// If user did a POST, session should be valid
+
+		if r.FormValue("updatesel") == "update" {
+			switch r.FormValue("todisplay") {
+			case "created":
+				threads, err = findThreads("")
+			case "liked":
+				threads, err = findThreads("")
+			case "disliked":
+				threads, err = findThreads("")
+			default:
+				threads, err = findThreads("")
+			}
+			search = ""
+		}
+		if r.FormValue("serchcat") == "search" {
+			// filter threads by category
+			threads, err = findThreads("")
+			selection = ""
+		}
+	}
 
 	if err != nil {
 		http.Error(w, "Error fetching threads", http.StatusInternalServerError)
@@ -125,7 +160,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	}
 
 	for i, th := range threads {
-		replies, err := fetchReplies(db, th.ID)
+		replies, err := fetchReplies(th.ID)
 		if err != nil {
 			fmt.Println("Error fetching replies:", err.Error())
 			http.Error(w, "Error fetching replies", http.StatusInternalServerError)
@@ -134,8 +169,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		threads[i].RepliesN = len(replies)
 	}
 
-	usId, usName, validSes := validateSession(r)
-
-	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg, Selection: "liked", Search: "jokes"}
+	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg, Selection: selection, Search: search}
 	indexTmpl.Execute(w, data)
 }

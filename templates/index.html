@@ -26,18 +26,20 @@
                     <form method="POST" action="/">
                         <td>
                             {{if .ValidSes}}
-                            <input type="radio" id="standard" name="selection" value="created" {{if eq .Selection "created" }}checked="created" {{end}}>
-                            <label for="standard">Created</label><br>
-                            <input type="radio" id="shadow" name="selection" value="liked" {{if eq .Selection "liked" }}checked="checked" {{end}}>
-                            <label for="liked">Liked</label><br>
-                            <input type="radio" id="thinkertoy" name="selection" value="disliked" {{if eq .Selection "disliked" }}checked="checked" {{end}}>
-                            <label for="disliked">Disliked</label>
+                            <label for="todisplay">Show:</label><br>
+                            <select name="todisplay" id="todisplay">
+                              <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
+                              <option value="created"{{if eq .Selection "created" }}selected{{end}}>Created</option>
+                              <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
+                              <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked</option>                              
+                            </select><br>
+                            <button type="submit" name="updatesel" value="update">Update</button>
                             {{end}}
                         </td>
                         <td>
-                            <label for="search-categories">Categories:</label><br>
+                            <label for="search-categories">Search categories:</label><br>
                             <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"><br>
-                            <button>Search</button>
+                            <button type="submit" name="serchcat" value="search">Search</button>
                         </td>
                     </form>
                 </tr>

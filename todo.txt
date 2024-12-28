@@ -23,10 +23,10 @@ x implement like and dislike
     x some coloring to see if post is already liked by user
 x cookies to limit length and track sessions
 - Should expired sessions be cleared from db? How and when?
-- Encrypt session token aswell? Someone could fake a session if they can catch the token
+- Encrypt session token aswell? Someone could fake a session if they catch the token
 x Look for allowed method
 - for filtering, create a bar or something on the front page:
-    x if session is valid: radio buttons for created, liked and disliked
+    - if session is valid: *Dropdown* for all, created, liked and disliked
     x text input for categories
     - queries that work
 - category items to (search?) links
