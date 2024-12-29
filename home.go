@@ -71,14 +71,6 @@ func countReactions(id int) (int, int) {
 
 func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 
-	// Find all posts without an empty title
-	/* 	rowsThreads, err := db.Query(selectQuery)
-	   	if err != nil {
-	   		fmt.Println("fetchThreads selectQuery failed", err.Error())
-	   		return nil, err
-	   	}
-	   	defer rowsThreads.Close() */
-
 	var threads []Thread
 	for rowsThreads.Next() {
 		var th Thread
@@ -99,39 +91,58 @@ func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 	return threads, nil
 }
 
-func findThreads(filter string, authId int) ([]Thread, error) {
+func findThreads(r *http.Request) ([]Thread, string, string, error) {
 
-	var selectQuery string
-	var rowsThreads *sql.Rows
-	var err error
+	usId, _, validSes := validateSession(r)
+	selection := r.FormValue("todisplay")
+	search := r.FormValue("usersearch")
+	/* 	var selectQuery string
+	   	var rowsThreads *sql.Rows
+	   	var err error */
 
-	if filter == "" || filter == "all" {
-		selectQuery = `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
-		rowsThreads, err = db.Query(selectQuery)
-		if err != nil {
-			fmt.Println("findThreads selectQuery failed", err.Error())
-			return nil, err
+	// Find all threads by default
+	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
+	rowsThreads, err := db.Query(selectQuery)
+	if err != nil {
+		fmt.Println("findThreads selectQuery failed", err.Error())
+		return nil, selection, search, err
+	}
+	defer rowsThreads.Close()
+
+	if !(r.Method == http.MethodGet || !validSes) { // If user did a POST, session should be valid
+
+		if r.FormValue("updatesel") == "update" && (selection == "created" || selection == "liked" || selection == "disliked") {
+			switch selection {
+			case "created":
+				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p WHERE title != "" AND authorID = ?;`
+			case "liked":
+				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p JOIN post_reactions pr ON p.id = pr.post_id WHERE p.title != "" AND pr.reaction_type = 'like' AND pr.user_id = ?`
+			case "disliked":
+				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p JOIN post_reactions pr ON p.id = pr.post_id WHERE p.title != "" AND pr.reaction_type = 'dislike' AND pr.user_id = ?`
+			}
+
+			rowsThreads, err = db.Query(selectQuery, usId)
+			if err != nil {
+				fmt.Println("findThreads selectQuery failed", err.Error())
+				return nil, selection, search, err
+			}
+			defer rowsThreads.Close()
+
+			search = ""
 		}
-		defer rowsThreads.Close()
-	}
 
-	if filter == "created" {
-		selectQuery = `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "" AND authorID = ?;`
-		rowsThreads, err = db.Query(selectQuery, authId)
-		if err != nil {
-			fmt.Println("findThreads selectQuery failed", err.Error())
-			return nil, err
+		if r.FormValue("serchcat") == "search" {
+			// filter threads by category
+			selection = ""
 		}
-		defer rowsThreads.Close()
-	}
-	if filter == "liked" {
-		// Find all threads and filter them otherwise?
-	}
-	if filter == "disliked" {
-		// Find all threads and filter them otherwise?
 	}
 
-	return fetchThreads(rowsThreads)
+	var threads []Thread
+	threads, err = fetchThreads(rowsThreads)
+
+	// Or remove the offending threads here?
+
+	return threads, selection, search, err
 }
 
 func fetchReplies(thisID int) ([]Reply, error) {
@@ -154,36 +165,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	}
 
 	usId, usName, validSes := validateSession(r)
-	selection := r.FormValue("todisplay")
-	search := r.FormValue("usersearch")
-
-	var threads []Thread
-	var err error
-	if r.Method == http.MethodGet || !validSes {
-		threads, err = findThreads("", usId)
-	} else {
-
-		// If user did a POST, session should be valid
-
-		if r.FormValue("updatesel") == "update" {
-			switch r.FormValue("todisplay") {
-			case "created":
-				threads, err = findThreads("created", usId)
-			case "liked":
-				threads, err = findThreads("liked", usId)
-			case "disliked":
-				threads, err = findThreads("disliked", usId)
-			default:
-				threads, err = findThreads("", usId)
-			}
-			search = ""
-		}
-		if r.FormValue("serchcat") == "search" {
-			// filter threads by category
-			threads, err = findThreads("", usId)
-			selection = ""
-		}
-	}
+	threads, selection, search, err := findThreads(r)
 
 	if err != nil {
 		http.Error(w, "Error fetching threads", http.StatusInternalServerError)

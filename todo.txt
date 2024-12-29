@@ -24,6 +24,7 @@ x implement like and dislike
 x cookies to limit length and track sessions
 - Should expired sessions be cleared from db? How and when?
 - Encrypt session token aswell? Someone could fake a session if they catch the token
+- Threads with most recent post to the top
 x Look for allowed method
 - for filtering, create a bar or something on the front page:
     - if session is valid: *Dropdown* for all, created, liked and disliked
