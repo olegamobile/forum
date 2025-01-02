@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 type Thread struct {
@@ -70,7 +71,6 @@ func countReactions(id int) (int, int) {
 }
 
 func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
-
 	var threads []Thread
 	for rowsThreads.Next() {
 		var th Thread
@@ -96,9 +96,6 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 	usId, _, validSes := validateSession(r)
 	selection := r.FormValue("todisplay")
 	search := r.FormValue("usersearch")
-	/* 	var selectQuery string
-	   	var rowsThreads *sql.Rows
-	   	var err error */
 
 	// Find all threads by default
 	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
@@ -109,9 +106,9 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 	}
 	defer rowsThreads.Close()
 
-	if !(r.Method == http.MethodGet || !validSes) { // If user did a POST, session should be valid
+	if r.Method == http.MethodPost { // If user did a POST, session should be valid
 
-		if r.FormValue("updatesel") == "update" && (selection == "created" || selection == "liked" || selection == "disliked") {
+		if validSes && (r.FormValue("updatesel") == "update" && (selection == "created" || selection == "liked" || selection == "disliked")) {
 			switch selection {
 			case "created":
 				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p WHERE title != "" AND authorID = ?;`
@@ -123,7 +120,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 
 			rowsThreads, err = db.Query(selectQuery, usId)
 			if err != nil {
-				fmt.Println("findThreads selectQuery failed", err.Error())
+				fmt.Println("findThreads selectQuery to filter selected failed", err.Error())
 				return nil, selection, search, err
 			}
 			defer rowsThreads.Close()
@@ -132,15 +129,32 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 		}
 
 		if r.FormValue("serchcat") == "search" {
-			// filter threads by category
+
+			searches := strings.Fields(strings.ToLower(search))
+			selectQuery = `SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE json_each.value = ?;`
+			// json_each expands the JSON array in p.categories into rows, allowing filtering by category strings
+			// DISTINCT to avoid duplicates in case of repeated category in post
+
+			if len(searches) > 0 {
+				rowsThreads, err = db.Query(selectQuery, searches[0]) // Only use the first search term
+				if err != nil {
+					fmt.Println("findThreads selectQuery to search categories failed", err.Error())
+					return nil, selection, search, err
+				}
+				defer rowsThreads.Close()
+			}
+
+			selection = ""
+		}
+
+		if r.FormValue("reset") == "reset" {
+			search = ""
 			selection = ""
 		}
 	}
 
 	var threads []Thread
 	threads, err = fetchThreads(rowsThreads)
-
-	// Or remove the offending threads here?
 
 	return threads, selection, search, err
 }
