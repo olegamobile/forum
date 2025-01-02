@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Thread struct {
@@ -196,6 +197,61 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		threads[i].RepliesN = len(replies)
 	}
 
+	sortByRecentInteraction(&threads, w)
+
 	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg, Selection: selection, Search: search}
 	indexTmpl.Execute(w, data)
+}
+
+func newestReply(this *Reply, w http.ResponseWriter) time.Time {
+	thisTime, err := time.Parse(time.RFC3339, this.Created)
+	if err != nil {
+		fmt.Println("Error parsing date:", err.Error())
+		http.Error(w, "Error parsing date", http.StatusInternalServerError)
+	}
+
+	if len(this.Replies) == 0 {
+		return thisTime
+	} else {
+		newest := thisTime
+		for _, rep := range this.Replies {
+			repTime := newestReply(&rep, w)
+			if repTime.Before(newest) {
+				newest = repTime
+			}
+		}
+		return newest
+	}
+}
+
+func getThreadTime(th *Thread, w http.ResponseWriter) time.Time {
+	threadTime, err := time.Parse(time.RFC3339, th.Created) // "created" looks something like this: 2024-12-02T15:44:52Z
+	if err != nil {
+		fmt.Println("Error parsing date:", err.Error())
+		http.Error(w, "Error parsing date", http.StatusInternalServerError)
+		return threadTime
+	}
+
+	for _, rep := range th.Replies {
+		replyTime := newestReply(&rep, w)
+
+		if threadTime.Before(replyTime) {
+			threadTime = replyTime
+		}
+	}
+
+	return threadTime
+}
+
+func sortByRecentInteraction(threads *[]Thread, w http.ResponseWriter) {
+	for i := 0; i < len(*threads)-1; i++ {
+		time1 := getThreadTime(&(*threads)[i], w)
+		for j := i + 1; j < len(*threads); j++ {
+			time2 := getThreadTime(&(*threads)[j], w)
+
+			if time1.Before(time2) {
+				(*threads)[i], (*threads)[j] = (*threads)[j], (*threads)[i]
+			}
+		}
+	}
 }

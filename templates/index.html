@@ -18,7 +18,7 @@
         <table>
             <thead>
                 <tr>
-                    <th colspan="2">Filter</th>
+                    <th colspan="3">Filter</th>
                 </tr>
             </thead>
             <tbody>
@@ -27,8 +27,7 @@
                         <td>
                             <label for="search-categories">Search categories:</label><br>
                             <input type="search" id="search-categories" name="usersearch" value="{{.Search}}" placeholder="Enter category"><br>
-                            <button type="submit" name="serchcat" value="search">Search</button>
-                            <button type="submit" name="reset" value="reset">Reset</button>
+                            <button type="submit" name="serchcat" value="search">Search</button>                            
                         </td>
                         <td>
                             {{if .ValidSes}}
@@ -41,6 +40,9 @@
                             </select><br>
                             <button type="submit" name="updatesel" value="update">Update</button>
                             {{end}}
+                        </td>
+                        <td>
+                            <button type="submit" name="reset" value="reset">Reset</button>
                         </td>
                     </form>
                 </tr>
