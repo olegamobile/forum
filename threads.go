@@ -129,7 +129,8 @@ func timeStrings(created string) (string, string, error) {
 	return day, time, nil
 }
 
-func getReplies(rows *sql.Rows, thisID int) []Reply {
+// createReplies creates a slice of Replies from database rows
+func createReplies(rows *sql.Rows, thisID int) []Reply {
 	var err error
 	var replies []Reply
 
@@ -164,7 +165,7 @@ func recurseReplies(db *sql.DB, this *Reply) {
 	}
 	defer rows.Close()
 
-	replies := getReplies(rows, this.ID)
+	replies := createReplies(rows, this.ID)
 
 	if len(replies) != 0 {
 		this.Replies = replies
@@ -252,7 +253,7 @@ func findThread(db *sql.DB, id int) (Thread, error) {
 	}
 	defer rows.Close()
 
-	replies := getReplies(rows, thread.ID)
+	replies := createReplies(rows, thread.ID)
 
 	// Add replies to replies recursively
 	for i := 0; i < len(replies); i++ {

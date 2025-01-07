@@ -71,6 +71,7 @@ func countReactions(id int) (int, int) {
 	return likes, dislikes
 }
 
+// fetchThreads
 func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 	var threads []Thread
 	for rowsThreads.Next() {
@@ -160,6 +161,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 	return threads, selection, search, err
 }
 
+// fetchReplies returns replies based on post ID
 func fetchReplies(thisID int) ([]Reply, error) {
 	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM posts WHERE base_id = ? AND title = '';` // All replies
 	rows, err := db.Query(selectQueryReplies, thisID)
@@ -168,7 +170,7 @@ func fetchReplies(thisID int) ([]Reply, error) {
 	}
 	defer rows.Close()
 
-	replies := getReplies(rows, thisID)
+	replies := createReplies(rows, thisID)
 	return replies, nil
 }
 
@@ -194,6 +196,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 			http.Error(w, "Error fetching replies", http.StatusInternalServerError)
 			return
 		}
+		threads[i].Replies = replies
 		threads[i].RepliesN = len(replies)
 	}
 
@@ -203,6 +206,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	indexTmpl.Execute(w, data)
 }
 
+// newestReply finds time of the  newest reply in the tree
 func newestReply(this *Reply, w http.ResponseWriter) time.Time {
 	thisTime, err := time.Parse(time.RFC3339, this.Created)
 	if err != nil {
@@ -216,7 +220,7 @@ func newestReply(this *Reply, w http.ResponseWriter) time.Time {
 		newest := thisTime
 		for _, rep := range this.Replies {
 			repTime := newestReply(&rep, w)
-			if repTime.Before(newest) {
+			if repTime.After(newest) {
 				newest = repTime
 			}
 		}
@@ -224,6 +228,7 @@ func newestReply(this *Reply, w http.ResponseWriter) time.Time {
 	}
 }
 
+// getThreadTime finds the time the thread got its most recent post
 func getThreadTime(th *Thread, w http.ResponseWriter) time.Time {
 	threadTime, err := time.Parse(time.RFC3339, th.Created) // "created" looks something like this: 2024-12-02T15:44:52Z
 	if err != nil {
@@ -234,8 +239,7 @@ func getThreadTime(th *Thread, w http.ResponseWriter) time.Time {
 
 	for _, rep := range th.Replies {
 		replyTime := newestReply(&rep, w)
-
-		if threadTime.Before(replyTime) {
+		if replyTime.After(threadTime) {
 			threadTime = replyTime
 		}
 	}
@@ -243,12 +247,12 @@ func getThreadTime(th *Thread, w http.ResponseWriter) time.Time {
 	return threadTime
 }
 
+// sortByRecentInteraction sorts the threads by most recent post within the thread
 func sortByRecentInteraction(threads *[]Thread, w http.ResponseWriter) {
 	for i := 0; i < len(*threads)-1; i++ {
-		time1 := getThreadTime(&(*threads)[i], w)
 		for j := i + 1; j < len(*threads); j++ {
+			time1 := getThreadTime(&(*threads)[i], w)
 			time2 := getThreadTime(&(*threads)[j], w)
-
 			if time1.Before(time2) {
 				(*threads)[i], (*threads)[j] = (*threads)[j], (*threads)[i]
 			}
