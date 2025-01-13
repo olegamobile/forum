@@ -58,6 +58,8 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 		for _, char := range strings.TrimSpace(rawCats) {
 			if !unicode.IsPunct(char) {
 				cleanCats += string(char)
+			} else {
+				cleanCats += " "
 			}
 		}
 		catsJson, _ := json.Marshal(strings.Fields(cleanCats))

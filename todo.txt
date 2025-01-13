@@ -31,6 +31,10 @@ x Look for allowed method
     x text input for categories
     - queries that work
 - category items to (search?) links
+- prevent html and Js in all input
+- UUID for used id
+- limit title and categories length
+- prevent duplicate categories
 
 
 Advanced features:
