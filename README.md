@@ -31,14 +31,14 @@ Following is an entity relationship diagram (ERD) showing the relationships amon
 ```mermaid
 erDiagram
    USER {
-        *user_id TEXT(UUID)
+        user_id TEXT(UUID) PK
         email TEXT
         username TEXT
         password TEXT
         created_at TEXT
     }
     P["POST/COMMENT"] {
-        *post_id INT
+        post_id INT PK
         user_id TEXT(UUID)
         title TEXT
         content TEXT
@@ -48,14 +48,14 @@ erDiagram
         base_id INT
     }
     R[REACTION] {
-        *id INT
+        id INT PK
         user_id TEXT(UUID)
         post_id INT
         reaction_type TEXT
         created_at TEXT
     }
     S[SESSION] {
-        *id INT
+        id INT PK
         user_id TEXT(UUID)
         session_token TEXT
         expires_at TEXT
