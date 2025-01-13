@@ -31,7 +31,7 @@ func validateSession(r *http.Request) (int, string, bool) {
 		query := `SELECT user_id, username FROM sessions WHERE session_token = ? AND expires_at > ?`
 		err := db.QueryRow(query, cookie.Value, time.Now()).Scan(&userID, &userName)
 		if err != nil { // invalid session
-			fmt.Println(err.Error())
+			//fmt.Println("Invalid session:", err.Error())
 			validSes = false
 		}
 	} else {
