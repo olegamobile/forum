@@ -29,10 +29,6 @@ You can now use the application by running the following command:
 Following is an entity relationship diagram (ERD) showing the relationships among entities with their corresponding attributes:
 
 ```mermaid
----
-title: FORUM
----
-
 erDiagram
    USER {
         *user_id TEXT(UUID)
