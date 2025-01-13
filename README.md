@@ -30,8 +30,6 @@ Following is an entity relationship diagram (ERD) showing the relationships amon
 
 ```mermaid
 ---
-config:
-  theme: forest
 title: FORUM
 ---
 
@@ -68,8 +66,8 @@ erDiagram
     }
 
     USER ||--|| S : has
-    USER ||--o{ P : has
-    USER ||--o{ R : has
+    USER ||--o{ P : writes
+    USER ||--o{ R : gives
     P ||--o{ R : has
 ```
 
