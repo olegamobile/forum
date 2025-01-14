@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"text/template"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -57,6 +59,17 @@ func setHandlers() {
 	})
 }
 
+// sessionCleanup removes expired sessions once every hour
+func sessionCleanup(interval time.Duration) {
+	ticker := time.NewTicker(interval)
+	go func() {
+		for range ticker.C {
+			log.Println("Running session cleanup...")
+			removeExpiredSessions()
+		}
+	}()
+}
+
 func main() {
 	// Open database connection
 	var err error
@@ -68,6 +81,7 @@ func main() {
 	defer db.Close()
 
 	makeTables()
+	sessionCleanup(time.Hour) // Remove expires sessions every hour
 	initTemplates()
 	setHandlers()
 
