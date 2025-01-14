@@ -282,6 +282,7 @@ func markValidity(rep *Reply, valid bool, reactMap map[int]reaction) {
 	}
 }
 
+// threadPageHandler handles request from /thread/
 func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
