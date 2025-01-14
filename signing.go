@@ -144,6 +144,16 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// deleteSession removes all sessions from the db by user Id
+func deleteSession(w http.ResponseWriter, usrId int) {
+	query := `DELETE FROM sessions WHERE user_id = ?`
+	_, err := db.Exec(query, usrId)
+	if err != nil {
+		http.Error(w, "Failed to delete old session", http.StatusInternalServerError)
+		return
+	}
+}
+
 func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
@@ -192,6 +202,9 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Correct password")
 	}
+
+	// Remove any old sessions so user can't be active on different browsers (audit question)
+	deleteSession(w, userID)
 
 	// Cookie and session
 	sessionToken, err := createSession()

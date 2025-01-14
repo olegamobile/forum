@@ -29,12 +29,18 @@ x Look for allowed method
 - for filtering, create a bar or something on the front page:
     x if session is valid: Dropdown for: all, created, liked and disliked
     x text input for categories
-    - queries that work
+    x queries that work
+    - filter by all search terms:
+        - inclusive (match any)
+        - exclusive (match all)
+x do not allow multiple sessions for one user (delete olds when signing in)
+- Always "sign" not "log"
 - category items to (search?) links
 - prevent html and Js in all input
 - UUID for used id
 - limit title and categories length
 - prevent duplicate categories
+- proper error page
 
 
 Advanced features:
