@@ -21,7 +21,7 @@ type SignData struct {
 	UsrNm    string
 }
 
-// cleanUpExpiredSessions deletes all expired sessions
+// removeExpiredSessions deletes all expired sessions
 func removeExpiredSessions() {
 	_, err := db.Exec("DELETE FROM sessions WHERE expires_at < ?", time.Now())
 	if err != nil {
