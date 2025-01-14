@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"net/mail"
 	"time"
@@ -20,8 +21,18 @@ type SignData struct {
 	UsrNm    string
 }
 
+// cleanUpExpiredSessions deletes all expired sessions
+func removeExpiredSessions() {
+	_, err := db.Exec("DELETE FROM sessions WHERE expires_at < ?", time.Now())
+	if err != nil {
+		log.Printf("Error deleting expired sessions: %v\n", err.Error())
+	}
+}
+
 // validateSession returns user id, name and if session is (still) valid
 func validateSession(r *http.Request) (int, string, bool) {
+	//removeExpiredSessions()	// Doing this every hour instead from main()
+
 	validSes := true
 	var userID int
 	var userName string

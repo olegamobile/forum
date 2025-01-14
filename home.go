@@ -93,7 +93,7 @@ func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 	return threads, nil
 }
 
-func findThreads(r *http.Request) ([]Thread, string, string, error) {
+func findThreads(w http.ResponseWriter, r *http.Request) ([]Thread, string, string, error) {
 
 	usId, _, validSes := validateSession(r)
 	selection := r.FormValue("todisplay")
@@ -182,7 +182,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	}
 
 	usId, usName, validSes := validateSession(r)
-	threads, selection, search, err := findThreads(r)
+	threads, selection, search, err := findThreads(w, r)
 
 	if err != nil {
 		http.Error(w, "Error fetching threads", http.StatusInternalServerError)
