@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"html"
 	"net/http"
 	"strings"
 	"time"
@@ -28,13 +29,14 @@ type Thread struct {
 }
 
 type PageData struct {
-	Threads   []Thread
-	ValidSes  bool
-	UsrId     string
-	UsrNm     string
-	Message   string
-	Selection string
-	Search    string
+	Threads     []Thread
+	ValidSes    bool
+	UsrId       string
+	UsrNm       string
+	Message     string
+	Selection   string
+	Search      string
+	Multisearch string
 }
 
 func countReactions(id int) (int, int) {
@@ -93,18 +95,42 @@ func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 	return threads, nil
 }
 
-func findThreads(r *http.Request) ([]Thread, string, string, error) {
+// getMultipleSearch returns a search query that looks for either any or all matches to the search terms
+func getMultipleSearch(multisearch string, searches []string) (string, []interface{}) {
+	query := ""
+	questionmarks := make([]string, len(searches))
+	searchesInterface := make([]interface{}, len(searches))
+	for i, s := range searches {
+		questionmarks[i] = "?"
+		searchesInterface[i] = s
+	}
+
+	if multisearch == "any" {
+		query = fmt.Sprintf(`SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s);`, strings.Join(questionmarks, ", "))
+	} else {
+		query = fmt.Sprintf(`SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s) GROUP BY p.id HAVING COUNT(DISTINCT LOWER(json_each.value)) = ?;`, strings.Join(questionmarks, ", "))
+		// HAVING COUNT to have equal number of matching categories to search terms
+	}
+
+	// json_each expands the JSON array in p.categories into rows, allowing filtering by category strings
+	// DISTINCT to avoid duplicates in case of repeated category in post
+
+	return query, searchesInterface
+}
+
+func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 
 	usId, _, validSes := validateSession(r)
 	selection := r.FormValue("todisplay")
 	search := r.FormValue("usersearch")
+	multisearch := r.FormValue("multisearch")
 
 	// Find all threads by default
 	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
 	rowsThreads, err := db.Query(selectQuery)
 	if err != nil {
 		fmt.Println("findThreads selectQuery failed", err.Error())
-		return nil, selection, search, err
+		return nil, selection, search, multisearch, err
 	}
 	defer rowsThreads.Close()
 
@@ -123,7 +149,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 			rowsThreads, err = db.Query(selectQuery, usId)
 			if err != nil {
 				fmt.Println("findThreads selectQuery to filter selected failed", err.Error())
-				return nil, selection, search, err
+				return nil, selection, search, multisearch, err
 			}
 			defer rowsThreads.Close()
 
@@ -131,17 +157,21 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 		}
 
 		if r.FormValue("serchcat") == "search" {
+			searches := strings.Fields(cleanString(html.EscapeString(strings.ToLower(search))))
 
-			searches := strings.Fields(strings.ToLower(search))
-			selectQuery = `SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE json_each.value = ?;`
-			// json_each expands the JSON array in p.categories into rows, allowing filtering by category strings
-			// DISTINCT to avoid duplicates in case of repeated category in post
+			selectQuery, searchesInterface := getMultipleSearch(multisearch, searches)
 
 			if len(searches) > 0 {
-				rowsThreads, err = db.Query(selectQuery, searches[0]) // Only use the first search term
+
+				if multisearch == "all" { // query for "all" compares matching categories to the number of search terms
+					searchesInterface = append(searchesInterface, len(searchesInterface))
+				}
+
+				rowsThreads, err = db.Query(selectQuery, searchesInterface...)
+
 				if err != nil {
 					fmt.Println("findThreads selectQuery to search categories failed", err.Error())
-					return nil, selection, search, err
+					return nil, selection, search, multisearch, err
 				}
 				defer rowsThreads.Close()
 			}
@@ -158,7 +188,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, error) {
 	var threads []Thread
 	threads, err = fetchThreads(rowsThreads)
 
-	return threads, selection, search, err
+	return threads, selection, search, multisearch, err
 }
 
 // fetchReplies returns replies based on post ID
@@ -182,7 +212,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	}
 
 	usId, usName, validSes := validateSession(r)
-	threads, selection, search, err := findThreads(r)
+	threads, selection, search, multisearch, err := findThreads(r)
 
 	if err != nil {
 		http.Error(w, "Error fetching threads", http.StatusInternalServerError)
@@ -202,7 +232,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 
 	sortByRecentInteraction(&threads, w)
 
-	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg, Selection: selection, Search: search}
+	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg, Selection: selection, Search: search, Multisearch: multisearch}
 	indexTmpl.Execute(w, data)
 }
 
