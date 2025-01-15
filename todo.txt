@@ -26,6 +26,8 @@ x Should expired sessions be cleared from db? How and when?
 x Threads with most recent post to the top
 x Look for allowed method
 x do not allow multiple sessions for one user (delete olds when signing in)
+x prevent html and Js in all input
+x UUID for used id
 
 - Encrypt session token aswell? Someone could fake a session if they catch the token
 - for filtering, create a bar or something on the front page:
@@ -37,8 +39,6 @@ x do not allow multiple sessions for one user (delete olds when signing in)
         - exclusive (match all)
 - Always "sign" not "log"
 - category items to (search?) links
-- prevent html and Js in all input
-- UUID for used id
 - limit title and categories length
 - prevent duplicate categories
 - proper error page
