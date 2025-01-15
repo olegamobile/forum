@@ -41,6 +41,8 @@ x for category search something on the front page:
 - limit title and categories length
 - prevent duplicate categories
 - proper error page
+- remove e-mail from login page
+- redirect to thread page after it's creation (not to the list of threads)
 
 
 Advanced features:
@@ -53,3 +55,4 @@ Advanced features:
 - notifications for:
     - likes and dislikes
     - comments
+- images upload
