@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"html"
 	"log"
 	"net/http"
 	"net/mail"
@@ -98,9 +99,9 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.FormValue("username")
-	email := r.FormValue("email")
-	pass := r.FormValue("password")
+	name := html.EscapeString(r.FormValue("username"))
+	email := html.EscapeString(r.FormValue("email"))
+	pass := html.EscapeString(r.FormValue("password"))
 	var signData SignData
 	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
 
