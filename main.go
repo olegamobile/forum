@@ -46,6 +46,9 @@ func initTemplates() {
 func setHandlers() {
 	fileServer := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/styles.css", http.StripPrefix("/static/", fileServer))
+	http.Handle("/static/ui-functions.js", http.StripPrefix("/static/", fileServer))
+
+	http.Handle("/favicon.ico", http.NotFoundHandler()) //accessing favicon will cause 404
 
 	//http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +68,7 @@ func setHandlers() {
 	})
 }
 
-// sessionCleanup removes expired sessions once every hour
+// sessionCleanup removes expired sessions every given time interval
 func sessionCleanup(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	go func() {
@@ -87,7 +90,7 @@ func main() {
 	defer db.Close()
 
 	makeTables()
-	sessionCleanup(time.Hour) // Remove expires sessions every hour
+	sessionCleanup(time.Hour) // Remove expired sessions every hour
 	initTemplates()
 	setHandlers()
 

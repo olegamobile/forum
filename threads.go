@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,14 +30,14 @@ type Reply struct {
 }
 
 type reaction struct {
-	userID  int
+	userID  string
 	opinion string
 }
 
 type threadPageData struct {
 	Thread   Thread
 	ValidSes bool
-	UsrId    int
+	UsrId    string
 	UsrNm    string
 }
 
@@ -50,9 +51,9 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 	authID, author, valid := validateSession(r)
 
 	if valid && r.Method == http.MethodPost {
-		title := strings.TrimSpace(r.FormValue("title"))
-		content := strings.TrimSpace(r.FormValue("content"))
-		rawCats := strings.ToLower(r.FormValue("categories"))
+		title := html.EscapeString(strings.TrimSpace(r.FormValue("title")))
+		content := html.EscapeString(strings.TrimSpace(r.FormValue("content")))
+		rawCats := html.EscapeString(strings.ToLower(r.FormValue("categories")))
 
 		cleanCats := ""
 		for _, char := range strings.TrimSpace(rawCats) {
@@ -91,7 +92,7 @@ func addReplyHandler(w http.ResponseWriter, r *http.Request) {
 	authID, author, valid := validateSession(r)
 
 	if valid && r.Method == http.MethodPost {
-		content := strings.TrimSpace(r.FormValue("content"))
+		content := html.EscapeString(strings.TrimSpace(r.FormValue("content")))
 		parId := r.FormValue("parentId") // No int conversion necessary
 		baseId := r.FormValue("baseId")  // No int conversion necessary
 
@@ -282,6 +283,7 @@ func markValidity(rep *Reply, valid bool, reactMap map[int]reaction) {
 	}
 }
 
+// threadPageHandler handles request from /thread/
 func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
