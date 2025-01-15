@@ -92,15 +92,6 @@ func saveSession(db *sql.DB, userID int, usname, sessionToken string, expiresAt 
 }
 
 func addUserHandler(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
-		return
-	}
-
-	name := r.FormValue("username")
-	email := r.FormValue("email")
-	pass := r.FormValue("password")
 	var signData SignData
 	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
 
@@ -111,48 +102,62 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nameOk, passOk := checkString(name), checkString(pass)
-	_, emailErr := mail.ParseAddress(email)
-
-	if !nameOk || !passOk {
-		fmt.Println("Minimum 5 chars, limited chars")
-		signData.Message2 = "Minimum 5 characters in usename and password. Only letters, numbers and symbols allowed."
-		signTmpl.Execute(w, signData)
+	switch r.Method {
+	case http.MethodGet:
+		// Handle GET request - show registration form
+		registerTmpl.Execute(w, signData)
 		return
+
+	case http.MethodPost:
+		name := r.FormValue("username")
+		email := r.FormValue("email")
+		pass := r.FormValue("password")
+
+		nameOk, passOk := checkString(name), checkString(pass)
+		_, emailErr := mail.ParseAddress(email)
+
+		if !nameOk || !passOk {
+			fmt.Println("Minimum 5 chars, limited chars")
+			signData.Message2 = "Minimum 5 characters in username and password. Only letters, numbers and symbols allowed."
+			registerTmpl.Execute(w, signData)
+			return
+		}
+
+		if emailErr != nil {
+			fmt.Println("Invalid email address")
+			signData.Message2 = "Invalid email address"
+			registerTmpl.Execute(w, signData)
+			return
+		}
+
+		if nameExists(db, name) {
+			fmt.Println("Name already taken")
+			signData.Message2 = "Name already taken"
+			registerTmpl.Execute(w, signData)
+			return
+		}
+
+		if emailExists(db, email) {
+			fmt.Println("Email already taken")
+			signData.Message2 = "Email already taken"
+			registerTmpl.Execute(w, signData)
+			return
+		}
+
+		hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+
+		_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
+		if err != nil {
+			fmt.Println("Adding:", err.Error())
+			http.Error(w, "Error adding user", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
-
-	if emailErr != nil {
-		fmt.Println("Invalid email address")
-		signData.Message2 = "Invalid email address"
-		signTmpl.Execute(w, signData)
-		return
-	}
-
-	if nameExists(db, name) {
-		fmt.Println("Name already taken")
-		signData.Message2 = "Name already taken"
-		signTmpl.Execute(w, signData)
-		return
-	}
-
-	if emailExists(db, email) {
-		fmt.Println("Email already taken")
-		signData.Message2 = "Email already taken"
-		signTmpl.Execute(w, signData)
-		return
-	}
-
-	hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
-
-	_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
-	if err != nil {
-		fmt.Println("Adding:", err.Error())
-		http.Error(w, "Error adding user", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-
 }
 
 // deleteSession removes all sessions from the db by user Id

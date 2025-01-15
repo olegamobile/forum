@@ -12,10 +12,11 @@ import (
 )
 
 var (
-	db         *sql.DB
-	indexTmpl  *template.Template
-	threadTmpl *template.Template
-	signTmpl   *template.Template
+	db           *sql.DB
+	indexTmpl    *template.Template
+	threadTmpl   *template.Template
+	signTmpl     *template.Template
+	registerTmpl *template.Template
 )
 
 func initTemplates() {
@@ -31,6 +32,11 @@ func initTemplates() {
 		return
 	}
 	signTmpl, err = template.ParseFiles("templates/signin.html", "templates/header.html")
+	if err != nil {
+		fmt.Println("Error parsing template:", err)
+		return
+	}
+	registerTmpl, err = template.ParseFiles("templates/registerUser.html", "templates/header.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return

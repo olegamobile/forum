@@ -27,23 +27,19 @@
     {{ template "header" . }}
 
     <div class="content">
-
-        <h2>Sign in with your username or email</h2>
-        <form method="POST" action="/login">
+        <h2>Register new user</h2>
+        <form method="POST" action="/register">
             <label for="username">Username:</label><br>
-            <input type="text" id="username" name="username" /><br>
+            <input type="text" id="username" name="username" required /><br>
             <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email" /><br>
+            <input type="email" id="email" name="email" required /><br>
             <label for="pwd">Password:</label><br>
             <input type="password" id="pwd" name="password" required /><br>
-            <button type="submit" style="margin-top: 1rem;">Login</button>
-            <p class="">Don't have an account? <a href="/register">Register</a></p> 
-           
-            <p style="color:darkred;">{{.Message1}}</p>
+            <button type="submit" style="margin-top: 1rem;">Register</button>
+            <p class="">Already have an account? <a href="/signin">Login</a></p>
+            <p style="color:darkred;">{{.Message2}}</p>
         </form>
 
-      
-       
         <br>
         <a href="/">Back to Front Page</a>
     </div>
