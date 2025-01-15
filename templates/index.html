@@ -26,17 +26,24 @@
                     <form method="POST" action="/">
                         <td>
                             <label for="search-categories">Search categories:</label><br>
-                            <input type="search" id="search-categories" name="usersearch" value="{{.Search}}" placeholder="Enter category"><br>
-                            <button type="submit" name="serchcat" value="search">Search</button>                            
+                            <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"
+                                placeholder="Enter category">
+                            <input type="radio" id="any" name="multisearch" value="any" checked>
+                            <label for="any">Any</label>
+                            <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"
+                                }}checked="checked" {{end}}>
+                            <label for="all">All</label><br>
+                            <button type="submit" name="serchcat" value="search">Search</button>
                         </td>
                         <td>
                             {{if .ValidSes}}
                             <label for="todisplay">Show:</label><br>
                             <select name="todisplay" id="todisplay">
-                              <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
-                              <option value="created"{{if eq .Selection "created" }}selected{{end}}>Created</option>
-                              <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
-                              <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked</option>                              
+                                <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
+                                <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created</option>
+                                <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
+                                <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked
+                                </option>
                             </select><br>
                             <button type="submit" name="updatesel" value="update">Update</button>
                             {{end}}

@@ -41,6 +41,19 @@ type threadPageData struct {
 	UsrNm    string
 }
 
+// cleanString removes trailing and leading spaces and punctuation
+func cleanString(s string) string {
+	result := ""
+	for _, char := range strings.TrimSpace(s) {
+		if !unicode.IsPunct(char) {
+			result += string(char)
+		} else {
+			result += " "
+		}
+	}
+	return result
+}
+
 func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
@@ -55,15 +68,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 		content := html.EscapeString(strings.TrimSpace(r.FormValue("content")))
 		rawCats := html.EscapeString(strings.ToLower(r.FormValue("categories")))
 
-		cleanCats := ""
-		for _, char := range strings.TrimSpace(rawCats) {
-			if !unicode.IsPunct(char) {
-				cleanCats += string(char)
-			} else {
-				cleanCats += " "
-			}
-		}
-		catsJson, _ := json.Marshal(strings.Fields(cleanCats))
+		catsJson, _ := json.Marshal(strings.Fields(cleanString(rawCats)))
 
 		if content != "" {
 			_, err := db.Exec(`INSERT INTO posts (author, authorID, title, content, categories) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content, string(catsJson))

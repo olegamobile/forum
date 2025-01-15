@@ -28,16 +28,15 @@ x Look for allowed method
 x do not allow multiple sessions for one user (delete olds when signing in)
 x prevent html and Js in all input
 x UUID for used id
-
-- Encrypt session token aswell? Someone could fake a session if they catch the token
-- for filtering, create a bar or something on the front page:
+x for category search something on the front page:
     x if session is valid: Dropdown for: all, created, liked and disliked
     x text input for categories
     x queries that work
-    - filter by all search terms:
-        - inclusive (match any)
-        - exclusive (match all)
-- Always "sign" not "log"
+    x filter by all search terms:
+        x inclusive (match any)
+        x exclusive (match all)
+
+- Always either "sign" or "log", not both
 - category items to (search?) links
 - limit title and categories length
 - prevent duplicate categories
