@@ -39,7 +39,7 @@
             <tbody>
                 <tr>
                     <td rowspan="2" style="width: 10rem; color:rgb(122, 122, 122)">{{.Thread.Author}}<br>{{.Thread.CreatedDay}}<br>{{.Thread.CreatedTime}}</td>
-                    <td colspan="2">{{.Thread.Content}}</td>
+                    <td colspan="2" style="white-space: pre-wrap;">{{.Thread.Content}}</td>
                 </tr>
                 <tr>
                     {{if .ValidSes}}
