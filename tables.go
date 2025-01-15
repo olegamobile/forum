@@ -12,7 +12,7 @@ func makeTables() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			base_id INTEGER DEFAULT 0,
 			author TEXT NOT NULL,
-			authorID INTEGER NOT NULL,
+			authorID TEXT NOT NULL,
 			title TEXT DEFAULT '',
 			content TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -27,7 +27,7 @@ func makeTables() {
 	// Create users table if it doesn't exist
 	createUsersTableQuery := `
 		CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		id TEXT PRIMARY KEY,
 		email TEXT UNIQUE NOT NULL,
 		username TEXT UNIQUE NOT NULL,
 		password TEXT NOT NULL,  -- Hashed passwords
@@ -42,7 +42,7 @@ func makeTables() {
 	creatSessionsTableQuery := `
 		CREATE TABLE IF NOT EXISTS sessions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER NOT NULL,
+		user_id TEXT NOT NULL,
 		username TEXT,
 		session_token TEXT UNIQUE NOT NULL,
 		expires_at DATETIME NOT NULL,
@@ -57,7 +57,7 @@ func makeTables() {
 	createReactionsTableQuery := `
 	CREATE TABLE IF NOT EXISTS post_reactions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id INTEGER NOT NULL,          -- User who reacted
+		user_id TEXT NOT NULL,          -- User who reacted
 		post_id INTEGER NOT NULL,          -- ID of the thread or reply
 		reaction_type TEXT NOT NULL,       -- 'like' or 'dislike'
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

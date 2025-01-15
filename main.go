@@ -62,7 +62,7 @@ func setHandlers() {
 	})
 }
 
-// sessionCleanup removes expired sessions once every hour
+// sessionCleanup removes expired sessions every given time interval
 func sessionCleanup(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 	go func() {
@@ -84,7 +84,7 @@ func main() {
 	defer db.Close()
 
 	makeTables()
-	sessionCleanup(time.Hour) // Remove expires sessions every hour
+	sessionCleanup(time.Hour) // Remove expired sessions every hour
 	initTemplates()
 	setHandlers()
 

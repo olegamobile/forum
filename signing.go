@@ -18,7 +18,7 @@ type SignData struct {
 	Message1 string
 	Message2 string
 	ValidSes bool
-	UsrId    int
+	UsrId    string
 	UsrNm    string
 }
 
@@ -31,11 +31,11 @@ func removeExpiredSessions() {
 }
 
 // validateSession returns user id, name and if session is (still) valid
-func validateSession(r *http.Request) (int, string, bool) {
+func validateSession(r *http.Request) (string, string, bool) {
 	//removeExpiredSessions()	// Doing this every hour instead from main()
 
 	validSes := true
-	var userID int
+	var userID string
 	var userName string
 
 	cookie, _ := r.Cookie("session_token")
@@ -86,7 +86,7 @@ func createSession() (string, error) {
 	return sessionUUID.String(), nil
 }
 
-func saveSession(db *sql.DB, userID int, usname, sessionToken string, expiresAt time.Time) error {
+func saveSession(db *sql.DB, userID, usname, sessionToken string, expiresAt time.Time) error {
 	query := `INSERT INTO sessions (user_id, username, session_token, expires_at) VALUES (?, ?, ?, ?)`
 	_, err := db.Exec(query, userID, usname, sessionToken, expiresAt)
 	return err
@@ -144,8 +144,13 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	userId, err := uuid.NewV4() // Generate a new UUID user id
+	if err != nil {
+		http.Error(w, "Error generating Id for user", http.StatusInternalServerError)
+		return
+	}
 
-	_, err := db.Exec(`INSERT INTO users (email, username, password) VALUES (?, ?, ?);`, email, name, string(hashPass))
+	_, err = db.Exec(`INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?);`, userId, email, name, string(hashPass))
 	if err != nil {
 		fmt.Println("Adding:", err.Error())
 		http.Error(w, "Error adding user", http.StatusInternalServerError)
@@ -157,7 +162,7 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // deleteSession removes all sessions from the db by user Id
-func deleteSession(w http.ResponseWriter, usrId int) {
+func deleteSession(w http.ResponseWriter, usrId string) {
 	query := `DELETE FROM sessions WHERE user_id = ?`
 	_, err := db.Exec(query, usrId)
 	if err != nil {
@@ -195,7 +200,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Checking password, find with either name or email
-	storedHashedPass, userID := "", 0
+	storedHashedPass, userID := "", ""
 	if nameExists(db, name) {
 		query := `SELECT password, id FROM users WHERE username = ?`
 		db.QueryRow(query, name).Scan(&storedHashedPass, &userID)

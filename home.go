@@ -30,7 +30,7 @@ type Thread struct {
 type PageData struct {
 	Threads   []Thread
 	ValidSes  bool
-	UsrId     int
+	UsrId     string
 	UsrNm     string
 	Message   string
 	Selection string

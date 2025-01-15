@@ -30,14 +30,14 @@ type Reply struct {
 }
 
 type reaction struct {
-	userID  int
+	userID  string
 	opinion string
 }
 
 type threadPageData struct {
 	Thread   Thread
 	ValidSes bool
-	UsrId    int
+	UsrId    string
 	UsrNm    string
 }
 
