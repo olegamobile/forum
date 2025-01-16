@@ -1,18 +1,30 @@
 {{ define "header" }}
 <header>
-    <div id="header-container">
-        <div class="content">
-            <p align="left"><a href="/signin">Sign-in page</a></p>
-
-            {{if .ValidSes}}
-            <p> Signed in as {{.UsrNm}} </p>
-            <form method="POST" action="/logout">
-                <p><button type="submit" value="logout">Log out</button></p>
-            </form>
-            {{else}}
-            <p> Not signed in </p>
-            {{end}}           
-
+    <div class="header">
+        <div class="topnav">
+            <h1>grit:lab fika café</h1><br>
+            <p class="subtitle">where grit:labbers hang out and talk about their hobbies</p>
+            <ul>
+                <li>
+                    <a href="/" class="logo"><span class="material-symbols-outlined">local_cafe</span></a>
+                </li>
+                <li style="float: right;">
+                    {{if .ValidSes}}
+                    <p>Signed in as {{.UsrNm}}.</p>
+                    <form method="POST" action="/logout">
+                        <button type="submit"><span class="material-symbols-outlined">logout</span></button>
+                        {{else}}
+                        <p>Not signed in.</p>
+                        <a href="/signin"><span class="material-symbols-outlined">login</span></a>
+                        {{end}}
+                    </form>
+                </li>
+                <li style="float: right;">
+                    <button id="buttonText" class="dark-btn" onclick="toggleDarkMode()">
+                        <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
+                    </button>
+                </li>
+            </ul>
         </div>
     </div>
 </header>
