@@ -35,11 +35,11 @@ x for category search something on the front page:
     x filter by all search terms:
         x inclusive (match any)
         x exclusive (match all)
+x limit title and categories length
+x prevent duplicate categories
 
 - Always either "sign" or "log", not both
 - category items to (search?) links
-- limit title and categories length
-- prevent duplicate categories
 - proper error page
 - remove e-mail from login page
 - redirect to thread page after it's creation (not to the list of threads)

@@ -68,7 +68,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 		content := html.EscapeString(strings.TrimSpace(r.FormValue("content")))
 		rawCats := html.EscapeString(strings.ToLower(r.FormValue("categories")))
 
-		catsJson, _ := json.Marshal(strings.Fields(cleanString(rawCats)))
+		catsJson, _ := json.Marshal(removeDuplicates(strings.Fields(cleanString(rawCats))))
 
 		if content != "" {
 			_, err := db.Exec(`INSERT INTO posts (author, authorID, title, content, categories) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content, string(catsJson))

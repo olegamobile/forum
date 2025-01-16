@@ -27,7 +27,7 @@
                         <td>
                             <label for="search-categories">Search categories:</label><br>
                             <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"
-                                placeholder="Enter category">
+                                placeholder="Enter category" maxlength="200">
                             <input type="radio" id="any" name="multisearch" value="any" checked>
                             <label for="any">Any</label>
                             <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"
@@ -83,9 +83,9 @@
         {{if .ValidSes}}
         <h3>Start a new thread</h3>
         <form method="POST" action="/add">
-            <input type="text" name="title" placeholder="Thread title" required><br>
-            <textarea name="content" placeholder="Message" rows="3"></textarea><br>
-            <textarea name="categories" placeholder="List categories" rows="2"></textarea><br>
+            <input type="text" name="title" placeholder="Thread title" maxlength="200" required><br>
+            <textarea name="content" placeholder="Message" rows="3" maxlength="3000"></textarea><br>
+            <textarea name="categories" placeholder="List categories" rows="2" maxlength="200"></textarea><br>
             <p><button type="submit">Start Thread</button></p>
         </form>
         {{else}}

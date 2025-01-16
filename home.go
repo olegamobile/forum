@@ -118,6 +118,23 @@ func getMultipleSearch(multisearch string, searches []string) (string, []interfa
 	return query, searchesInterface
 }
 
+// removeDuplicates returns a slice of strings without duplicates
+func removeDuplicates(searches []string) []string {
+	result := []string{}
+	for i := 0; i < len(searches); i++ {
+		found := false
+		for j := 0; j < len(result); j++ {
+			if searches[i] == result[j] {
+				found = true
+			}
+		}
+		if !found {
+			result = append(result, searches[i])
+		}
+	}
+	return result
+}
+
 func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 
 	usId, _, validSes := validateSession(r)
@@ -157,7 +174,10 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 		}
 
 		if r.FormValue("serchcat") == "search" {
-			searches := strings.Fields(cleanString(html.EscapeString(strings.ToLower(search))))
+			search = cleanString(html.EscapeString(strings.ToLower(search)))
+			searches := strings.Fields(search)
+			searches = removeDuplicates(searches)
+			search = strings.Join(searches, " ") // This value gets show to the user, so let's update
 
 			selectQuery, searchesInterface := getMultipleSearch(multisearch, searches)
 
