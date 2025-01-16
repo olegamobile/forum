@@ -106,7 +106,7 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
 
 	if signData.ValidSes {
-		fmt.Println(signData.UsrNm + "trying to create a new user while signed-in")
+		fmt.Println(signData.UsrNm + " trying to create a new user while signed-in")
 		signData.Message1 = "Signed in as " + signData.UsrNm + ". Log out first."
 		signTmpl.Execute(w, signData)
 		return
