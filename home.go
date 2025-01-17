@@ -170,7 +170,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 			}
 			defer rowsThreads.Close()
 
-			//search = ""
+			search = ""
 		}
 
 		if r.FormValue("serchcat") == "search" {
@@ -193,7 +193,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 				defer rowsThreads.Close()
 			}
 
-			//selection = ""
+			selection = ""
 		}
 
 		if r.FormValue("reset") == "reset" {
