@@ -38,49 +38,75 @@ body {
     color: var(--light5);
     margin: 0;
     padding: 0;
-    height: 100vh;
     background-color: var(--light1);
 }
 
-.grid-container {
-    display: grid;
+.container {
+    display: -webkit-flex;
+    display: flex;
 
-    grid-template-areas:
-        "header header header"
-        "sidenav content";
 }
 
-.sidenav {
-    grid-column: 1 / span 1;
-    grid-area: sidenav;
-    position: absolute;
-    top: 30%;
-    bottom: 0;
-    left: 0;
-    width: 20%;
-    padding: 1rem;
+.leftnav {
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+
+    padding: 10px;
+    margin-left: 0;
+    overflow-y: auto;
+}
+
+.rightnav {
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+
+    padding: 10px;
+    margin-left: 0;
     overflow-y: auto;
 }
 
 /* Main */
 .content {
-    grid-column: 2 / span 2;
-    grid-area: content;
-    position: absolute;
-    top: 30%;
-    bottom: 0;
-    left: 20%;
-    right: 20%;
+    -webkit-flex: 2;
+    -ms-flex: 2;
+    flex: 2;
     font-family: "Space Grotesk", serif;
     font-optical-sizing: auto;
     font-size: clamp(12px, 1vw, 18px);
-    width: 60%;
     padding: 2rem clamp(20px, 3, 32px);
     overflow-y: auto;
+
+}
+
+input {
+    text-decoration: none;
+    border: none;
+    padding: 6px;
+    top: 0;
+    resize: vertical;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+button {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background-color: var(--light2);
+    color: var(--light5);
+    padding: 10px;
+    border-radius: 4px;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
 }
 
 .newpostModal input[type="text"],
-.newpostModal textarea {
+textarea {
     text-decoration: none;
     border: none;
     padding: 6px;
@@ -110,23 +136,47 @@ body {
     font-size: clamp(12px, 1vw, 18px);
 }
 
-.newpost button:hover {
+input[type="reset"] {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background-color: lightgray;
+    color: var(--light5);
+    padding: 10px;
+    width: auto;
+    border-radius: 4px;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.newpost button:hover,
+input[type="reset"]:hover {
     color: var(--light1);
     background-color: var(--light5);
 }
 
 /* The Modal (background) */
 .newpostModal {
-    display: none;    /* Hidden by default */
-    position: fixed;    /* Stay in place */
-    z-index: 1;    /* Sit on top */
-    padding-top: 100px;    /* Location of the box */
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    padding-top: 100px;
+    /* Location of the box */
     left: 0;
     top: 0;
-    width: 100%;    /* Full width */
-    height: 100%;    /* Full height */
-    overflow: auto;    /* Enable scroll if needed */
-    
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
 }
 
 /* Modal Content */
@@ -192,9 +242,9 @@ body {
 /* Div post */
 .allthreads {
     margin-top: 10px;
-
 }
-.allthreads ul {
+
+.allthreads ul, .thread ul {
     padding: 0;
     list-style: none;
 }
@@ -204,7 +254,7 @@ body {
     padding: 8px;
 }
 
-.threadbox span {
+.threadbox span, .thread span {
     vertical-align: middle;
     margin-right: 4px;
 }
@@ -213,8 +263,28 @@ body {
     margin-right: 10%;
 }
 
+/* Thread page */
+.thread {
+    list-style: none;
+    border-bottom: 1px solid lightgrey;
+    padding: 8px;
+    margin: 4px;
+}
+
+.thread .material-symbols-outlined {
+    font-size: clamp(16px, 2vw, 24px);
+}
+
+.thread li {
+    padding-top: 8px;
+    vertical-align: middle;
+}
+.thread li .like-dislike-cell {
+    margin-top: 10px;
+}
+
 /* Table styles */
-table {
+/* table {
     width: 100%;
     max-width: 90%;
     border-collapse: collapse;
@@ -239,7 +309,7 @@ th {
 
 td {
     background-color: #fafafa;
-}
+} */
 
 /* No bullets to list*/
 ul {
@@ -272,13 +342,10 @@ textarea {
 
 /* Header styling */
 .header {
-    grid-column: 1 / span 3;
-    grid-area: header;
     position: sticky;
     align-items: center;
-    justify-content: space-between;
-    background-color: var(--light2);
     margin: 0;
+    margin-bottom: 10px;
     padding: 0;
     text-align: center;
     max-width: 100%;
@@ -313,7 +380,7 @@ h1 {
 }
 
 .topnav {
-    position: absolute;
+
     text-align: center;
     top: 0;
     bottom: 0;
@@ -367,7 +434,6 @@ h1 {
     font-size: clamp(12px, 1vw, 18px);
 }
 
-
 .topnav li a:hover,
 .topnav li button:hover,
 .topnav input[type="button"]:hover {
@@ -388,63 +454,60 @@ h1 {
     top: 0;
 }
 
-/* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other*/
-@media only screen and (max-width: 800px) {
+/* Footer */
+.footer {
+    align-items: center;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+    max-width: 100%;
+    background-color: #ddd;
+}
 
-    .header,
-    .sidenav,
-    .content {
-        grid-column: 1 / span 1;
-        max-width: 100%;
-    }
-
+/* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 800px) {
     input[type="search"] {
         max-width: 100px;
     }
 
-    .grid-container {
-        grid-template-areas:
-            "header"
-            "sidenav"
-            "content";
-
+    .container {
+        max-width: 100%;
+        padding: 10px;
+        -webkit-flex-direction: column;
+        flex-direction: column;
     }
 }
 
-@media only screen and (max-width: 300px) {
-
-    .header,
-    .sidenav,
-    .content {
-        grid-column: 1 / span 1;
-        max-width: 100%;
-    }
-
+@media screen and (max-width: 300px) {
     input[type="search"] {
         max-width: 100px;
     }
 
-    .grid-container {
-        grid-template-areas:
-            "header"
-            "sidenav"
-            "content";
-
+    .container {
+        padding: 10px;
+        max-width: 100%;
+        -webkit-flex-direction: column;
+        flex-direction: column;
     }
 }
 
 /* Dark Mode */
-.dark-mode,
-.dark-mode .content {
+.dark-mode {
     background-color: var(--dark1);
     color: var(--dark-text);
 }
-
-.dark-mode header {
-    background-color: var(--dark3);
+.dark-mode footer {
+    background-color: var(--dark5);
     color: var(--dark-text);
 }
 
+.dark-mode h1, .dark-mode .subtitle {
+    color: var(--dark-text);
+}
+.dark-mode .topnav {
+    color: var(--light5);
+}
+
 .dark-mode a {
-    color: #fff200;
+    color: yellow;
 }

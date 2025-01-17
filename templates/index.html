@@ -9,16 +9,14 @@
 </head>
 
 <body>
-    <div class="grid-container">
 
-        {{ template "header" . }}
+    {{ template "header" . }}
 
-        <div class="sidenav">
-            <p>Sidenav: possible place to put categories</p>
+    <div class="container">
+        <div class="leftnav">
+            <p>leftnav: possible place to put categories</p>
         </div>
-
         <div class="content">
-
             <!-- Form to start a thread -->
             <div class="newpost">
                 {{if .ValidSes}}
@@ -27,19 +25,14 @@
                 <!-- The Modal -->
                 <div class="newpostModal" id="newpostModal">
                     <!-- Modal content -->
-                    <div class="modal-content">
-                        <span class="close">&times;</span>
+                    <div class="modal-content"> <span class="close">&times;</span>
                         <h3>Start a new thread</h3>
                         <form method="POST" action="/add">
-                            <input type="text" name="title" placeholder="Thread title" maxlength="200" id="newpost"
-                                required><br>
-                            <textarea name="content" placeholder="Message" rows="6" maxlength="3000"
-                                id="newpost"></textarea><br>
-                            <input type="text" name="categories" placeholder="List categories" maxlength="200"
-                                id="newpost"><br>
-                            <button style="float: right;" onclick="document.getElementById('newpost').value = ''">Clear
-                                all</button>
-                            <button type="submit">Start thread</button>
+                            <input type="text" name="title" placeholder="Thread title" maxlength="200" required><br>
+                            <textarea name="content" placeholder="Message" rows="6" maxlength="3000"></textarea><br>
+                            <input type="text" name="categories" placeholder="List categories" maxlength="200"><br>
+                            <input type="reset" value="Clear all" style="float: right;" /> <button type="submit">Start
+                                thread</button>
                         </form>
                     </div>
                 </div>
@@ -49,64 +42,33 @@
                 {{end}}
             </div>
             <!-- All threads -->
-
             <h2>Threads</h2>
             <div class="filter">
                 <h3>Filter</h3>
-
-
                 <form method="POST" action="/">
+                    <button type="submit" name="reset" value="reset" style="float: right;">Reset filter</button>
                     <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"
                         placeholder="Search categories" maxlength="200">
                     <input type="radio" id="any" name="multisearch" value="any" checked>
                     <label for="any">Any</label>
-                    <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"
-                        }}checked="checked" {{end}}>
+                    <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"}}checked="checked" {{end}}>
                     <label for="all">All</label>
                     <button type="submit" name="serchcat" value="search"><span
-                            class="material-symbols-outlined">search</span></button>
-                    <br>
+                            class="material-symbols-outlined">search</span></button> <br>
                     {{if .ValidSes}}
                     <label for="todisplay">Show:</label>
                     <select name="todisplay" id="todisplay">
                         <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
                         <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created</option>
                         <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
-                        <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked
-                        </option>
-                    </select>
-                    <button type="submit" name="updatesel" value="update">Apply sort</button>
-                    {{end}}
-
-
-                    <button type="submit" name="reset" value="reset">Reset</button>
-
-                </form>
-
-            </div>
-
-
-
-            <!-- new filter -->
-            <!--      <div class="filter">
-                {{if .ValidSes}}
-                <h3>Filter</h3>
-                <form method="POST" action="/">
-                    <label for="todisplay">Show:</label>
-                    <select name="todisplay" id="todisplay">
-                        <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
-                        <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created </option>
-                        <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
                         <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked </option>
                     </select>
-                    <button type="submit" name="updatesel" value="update">Update</button>
-                    <button type="submit" name="reset" value="reset">Reset</button>
+                    <button type="submit" name="updatesel" value="update">Apply filter</button>
+                    {{end}}
                 </form>
-                {{end}}
-            </div> -->
-
+            </div>
             <!-- Div for each post -->
-            <div class="allthreads">
+            <div class="allthreads"> 
                 {{range .Threads}}
                 <div class="threadbox">
                     <ul>
@@ -115,7 +77,7 @@
                         <li>
                             <h3><a href="/thread/{{.ID}}">{{.Title}}</a></h3>
                         </li>
-                        <li><span class="material-symbols-outlined">person</span>{{.Author}} posted on {{.CreatedDay}}
+                        <li><span class="material-symbols-outlined">person</span><b>{{.Author}}</b> posted on {{.CreatedDay}}
                             {{.CreatedTime}}</li>
                         <li><span class="material-symbols-outlined">category</span>{{ range .CatsSlice }}{{.}} {{ end }}
                         </li>
@@ -123,10 +85,12 @@
                 </div>
                 {{end}}
             </div>
-
-
+        </div>
+        <div class="rightnav">
+            <p>rightnav: placeholder for rightnav</p>
         </div>
     </div>
+    {{ template "footer" . }}
     <script src="/static/ui-functions.js"></script>
 
 </body>

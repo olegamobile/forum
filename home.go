@@ -170,14 +170,11 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 			}
 			defer rowsThreads.Close()
 
-			search = ""
+			//search = ""
 		}
 
 		if r.FormValue("serchcat") == "search" {
-			search = cleanString(html.EscapeString(strings.ToLower(search)))
-			searches := strings.Fields(search)
-			searches = removeDuplicates(searches)
-			search = strings.Join(searches, " ") // This value gets show to the user, so let's update
+			searches := strings.Fields(cleanString(html.EscapeString(strings.ToLower(search))))
 
 			selectQuery, searchesInterface := getMultipleSearch(multisearch, searches)
 
@@ -196,7 +193,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 				defer rowsThreads.Close()
 			}
 
-			selection = ""
+			//selection = ""
 		}
 
 		if r.FormValue("reset") == "reset" {

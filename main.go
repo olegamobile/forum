@@ -21,22 +21,22 @@ var (
 
 func initTemplates() {
 	var err error
-	indexTmpl, err = template.ParseFiles("templates/index.html", "templates/header.html")
+	indexTmpl, err = template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	threadTmpl, err = template.ParseFiles("templates/thread.html", "templates/header.html", "templates/reply.html")
+	threadTmpl, err = template.ParseFiles("templates/thread.html", "templates/header.html", "templates/reply.html", "templates/footer.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	signTmpl, err = template.ParseFiles("templates/signin.html", "templates/header.html")
+	signTmpl, err = template.ParseFiles("templates/signin.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	registerTmpl, err = template.ParseFiles("templates/registerUser.html", "templates/header.html")
+	registerTmpl, err = template.ParseFiles("templates/registerUser.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return

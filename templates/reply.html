@@ -1,25 +1,26 @@
 {{ define "reply" }}
 <li>
     <!-- Content of reply -->
-    <table>
-        <tbody>
-            <tr>
-                <td rowspan="2" style="width: 10rem; color:rgb(122, 122, 122)">{{.Author}}<br>{{.CreatedDay}}<br>{{.CreatedTime}}</td>
-                <td colspan="2">{{.Content}}</td>
-            </tr>
-            <tr>
+    <div class="replies">
 
+        <div class="thread">
+            <ul>
+                
                 {{if .ValidSes}}
-                <td class="like-dislike-cell">
+                <li class="like-dislike-cell"  style="float: right;">
                     <form action="/like" method="POST" class="like-form">
                         <input type="hidden" name="base_id" value="{{.BaseID}}">
                         <input type="hidden" name="post_id" value="{{.ID}}">
                         <input type="hidden" name="post_type" value="reply">
 
                         {{if .LikedNow}}
-                        <button type="submit" title="Like" class="like-button" style="color: darkgreen"> &#9650; {{.Likes}}</button>
+                        <button type="submit" title="Like" class="like-button" style="color: darkgreen">
+                            <span class="material-symbols-outlined">thumb_up</span>
+                            {{.Likes}}</button>
                         {{else}}
-                        <button type="submit" title="Like" class="like-button"> &#9650; {{.Likes}}</button>
+                        <button type="submit" title="Like" class="like-button">
+                            <span class="material-symbols-outlined">thumb_up</span>
+                            {{.Likes}}</button>
                         {{end}}
 
                     </form>
@@ -29,23 +30,34 @@
                         <input type="hidden" name="post_type" value="reply">
 
                         {{if .DislikedNow}}
-                        <button type="submit" title="Dislike" class="dislike-button" style="color:darkred"> &#9660; {{.Dislikes}}</button>
+                        <button type="submit" title="Dislike" class="dislike-button" style="color:darkred">
+                            <span class="material-symbols-outlined">thumb_down</span>
+                            {{.Dislikes}}</button>
                         {{else}}
-                        <button type="submit" title="Dislike" class="dislike-button"> &#9660; {{.Dislikes}}</button>
+                        <button type="submit" title="Dislike" class="dislike-button">
+                            <span class="material-symbols-outlined">thumb_down</span>
+                            {{.Dislikes}}</button>
                         {{end}}
 
                     </form>
-                </td>
+                </li>
                 {{else}}
-                <td>&#9650; {{.Likes}} &#9660; {{.Dislikes}}</td>
+                <li style="float: right;">
+                    <span class="material-symbols-outlined">thumb_up</span>{{.Likes}}
+                    <span class="material-symbols-outlined">thumb_down</span>{{.Dislikes}}
+                    </li>
                 {{end}}
-
+                <li><span class="material-symbols-outlined">person</span><b>{{.Author}}</b> posted on {{.CreatedDay}}
+                    {{.CreatedTime}}</li>
+                <li>{{.Content}}</li>
                 {{if .ValidSes}}
-                <td><button class="reply-button" type="button">Reply</button></td>
+                <li><button class="reply-button" type="button">Reply</button></li>
                 {{end}}
-            </tr>
-        </tbody>
-    </table>
+            </ul>
+        </div>
+
+    </div>
+
 
     <!-- Reply submission form -->
     <div class="reply-form-container" style="display: none; margin-left: 5rem;">
