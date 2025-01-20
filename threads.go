@@ -56,7 +56,10 @@ func cleanString(s string) string {
 }
 
 func addThreadHandler(w http.ResponseWriter, r *http.Request) {
-
+	if r.URL.Path != "/add" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	if r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
@@ -94,7 +97,10 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func addReplyHandler(w http.ResponseWriter, r *http.Request) {
-
+	if r.URL.Path != "/reply" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	if r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
@@ -195,7 +201,10 @@ func recurseReplies(db *sql.DB, this *Reply) {
 }
 
 func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
-
+	if r.URL.Path != "/like" && r.URL.Path != "/dislike" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	if r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
@@ -301,6 +310,11 @@ func markValidity(rep *Reply, valid bool, reactMap map[int]reaction) {
 
 // threadPageHandler handles request from /thread/
 func threadPageHandler(w http.ResponseWriter, r *http.Request) {
+
+	if !strings.HasPrefix(r.URL.Path, "/thread/") {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return

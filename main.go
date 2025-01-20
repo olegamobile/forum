@@ -65,7 +65,7 @@ func setHandlers() {
 	http.HandleFunc("/reply", addReplyHandler)
 	http.HandleFunc("/login", logInHandler)
 	http.HandleFunc("/loguserin", logUserInHandler)
-	http.HandleFunc("/register", addUserHandler)
+	http.HandleFunc("/register", registerHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/like", likeHandler)
 	http.HandleFunc("/dislike", dislikeHandler)
