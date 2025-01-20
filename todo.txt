@@ -13,7 +13,7 @@ x reply only if logged in (name and id to message or reply)
     x reply button only works if session is valid
 x header to display "logged in as <Name>" and maybe logout/login link
 x check session validity at:
-    x load sign in
+    x load log in
     x log in
     x register
     x log out too?
@@ -25,7 +25,7 @@ x cookies to limit length and track sessions
 x Should expired sessions be cleared from db? How and when?
 x Threads with most recent post to the top
 x Look for allowed method
-x do not allow multiple sessions for one user (delete olds when signing in)
+x do not allow multiple sessions for one user (delete olds when logging in)
 x prevent html and Js in all input
 x UUID for used id
 x for category search something on the front page:
@@ -35,19 +35,16 @@ x for category search something on the front page:
     x filter by all search terms:
         x inclusive (match any)
         x exclusive (match all)
-<<<<<<< HEAD
 x limit title and categories length
 x prevent duplicate categories
-=======
-    x limit title and categories length
-    x prevent duplicate categories
->>>>>>> 5c2e28e (Added footer, improved and broke some frontend (html, css, js), manually added markus's PR: limit input lengths, no duplicate categories)
 
+- check input lengths (title, categories, content) on server side 
 - terms consistency: "sign"/"log", thread/post, etc.
 - category items to (search?) links
 - proper error page
-- remove e-mail from login page
+- remove e-mail from login page (combined field for user name or email)
 - redirect to thread page after it's creation (not to the list of threads)
+- categories table?
 
 Frontend (jedi):
 - Filter reset button resets both?
