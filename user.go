@@ -149,30 +149,31 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 		hashPass, _ := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 		userId, err := uuid.NewV4() // Generate a new UUID user id
 		if err != nil {
-			http.Error(w, "Error generating Id for user", http.StatusInternalServerError)
+			goToErrorPage("Error generating Id for user", http.StatusInternalServerError, w, r)
 			return
 		}
 
 		_, err = db.Exec(`INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?);`, userId, email, name, string(hashPass))
 		if err != nil {
 			fmt.Println("Adding:", err.Error())
-			http.Error(w, "Error adding user", http.StatusInternalServerError)
+			goToErrorPage("Error adding user", http.StatusInternalServerError, w, r)
 			return
 		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	default:
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
+		return
 	}
 }
 
 // deleteSession removes all sessions from the db by user Id
-func deleteSession(w http.ResponseWriter, usrId string) {
+func deleteSession(w http.ResponseWriter, r *http.Request, usrId string) {
 	query := `DELETE FROM sessions WHERE user_id = ?`
 	_, err := db.Exec(query, usrId)
 	if err != nil {
-		http.Error(w, "Failed to delete old session", http.StatusInternalServerError)
+		goToErrorPage("Failed to delete old session", http.StatusInternalServerError, w, r)
 		return
 	}
 }
@@ -180,7 +181,7 @@ func deleteSession(w http.ResponseWriter, usrId string) {
 func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
@@ -227,12 +228,12 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Remove any old sessions so user can't be active on different browsers (audit question)
-	deleteSession(w, userID)
+	deleteSession(w, r, userID)
 
 	// Cookie and session
 	sessionToken, err := createSession()
 	if err != nil {
-		http.Error(w, "Unable to create session: "+err.Error(), http.StatusInternalServerError)
+		goToErrorPage("Unable to create session: "+err.Error(), http.StatusInternalServerError, w, r)
 		return
 	}
 	expiresAt := time.Now().Add(30 * time.Minute) // Set session validity length
@@ -240,7 +241,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	err = saveSession(db, userID, name, sessionToken, expiresAt)
 	if err != nil {
 		fmt.Println("Error saving session", err.Error())
-		http.Error(w, "Unable to save session", http.StatusInternalServerError)
+		goToErrorPage("Unable to save session"+err.Error(), http.StatusInternalServerError, w, r)
 		return
 	}
 
@@ -259,7 +260,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
@@ -272,7 +273,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		http.Error(w, "No session found", http.StatusBadRequest)
+		goToErrorPage("No session found", http.StatusBadRequest, w, r)
 		return
 	}
 
@@ -280,7 +281,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	query := `DELETE FROM sessions WHERE session_token = ?`
 	_, err = db.Exec(query, cookie.Value)
 	if err != nil {
-		http.Error(w, "Failed to log out", http.StatusInternalServerError)
+		goToErrorPage("Failed to log out", http.StatusInternalServerError, w, r)
 		return
 	}
 
@@ -299,7 +300,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 func logInHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
