@@ -116,9 +116,7 @@ func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 func getMultipleSearch(multisearch string, searches []string) string {
 	query := ""
 	searchesCount := len(searches)
-	questionmarks := make([]string, searchesCount)
 	for i := range searches {
-		questionmarks[i] = "?"
 		searches[i] = "'" + searches[i] + "'"
 	}
 
