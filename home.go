@@ -113,26 +113,24 @@ func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 }
 
 // getMultipleSearch returns a search query that looks for either any or all matches to the search terms
-func getMultipleSearch(multisearch string, searches []string) (string, []interface{}) {
+func getMultipleSearch(multisearch string, searches []string) string {
 	query := ""
-	questionmarks := make([]string, len(searches))
-	searchesInterface := make([]interface{}, len(searches))
-	for i, s := range searches {
-		questionmarks[i] = "?"
-		searchesInterface[i] = s
+	searchesCount := len(searches)
+	for i := range searches {
+		searches[i] = "'" + searches[i] + "'"
 	}
 
 	if multisearch == "any" {
-		query = fmt.Sprintf(`SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s);`, strings.Join(questionmarks, ", "))
+		query = fmt.Sprintf(`SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s);`, strings.Join(searches, ", "))
 	} else {
-		query = fmt.Sprintf(`SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s) GROUP BY p.id HAVING COUNT(DISTINCT LOWER(json_each.value)) = ?;`, strings.Join(questionmarks, ", "))
+		query = fmt.Sprintf(`SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s) GROUP BY p.id HAVING COUNT(DISTINCT LOWER(json_each.value)) = %v;`, strings.Join(searches, ", "), searchesCount)
 		// HAVING COUNT to have equal number of matching categories to search terms
 	}
 
 	// json_each expands the JSON array in p.categories into rows, allowing filtering by category strings
 	// DISTINCT to avoid duplicates in case of repeated category in post
 
-	return query, searchesInterface
+	return query
 }
 
 // removeDuplicates returns a slice of strings without duplicates
@@ -193,15 +191,10 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 		if r.FormValue("serchcat") == "search" {
 			searches := strings.Fields(cleanString(html.EscapeString(strings.ToLower(search))))
 
-			selectQuery, searchesInterface := getMultipleSearch(multisearch, searches)
+			selectQuery := getMultipleSearch(multisearch, searches)
 
 			if len(searches) > 0 {
-
-				if multisearch == "all" { // query for "all" compares matching categories to the number of search terms
-					searchesInterface = append(searchesInterface, len(searchesInterface))
-				}
-
-				rowsThreads, err = db.Query(selectQuery, searchesInterface...)
+				rowsThreads, err = db.Query(selectQuery)
 
 				if err != nil {
 					fmt.Println("findThreads selectQuery to search categories failed", err.Error())
