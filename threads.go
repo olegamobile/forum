@@ -13,20 +13,21 @@ import (
 )
 
 type Reply struct {
-	ID          int
-	Author      string
-	Content     string
-	Created     string
-	CreatedDay  string
-	CreatedTime string
-	Likes       int
-	Dislikes    int
-	ParentID    int
-	Replies     []Reply
-	BaseID      int
-	ValidSes    bool
-	LikedNow    bool
-	DislikedNow bool
+	ID            int
+	Author        string
+	Content       string
+	Created       string
+	CreatedDay    string
+	CreatedTime   string
+	Likes         int
+	Dislikes      int
+	ParentID      int
+	Replies       []Reply
+	BaseID        int
+	ValidSes      bool
+	LikedNow      bool
+	DislikedNow   bool
+	ContentMaxLen int
 }
 
 type reaction struct {
@@ -68,6 +69,10 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 		content := html.EscapeString(strings.TrimSpace(r.FormValue("content")))
 		rawCats := html.EscapeString(strings.ToLower(r.FormValue("categories")))
 
+		if len(title) > titleMaxLen || len(content) > contentMaxLen || len(rawCats) > categoriesMaxLen || title == "" || content == "" || rawCats == "" { // User may try to force a long or short input
+			http.Error(w, "Bad request, input length not supported: ", http.StatusBadRequest)
+		}
+
 		catsJson, _ := json.Marshal(removeDuplicates(strings.Fields(cleanString(rawCats))))
 
 		if content != "" {
@@ -100,6 +105,10 @@ func addReplyHandler(w http.ResponseWriter, r *http.Request) {
 		content := html.EscapeString(strings.TrimSpace(r.FormValue("content")))
 		parId := r.FormValue("parentId") // No int conversion necessary
 		baseId := r.FormValue("baseId")  // No int conversion necessary
+
+		if len(content) > contentMaxLen || content == "" { // User may try to force a bad input
+			http.Error(w, "Bad request, input length not supported: ", http.StatusBadRequest)
+		}
 
 		if content != "" {
 			_, err := db.Exec(`INSERT INTO posts (base_id, author, authorID, content, parent_id) VALUES (?, ?, ?, ?, ?);`, baseId, author, authID, content, parId)
@@ -149,7 +158,7 @@ func createReplies(rows *sql.Rows, thisID int) []Reply {
 			fmt.Println("Error reading reply rows for reply:", err2.Error())
 			return replies
 		}
-		re.ParentID = thisID
+		re.ParentID, re.ContentMaxLen = thisID, contentMaxLen
 
 		re.CreatedDay, re.CreatedTime, err = timeStrings(re.Created)
 		if err != nil {
@@ -241,7 +250,7 @@ func dataToThread(thread Thread) (Thread, error) {
 		return thread, err
 	}
 	thread.Likes, thread.Dislikes = countReactions(thread.ID)
-	thread.BaseID = thread.ID
+	thread.BaseID, thread.ContentMaxLen = thread.ID, contentMaxLen
 	return thread, nil
 }
 

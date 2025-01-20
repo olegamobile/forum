@@ -10,34 +10,44 @@ import (
 )
 
 type Thread struct {
-	ID          int
-	Author      string
-	Title       string
-	Content     string
-	Created     string
-	CreatedDay  string
-	CreatedTime string
-	Categories  string
-	CatsSlice   []string
-	Likes       int
-	Dislikes    int
-	RepliesN    int
-	Replies     []Reply
-	BaseID      int
-	LikedNow    bool
-	DislikedNow bool
+	ID            int
+	Author        string
+	Title         string
+	Content       string
+	Created       string
+	CreatedDay    string
+	CreatedTime   string
+	Categories    string
+	CatsSlice     []string
+	Likes         int
+	Dislikes      int
+	RepliesN      int
+	Replies       []Reply
+	BaseID        int
+	LikedNow      bool
+	DislikedNow   bool
+	ContentMaxLen int
 }
 
 type PageData struct {
-	Threads     []Thread
-	ValidSes    bool
-	UsrId       string
-	UsrNm       string
-	Message     string
-	Selection   string
-	Search      string
-	Multisearch string
+	Threads          []Thread
+	ValidSes         bool
+	UsrId            string
+	UsrNm            string
+	Message          string
+	Selection        string
+	Search           string
+	Multisearch      string
+	TitleMaxLen      int
+	ContentMaxLen    int
+	CategoriesMaxLen int
 }
+
+const (
+	titleMaxLen      int = 200
+	contentMaxLen    int = 3000
+	categoriesMaxLen int = 200
+)
 
 func countReactions(id int) (int, int) {
 	reactionsQuery := `SELECT reaction_type, COUNT(*) AS count FROM post_reactions WHERE post_id = ? GROUP BY reaction_type;`
@@ -249,7 +259,19 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 
 	sortByRecentInteraction(&threads, w)
 
-	data := PageData{Threads: threads, ValidSes: validSes, UsrId: usId, UsrNm: usName, Message: msg, Selection: selection, Search: search, Multisearch: multisearch}
+	data := PageData{
+		Threads:          threads,
+		ValidSes:         validSes,
+		UsrId:            usId,
+		UsrNm:            usName,
+		Message:          msg,
+		Selection:        selection,
+		Search:           search,
+		Multisearch:      multisearch,
+		TitleMaxLen:      titleMaxLen,
+		ContentMaxLen:    contentMaxLen,
+		CategoriesMaxLen: categoriesMaxLen,
+	}
 	indexTmpl.Execute(w, data)
 }
 

@@ -62,7 +62,7 @@
     <!-- Reply submission form -->
     <div class="reply-form-container" style="display: none; margin-left: 5rem;">
         <form method="POST" action="/reply">
-            <textarea name="content" rows="4" placeholder="Message"></textarea><br>
+            <textarea name="content" rows="4" placeholder="Message" maxlength="{{.ContentMaxLen}}"></textarea><br>
             <input type="hidden" name="parentId" value="{{.ID}}">
             <input type="hidden" name="baseId" value="{{.BaseID}}">
             <button type="submit">Submit Reply</button>
