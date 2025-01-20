@@ -21,39 +21,28 @@ function toggleDarkMode() {
   icon.textContent = currentTheme === 'dark' ? 'light_mode' : 'dark_mode';
 }
 
-
-/* NEW THREAD MODAL */
-// Get the modal
-var modal = document.getElementById("newpostModal");
-
-// Get the button that opens the modal
-var btn = document.getElementById("modalBtn");
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName("close")[0];
-
-// When the user clicks the button, open the modal 
-btn.onclick = function () {
-  modal.style.display = "block";
-}
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function () {
-  modal.style.display = "none";
-}
-
-// When the user clicks anywhere outside of the modal, close it
-window.onclick = function (event) {
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-}
-
 /* REPLY */
 // Open and close reply-to-reply form with "Reply" button
 document.addEventListener("DOMContentLoaded", function () {
   const buttons = document.querySelectorAll(".reply-button");
   buttons.forEach(button => {
+    button.addEventListener("click", function () {
+      // Find the closest thread and then look for the reply-form-container sibling
+      const formContainer = this.closest(".reply-and-form").querySelector(".reply-form-container");      
+
+      //console.log(formContainer);
+      console.log(formContainer.style.display);
+
+      // Toggle the display of the form container
+      if (formContainer.style.display === "none" || formContainer.style.display === "") {
+        formContainer.style.display = "block";
+      } else {
+        formContainer.style.display = "none";
+      }
+    });
+  });
+
+/*   buttons.forEach(button => {
     button.addEventListener("click", function () {
       const formContainer = this.closest("table").nextElementSibling;
       if (formContainer.style.display === "none") {
@@ -62,5 +51,6 @@ document.addEventListener("DOMContentLoaded", function () {
         formContainer.style.display = "none";
       }
     });
-  });
+  }); */
+
 });
