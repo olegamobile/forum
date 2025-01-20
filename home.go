@@ -43,6 +43,13 @@ type PageData struct {
 	CategoriesMaxLen int
 }
 
+type errorData struct {
+	Message   string
+	ErrorCode int
+	ValidSes  bool
+	UsrNm     string
+}
+
 const (
 	titleMaxLen      int = 200
 	contentMaxLen    int = 3000
@@ -233,16 +240,17 @@ func fetchReplies(thisID int) ([]Reply, error) {
 
 func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 
+	usId, usName, validSes := validateSession(r)
+
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
-	usId, usName, validSes := validateSession(r)
 	threads, selection, search, multisearch, err := findThreads(r)
 
 	if err != nil {
-		http.Error(w, "Error fetching threads", http.StatusInternalServerError)
+		goToErrorPage("Error fetching threads", http.StatusInternalServerError, w, r)
 		return
 	}
 
@@ -250,14 +258,14 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		replies, err := fetchReplies(th.ID)
 		if err != nil {
 			fmt.Println("Error fetching replies:", err.Error())
-			http.Error(w, "Error fetching replies", http.StatusInternalServerError)
+			goToErrorPage("Error fetching replies", http.StatusInternalServerError, w, r)
 			return
 		}
 		threads[i].Replies = replies
 		threads[i].RepliesN = len(replies)
 	}
 
-	sortByRecentInteraction(&threads, w)
+	sortByRecentInteraction(&threads, w, r)
 
 	data := PageData{
 		Threads:          threads,
@@ -276,11 +284,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 }
 
 // newestReply finds time of the  newest reply in the tree
-func newestReply(this *Reply, w http.ResponseWriter) time.Time {
+func newestReply(this *Reply, w http.ResponseWriter, r *http.Request) time.Time {
 	thisTime, err := time.Parse(time.RFC3339, this.Created)
 	if err != nil {
 		fmt.Println("Error parsing date:", err.Error())
-		http.Error(w, "Error parsing date", http.StatusInternalServerError)
+		goToErrorPage("Error parsing date", http.StatusInternalServerError, w, r)
+		return thisTime
 	}
 
 	if len(this.Replies) == 0 {
@@ -288,7 +297,7 @@ func newestReply(this *Reply, w http.ResponseWriter) time.Time {
 	} else {
 		newest := thisTime
 		for _, rep := range this.Replies {
-			repTime := newestReply(&rep, w)
+			repTime := newestReply(&rep, w, r)
 			if repTime.After(newest) {
 				newest = repTime
 			}
@@ -298,16 +307,16 @@ func newestReply(this *Reply, w http.ResponseWriter) time.Time {
 }
 
 // getThreadTime finds the time the thread got its most recent post
-func getThreadTime(th *Thread, w http.ResponseWriter) time.Time {
+func getThreadTime(th *Thread, w http.ResponseWriter, r *http.Request) time.Time {
 	threadTime, err := time.Parse(time.RFC3339, th.Created) // "created" looks something like this: 2024-12-02T15:44:52Z
 	if err != nil {
 		fmt.Println("Error parsing date:", err.Error())
-		http.Error(w, "Error parsing date", http.StatusInternalServerError)
+		goToErrorPage("Error parsing date", http.StatusInternalServerError, w, r)
 		return threadTime
 	}
 
 	for _, rep := range th.Replies {
-		replyTime := newestReply(&rep, w)
+		replyTime := newestReply(&rep, w, r)
 		if replyTime.After(threadTime) {
 			threadTime = replyTime
 		}
@@ -317,14 +326,21 @@ func getThreadTime(th *Thread, w http.ResponseWriter) time.Time {
 }
 
 // sortByRecentInteraction sorts the threads by most recent post within the thread
-func sortByRecentInteraction(threads *[]Thread, w http.ResponseWriter) {
+func sortByRecentInteraction(threads *[]Thread, w http.ResponseWriter, r *http.Request) {
 	for i := 0; i < len(*threads)-1; i++ {
 		for j := i + 1; j < len(*threads); j++ {
-			time1 := getThreadTime(&(*threads)[i], w)
-			time2 := getThreadTime(&(*threads)[j], w)
+			time1 := getThreadTime(&(*threads)[i], w, r)
+			time2 := getThreadTime(&(*threads)[j], w, r)
 			if time1.Before(time2) {
 				(*threads)[i], (*threads)[j] = (*threads)[j], (*threads)[i]
 			}
 		}
 	}
+}
+
+func goToErrorPage(msg string, code int, w http.ResponseWriter, r *http.Request) {
+	_, usName, validSes := validateSession(r)
+	errData := errorData{msg, code, validSes, usName}
+	w.WriteHeader(code)
+	errorTmpl.Execute(w, errData)
 }

@@ -58,7 +58,7 @@ func cleanString(s string) string {
 func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
@@ -70,7 +70,8 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 		rawCats := html.EscapeString(strings.ToLower(r.FormValue("categories")))
 
 		if len(title) > titleMaxLen || len(content) > contentMaxLen || len(rawCats) > categoriesMaxLen || title == "" || content == "" || rawCats == "" { // User may try to force a long or short input
-			http.Error(w, "Bad request, input length not supported: ", http.StatusBadRequest)
+			goToErrorPage("Bad request, input length not supported", http.StatusBadRequest, w, r)
+			return
 		}
 
 		catsJson, _ := json.Marshal(removeDuplicates(strings.Fields(cleanString(rawCats))))
@@ -79,7 +80,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 			_, err := db.Exec(`INSERT INTO posts (author, authorID, title, content, categories) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content, string(catsJson))
 			if err != nil {
 				fmt.Println("Adding:", err.Error())
-				http.Error(w, "Error adding thread", http.StatusInternalServerError)
+				goToErrorPage("Error adding thread", http.StatusInternalServerError, w, r)
 				return
 			}
 		}
@@ -95,7 +96,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 func addReplyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
@@ -107,14 +108,15 @@ func addReplyHandler(w http.ResponseWriter, r *http.Request) {
 		baseId := r.FormValue("baseId")  // No int conversion necessary
 
 		if len(content) > contentMaxLen || content == "" { // User may try to force a bad input
-			http.Error(w, "Bad request, input length not supported: ", http.StatusBadRequest)
+			goToErrorPage("Bad request, input length not supported", http.StatusBadRequest, w, r)
+			return
 		}
 
 		if content != "" {
 			_, err := db.Exec(`INSERT INTO posts (base_id, author, authorID, content, parent_id) VALUES (?, ?, ?, ?, ?);`, baseId, author, authID, content, parId)
 			if err != nil {
 				fmt.Println("Replying:", err.Error())
-				http.Error(w, "Error adding reply", http.StatusInternalServerError)
+				goToErrorPage("Error adding reply", http.StatusInternalServerError, w, r)
 				return
 			}
 		}
@@ -195,7 +197,7 @@ func recurseReplies(db *sql.DB, this *Reply) {
 func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
@@ -222,7 +224,7 @@ func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
 		_, err2 := db.Exec(`INSERT INTO post_reactions (user_id, post_id, reaction_type) VALUES (?, ?, ?) ON CONFLICT (user_id, post_id) DO UPDATE SET reaction_type = excluded.reaction_type;`, userID, postId, opinion)
 		if err2 != nil {
 			fmt.Println("Adding like or dislike:", err2.Error())
-			http.Error(w, "Error adding like or dislike", http.StatusInternalServerError)
+			goToErrorPage("Error adding like or dislike", http.StatusInternalServerError, w, r)
 			return
 		}
 	}
@@ -300,7 +302,7 @@ func markValidity(rep *Reply, valid bool, reactMap map[int]reaction) {
 // threadPageHandler handles request from /thread/
 func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
+		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
 
@@ -309,14 +311,14 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	threadID, err := strconv.Atoi(id)
 	if err != nil {
 		fmt.Println("Error parsing id:", id)
-		http.Error(w, "Invalid thread ID", http.StatusBadRequest)
+		goToErrorPage("Invalid thread ID", http.StatusBadRequest, w, r)
 		return
 	}
 
 	thread, err := findThread(db, threadID)
 	if err != nil {
 		fmt.Println("Find thread error:", err.Error())
-		http.Error(w, "Thread not found", http.StatusNotFound)
+		goToErrorPage("Thread not found", http.StatusNotFound, w, r)
 		return
 	}
 

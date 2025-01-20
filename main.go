@@ -17,6 +17,7 @@ var (
 	threadTmpl   *template.Template
 	logTmpl      *template.Template
 	registerTmpl *template.Template
+	errorTmpl    *template.Template
 )
 
 func initTemplates() {
@@ -41,6 +42,11 @@ func initTemplates() {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
+	errorTmpl, err = template.ParseFiles("templates/error.html", "templates/header.html", "templates/footer.html")
+	if err != nil {
+		fmt.Println("Error parsing template:", err)
+		return
+	}
 }
 
 func setHandlers() {
@@ -51,7 +57,6 @@ func setHandlers() {
 
 	http.Handle("/favicon.ico", http.NotFoundHandler()) //accessing favicon will cause 404
 
-	//http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		indexHandler(w, r, "")
 	})
