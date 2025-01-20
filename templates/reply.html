@@ -1,5 +1,5 @@
 {{ define "reply" }}
-<li>
+<li class="reply-and-form">
     <!-- Content of reply -->
     <div class="replies">
 
@@ -49,7 +49,7 @@
                 {{end}}
                 <li><span class="material-symbols-outlined">person</span><b>{{.Author}}</b> posted on {{.CreatedDay}}
                     {{.CreatedTime}}</li>
-                <li>{{.Content}}</li>
+                <li style="white-space: pre-wrap;">{{.Content}}</li>
                 {{if .ValidSes}}
                 <li><button class="reply-button" type="button">Reply</button></li>
                 {{end}}

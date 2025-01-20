@@ -47,6 +47,7 @@ func setHandlers() {
 	fileServer := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/styles.css", http.StripPrefix("/static/", fileServer))
 	http.Handle("/static/ui-functions.js", http.StripPrefix("/static/", fileServer))
+	http.Handle("/static/home-functions.js", http.StripPrefix("/static/", fileServer))
 
 	http.Handle("/favicon.ico", http.NotFoundHandler()) //accessing favicon will cause 404
 

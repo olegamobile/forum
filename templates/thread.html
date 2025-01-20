@@ -83,7 +83,7 @@
                         </li>
                         <li><span class="material-symbols-outlined">person</span><b>{{.Thread.Author}}</b> posted on
                             {{.Thread.CreatedDay}} {{.Thread.CreatedTime}}</li>
-                        <li>{{.Thread.Content}}</li>
+                        <li style="white-space: pre-wrap;">{{.Thread.Content}}</li>
                         <li><span class="material-symbols-outlined">category</span>{{ range .Thread.CatsSlice }}{{.}} {{
                             end }}
                         </li>
