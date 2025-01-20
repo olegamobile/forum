@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type SignData struct {
+type loginData struct {
 	Message1 string
 	Message2 string
 	ValidSes bool
@@ -94,28 +94,20 @@ func saveSession(db *sql.DB, userID, usname, sessionToken string, expiresAt time
 
 func addUserHandler(w http.ResponseWriter, r *http.Request) {
 
-	/* if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
-		return
-	}
+	var loginData loginData
+	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
 
-	name := r.FormValue("username")
-	email := r.FormValue("email")
-	pass := r.FormValue("password") */
-	var signData SignData
-	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
-
-	if signData.ValidSes {
-		fmt.Println(signData.UsrNm + " trying to create a new user while signed-in")
-		signData.Message1 = "Signed in as " + signData.UsrNm + ". Log out first."
-		signTmpl.Execute(w, signData)
+	if loginData.ValidSes {
+		fmt.Println(loginData.UsrNm + " trying to create a new user while logged-in")
+		loginData.Message1 = "Logged in as " + loginData.UsrNm + ". Log out first."
+		logTmpl.Execute(w, loginData)
 		return
 	}
 
 	switch r.Method {
 	case http.MethodGet:
 		// Handle GET request - show registration form
-		registerTmpl.Execute(w, signData)
+		registerTmpl.Execute(w, loginData)
 		return
 
 	case http.MethodPost:
@@ -128,29 +120,29 @@ func addUserHandler(w http.ResponseWriter, r *http.Request) {
 
 		if !nameOk || !passOk {
 			fmt.Println("Minimum 5 chars, limited chars")
-			signData.Message2 = "Minimum 5 characters in username and password. Only letters, numbers and symbols allowed."
-			registerTmpl.Execute(w, signData)
+			loginData.Message2 = "Minimum 5 characters in username and password. Only letters, numbers and symbols allowed."
+			registerTmpl.Execute(w, loginData)
 			return
 		}
 
 		if emailErr != nil {
 			fmt.Println("Invalid email address")
-			signData.Message2 = "Invalid email address"
-			registerTmpl.Execute(w, signData)
+			loginData.Message2 = "Invalid email address"
+			registerTmpl.Execute(w, loginData)
 			return
 		}
 
 		if nameExists(db, name) {
 			fmt.Println("Name already taken")
-			signData.Message2 = "Name already taken"
-			registerTmpl.Execute(w, signData)
+			loginData.Message2 = "Name already taken"
+			registerTmpl.Execute(w, loginData)
 			return
 		}
 
 		if emailExists(db, email) {
 			fmt.Println("Email already taken")
-			signData.Message2 = "Email already taken"
-			registerTmpl.Execute(w, signData)
+			loginData.Message2 = "Email already taken"
+			registerTmpl.Execute(w, loginData)
 			return
 		}
 
@@ -195,21 +187,21 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("username")
 	email := r.FormValue("email")
 	pass := r.FormValue("password")
-	var signData SignData
-	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
+	var loginData loginData
+	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
 
-	if signData.ValidSes {
-		fmt.Println(signData.UsrNm + "trying to sign in while already signed-in")
-		signData.Message1 = "Already signed in as " + signData.UsrNm + ". Log out first."
-		signTmpl.Execute(w, signData)
+	if loginData.ValidSes {
+		fmt.Println(loginData.UsrNm + "trying to log in while already logged-in")
+		loginData.Message1 = "Already logged in as " + loginData.UsrNm + ". Log out first."
+		logTmpl.Execute(w, loginData)
 		return
 	}
 
 	// Checking user
 	if !nameExists(db, name) && !emailExists(db, email) {
 		fmt.Println("User not found")
-		signData.Message1 = "User not found"
-		signTmpl.Execute(w, signData)
+		loginData.Message1 = "User not found"
+		logTmpl.Execute(w, loginData)
 		return
 	}
 
@@ -227,8 +219,8 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println("Password incorrect")
-		signData.Message1 = "Password incorrect"
-		signTmpl.Execute(w, signData)
+		loginData.Message1 = "Password incorrect"
+		logTmpl.Execute(w, loginData)
 		return
 	} else {
 		fmt.Println("Correct password")
@@ -273,7 +265,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	_, _, validSes := validateSession(r)
 	if !validSes {
-		fmt.Println("Trying to log out while not signed-in")
+		fmt.Println("Trying to log out while not logged-in")
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -303,14 +295,15 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func signInHandler(w http.ResponseWriter, r *http.Request) {
+// logInHandler handles user clicking log-in link
+func logInHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed: ", http.StatusMethodNotAllowed)
 		return
 	}
 
-	var signData SignData
-	signData.UsrId, signData.UsrNm, signData.ValidSes = validateSession(r)
-	signTmpl.Execute(w, signData)
+	var loginData loginData
+	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
+	logTmpl.Execute(w, loginData)
 }

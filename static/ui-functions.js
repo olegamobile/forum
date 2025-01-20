@@ -42,15 +42,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-/*   buttons.forEach(button => {
-    button.addEventListener("click", function () {
-      const formContainer = this.closest("table").nextElementSibling;
-      if (formContainer.style.display === "none") {
-        formContainer.style.display = "block";
-      } else {
-        formContainer.style.display = "none";
-      }
-    });
-  }); */
-
 });

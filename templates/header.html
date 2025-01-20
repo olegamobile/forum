@@ -10,12 +10,12 @@
                 </li>
                 <li style="float: right;">
                     {{if .ValidSes}}
-                    <p>Signed in as {{.UsrNm}}.</p>
+                    <p>Logged in as {{.UsrNm}}.</p>
                     <form method="POST" action="/logout">
                         <button type="submit"><span class="material-symbols-outlined">logout</span></button>
                         {{else}}
-                        <p>Not signed in.</p>
-                        <a href="/signin"><span class="material-symbols-outlined">login</span></a>
+                        <p>Not logged in.</p>
+                        <a href="/login"><span class="material-symbols-outlined">login</span></a>
                         {{end}}
                     </form>
                 </li>

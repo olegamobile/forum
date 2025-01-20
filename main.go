@@ -15,7 +15,7 @@ var (
 	db           *sql.DB
 	indexTmpl    *template.Template
 	threadTmpl   *template.Template
-	signTmpl     *template.Template
+	logTmpl      *template.Template
 	registerTmpl *template.Template
 )
 
@@ -31,7 +31,7 @@ func initTemplates() {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	signTmpl, err = template.ParseFiles("templates/signin.html", "templates/header.html", "templates/footer.html")
+	logTmpl, err = template.ParseFiles("templates/login.html", "templates/header.html", "templates/footer.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
@@ -58,8 +58,8 @@ func setHandlers() {
 	http.HandleFunc("/thread/", threadPageHandler)
 	http.HandleFunc("/add", addThreadHandler)
 	http.HandleFunc("/reply", addReplyHandler)
-	http.HandleFunc("/signin", signInHandler)
-	http.HandleFunc("/login", logUserInHandler)
+	http.HandleFunc("/login", logInHandler)
+	http.HandleFunc("/loguserin", logUserInHandler)
 	http.HandleFunc("/register", addUserHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/like", likeHandler)
