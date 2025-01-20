@@ -92,8 +92,11 @@ func saveSession(db *sql.DB, userID, usname, sessionToken string, expiresAt time
 	return err
 }
 
-func addUserHandler(w http.ResponseWriter, r *http.Request) {
-
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/register" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	var loginData loginData
 	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
 
@@ -179,7 +182,10 @@ func deleteSession(w http.ResponseWriter, r *http.Request, usrId string) {
 }
 
 func logUserInHandler(w http.ResponseWriter, r *http.Request) {
-
+	if r.URL.Path != "/loguserin" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	if r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
@@ -258,7 +264,10 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-
+	if r.URL.Path != "/logout" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	if r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
@@ -298,7 +307,10 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 
 // logInHandler handles user clicking log-in link
 func logInHandler(w http.ResponseWriter, r *http.Request) {
-
+	if r.URL.Path != "/login" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	if r.Method != http.MethodGet {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return

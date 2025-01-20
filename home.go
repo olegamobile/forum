@@ -240,6 +240,10 @@ func fetchReplies(thisID int) ([]Reply, error) {
 
 func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 
+	if r.URL.Path != "/" && r.URL.Path != "/forum" && r.URL.Path != "/expired" {
+		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
+		return
+	}
 	usId, usName, validSes := validateSession(r)
 
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
