@@ -28,9 +28,9 @@
                     <div class="modal-content"> <span class="close">&times;</span>
                         <h3>Start a new thread</h3>
                         <form method="POST" action="/add">
-                            <input type="text" name="title" placeholder="Thread title" maxlength="200" required><br>
-                            <textarea name="content" placeholder="Message" rows="6" maxlength="3000"></textarea><br>
-                            <input type="text" name="categories" placeholder="List categories" maxlength="200"><br>
+                            <input type="text" name="title" placeholder="Thread title" maxlength="{{.TitleMaxLen}}" required><br>
+                            <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}" required></textarea><br>
+                            <input type="text" name="categories" placeholder="List categories" maxlength="{{.CategoriesMaxLen}}" required><br>
                             <input type="reset" value="Clear all" style="float: right;" /> <button type="submit">Start
                                 thread</button>
                         </form>
