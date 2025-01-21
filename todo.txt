@@ -37,11 +37,11 @@ x for category search something on the front page:
         x exclusive (match all)
 x limit title and categories length
 x prevent duplicate categories
+x check input lengths (title, categories, content) on server side 
+x terms consistency: "sign"/"log", thread/post, etc.
+x error page
 
-- check input lengths (title, categories, content) on server side 
-- terms consistency: "sign"/"log", thread/post, etc.
 - category items to (search?) links
-- proper error page
 - remove e-mail from login page (combined field for user name or email)
 - redirect to thread page after it's creation (not to the list of threads)
 - categories table?
@@ -52,13 +52,12 @@ Frontend (jedi):
 - Update all pages
     - Update thread repplies
     - Replies to replies button not working
-- Error page
 - Footer
 - left and right nav contents ?
 x fix grid (header, leftnav, middle content, rightnav)
 x new post modal (popup) applied so that 'clear' button does not show that it resets the filters also
 
-Advanced features:
+Advanced features (optional, but the points are needed later in JS projects):
 - activities page
     - own posts
     - all own likes and dislikes

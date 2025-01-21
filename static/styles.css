@@ -39,12 +39,22 @@ body {
     margin: 0;
     padding: 0;
     background-color: var(--light1);
+
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Fill the viewport for the sticky footer*/
 }
 
 .container {
     display: -webkit-flex;
     display: flex;
-
+    flex : 1;
 }
 
 .leftnav {
@@ -159,6 +169,26 @@ input[type="reset"]:hover {
     background-color: var(--light5);
 }
 
+.content-line {
+    display: flex;
+    /* Keep icon and text on one line */
+    align-items: center;
+    /* Center vertically */
+}
+
+.truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
+}
+
+.categories {
+    font-size: smaller;
+}
+
+
 /* The Modal (background) */
 .newpostModal {
     display: none;
@@ -244,7 +274,8 @@ input[type="reset"]:hover {
     margin-top: 10px;
 }
 
-.allthreads ul, .thread ul {
+.allthreads ul,
+.thread ul {
     padding: 0;
     list-style: none;
 }
@@ -254,7 +285,8 @@ input[type="reset"]:hover {
     padding: 8px;
 }
 
-.threadbox span, .thread span {
+.threadbox span,
+.thread span {
     vertical-align: middle;
     margin-right: 4px;
 }
@@ -279,6 +311,7 @@ input[type="reset"]:hover {
     padding-top: 8px;
     vertical-align: middle;
 }
+
 .thread li .like-dislike-cell {
     margin-top: 10px;
 }
@@ -360,6 +393,16 @@ h1 {
     margin-bottom: 0%;
     text-align: center;
     font-size: clamp(1.5rem, 5vw, 3rem);
+}
+
+h1 a {
+    color: black;
+}
+
+h1 a:hover {
+    color: rgb(59, 80, 109);
+    text-decoration: none;
+    /* No underline */
 }
 
 .subtitle {
@@ -496,14 +539,17 @@ h1 {
     background-color: var(--dark1);
     color: var(--dark-text);
 }
+
 .dark-mode footer {
     background-color: var(--dark5);
     color: var(--dark-text);
 }
 
-.dark-mode h1, .dark-mode .subtitle {
+.dark-mode h1,
+.dark-mode .subtitle {
     color: var(--dark-text);
 }
+
 .dark-mode .topnav {
     color: var(--light5);
 }
