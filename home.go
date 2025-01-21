@@ -41,6 +41,7 @@ type PageData struct {
 	TitleMaxLen      int
 	ContentMaxLen    int
 	CategoriesMaxLen int
+	LoginURL         string
 }
 
 type errorData struct {
@@ -48,6 +49,7 @@ type errorData struct {
 	ErrorCode int
 	ValidSes  bool
 	UsrNm     string
+	LoginURL  string
 }
 
 const (
@@ -276,6 +278,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		TitleMaxLen:      titleMaxLen,
 		ContentMaxLen:    contentMaxLen,
 		CategoriesMaxLen: categoriesMaxLen,
+		LoginURL:         "/login",
 	}
 	indexTmpl.Execute(w, data)
 }
@@ -337,7 +340,7 @@ func sortByRecentInteraction(threads *[]Thread, w http.ResponseWriter, r *http.R
 
 func goToErrorPage(msg string, code int, w http.ResponseWriter, r *http.Request) {
 	_, usName, validSes := validateSession(r)
-	errData := errorData{msg, code, validSes, usName}
+	errData := errorData{msg, code, validSes, usName, "/login"}
 	w.WriteHeader(code)
 	errorTmpl.Execute(w, errData)
 }

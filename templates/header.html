@@ -15,7 +15,7 @@
                         <button type="submit"><span class="material-symbols-outlined">logout</span></button>
                         {{else}}
                         <p>Not logged in.</p>
-                        <a href="/login"><span class="material-symbols-outlined">login</span></a>
+                        <a href="{{.LoginURL}}"><span class="material-symbols-outlined">login</span></a>
                         {{end}}
                     </form>
                 </li>

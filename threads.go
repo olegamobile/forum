@@ -40,6 +40,7 @@ type threadPageData struct {
 	ValidSes bool
 	UsrId    string
 	UsrNm    string
+	LoginURL string
 }
 
 // cleanString removes trailing and leading spaces and punctuation
@@ -315,6 +316,7 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
 		return
 	}
+
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
@@ -372,6 +374,7 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 		thread.DislikedNow = true
 	}
 
-	tpd := threadPageData{thread, validSes, usId, usName}
+	loginUrl := "/login?return_url=" + r.URL.Path
+	tpd := threadPageData{thread, validSes, usId, usName, loginUrl}
 	threadTmpl.Execute(w, tpd)
 }
