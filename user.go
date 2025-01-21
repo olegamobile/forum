@@ -308,7 +308,13 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	// Determine the previous page
+	referer := r.Header.Get("Referer")
+	if referer == "" {
+		referer = "/"
+	}
+
+	http.Redirect(w, r, referer, http.StatusSeeOther)
 }
 
 // logInHandler handles user clicking log-in link
