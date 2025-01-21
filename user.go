@@ -69,16 +69,14 @@ func checkString(s string) bool {
 	return true
 }
 
-func nameExists(db *sql.DB, username string) bool {
-	selectQueryName := `SELECT username FROM users WHERE username = ?`
-	err := db.QueryRow(selectQueryName, username).Scan(&username)
-	return err == nil // no error if name found
-}
-
-func emailExists(db *sql.DB, mail string) bool {
-	selectQueryMail := `SELECT email FROM users WHERE email = ?`
-	err := db.QueryRow(selectQueryMail, mail).Scan(&mail)
-	return err == nil // no error if email found
+func nameOremailExists(db *sql.DB, input string) bool {
+	var exists bool
+	query := `SELECT EXISTS(SELECT 1 FROM users WHERE username = ? OR email = ?)`
+	err := db.QueryRow(query, input, input).Scan(&exists)
+	if err != nil {
+		return false
+	}
+	return exists
 }
 
 func createSession() (string, error) {
@@ -139,14 +137,14 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if nameExists(db, name) {
+		if nameOremailExists(db, name) {
 			fmt.Println("Name already taken")
 			loginData.Message2 = "Name already taken"
 			registerTmpl.Execute(w, loginData)
 			return
 		}
 
-		if emailExists(db, email) {
+		if nameOremailExists(db, email) {
 			fmt.Println("Email already taken")
 			loginData.Message2 = "Email already taken"
 			registerTmpl.Execute(w, loginData)
@@ -195,8 +193,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := r.FormValue("username")
-	email := r.FormValue("email")
+	nameOremail := r.FormValue("username-or-email")
 	pass := r.FormValue("password")
 	returnUrl := r.FormValue("return_url")
 
@@ -205,60 +202,57 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	loginData.ReturnURL = returnUrl
 
 	if loginData.ValidSes {
-		fmt.Println(loginData.UsrNm + "trying to log in while already logged-in")
+		fmt.Println(loginData.UsrNm + " trying to log in while already logged-in")
 		loginData.Message1 = "Already logged in as " + loginData.UsrNm + ". Log out first."
 		logTmpl.Execute(w, loginData)
 		return
 	}
 
-	// Checking user
-	if !nameExists(db, name) && !emailExists(db, email) {
+	// Checking if user 0r email exists
+	if !nameOremailExists(db, nameOremail) {
 		fmt.Println("User not found")
-		loginData.Message1 = "User not found"
+		loginData.Message1 = "Invalid username/email or password"
 		logTmpl.Execute(w, loginData)
 		return
 	}
 
-	// Checking password, find with either name or email
-	storedHashedPass, userID := "", ""
-	if nameExists(db, name) {
-		query := `SELECT password, id FROM users WHERE username = ?`
-		db.QueryRow(query, name).Scan(&storedHashedPass, &userID)
-	} else {
-		query := `SELECT password, id FROM users WHERE email = ?`
-		db.QueryRow(query, email).Scan(&storedHashedPass, &userID)
+	// Get user information and check password
+	var storedHashedPass, userID, username string
+	query := `SELECT password, id, username FROM users WHERE username = ? OR email = ?`
+	err := db.QueryRow(query, nameOremail, nameOremail).Scan(&storedHashedPass, &userID, &username)
+	if err != nil {
+		loginData.Message1 = "Invalid username/email or password"
+		logTmpl.Execute(w, loginData)
+		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(storedHashedPass), []byte(pass))
-
+	err = bcrypt.CompareHashAndPassword([]byte(storedHashedPass), []byte(pass))
 	if err != nil {
 		fmt.Println("Password incorrect")
-		loginData.Message1 = "Password incorrect"
+		loginData.Message1 = "Invalid username/email or password"
 		logTmpl.Execute(w, loginData)
 		return
-	} else {
-		fmt.Println("Correct password")
 	}
 
-	// Remove any old sessions so user can't be active on different browsers (audit question)
+	// Remove any old sessions
 	deleteSession(w, r, userID)
 
-	// Cookie and session
+	// Create new session
 	sessionToken, err := createSession()
 	if err != nil {
 		goToErrorPage("Unable to create session: "+err.Error(), http.StatusInternalServerError, w, r)
 		return
 	}
-	expiresAt := time.Now().Add(30 * time.Minute) // Set session validity length
+	expiresAt := time.Now().Add(30 * time.Minute)
 
-	err = saveSession(db, userID, name, sessionToken, expiresAt)
+	err = saveSession(db, userID, username, sessionToken, expiresAt)
 	if err != nil {
 		fmt.Println("Error saving session", err.Error())
 		goToErrorPage("Unable to save session"+err.Error(), http.StatusInternalServerError, w, r)
 		return
 	}
 
-	// Set the session token as a cookie. Cookie is added to the writer's header.
+	// Set the session token as a cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    sessionToken,

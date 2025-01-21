@@ -1,27 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forum Registering</title>
     <link rel="stylesheet" href="/static/styles.css">
-
     <style>
-        #username {
-            width: 50ch;
-        }
-
-        #email {
-            width: 50ch;
-        }
-
-        #pwd {
+        #username, #email, #pwd {
             width: 50ch;
         }
     </style>
 </head>
-
 
 <body>
     <div class="wrapper">
@@ -32,15 +21,16 @@
             </div>
             <div class="content">
                 <h2>Register new user</h2>
-                <form method="POST" action="/register">
+                <form method="POST" action="/register" id="registerForm">
                     <label for="username">Username:</label><br>
                     <input type="text" id="username" name="username" required /><br>
                     <label for="email">Email:</label><br>
                     <input type="email" id="email" name="email" required /><br>
                     <label for="pwd">Password:</label><br>
                     <input type="password" id="pwd" name="password" required /><br>
+                    <div id="error" style="color:darkred; margin-top: 0.5rem;"></div>
                     <button type="submit" style="margin-top: 1rem;">Register</button>
-                    <p class="">Already have an account? <a href="/login">Login</a></p>
+                    <p>Already have an account? <a href="/login">Login</a></p>
                     <p style="color:darkred;">{{.Message2}}</p>
                 </form>
             </div>
@@ -52,7 +42,85 @@
     </div>
     
     <script src="/static/ui-functions.js"></script>
+    <script>
+        const registerForm = document.getElementById("registerForm");
+        const usernameField = document.querySelector("input[name='username']");
+        const emailField = document.querySelector("input[name='email']");
+        const passwordField = document.querySelector("input[name='password']");
+        const errorElement = document.getElementById("error");
 
+        registerForm.addEventListener("submit", (e) => {
+            const messages = [];
+
+            // Username validation
+            const username = usernameField.value.trim();
+            if (username === "") {
+                messages.push("Username is required");
+            } else if (username.length < 5) {
+                messages.push("Username must be at least 5 characters");
+            } else if (username.length > 25) {
+                messages.push("Username must be less than 25 characters");
+            } else if (!/^[a-zA-Z0-9\-_]+$/.test(username)) {
+                messages.push("Username can only contain letters, numbers, hyphens and underscores");
+            }
+
+            // Email validation
+            const email = emailField.value.trim();
+            if (email === "") {
+                messages.push("Email is required");
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                messages.push("Please enter a valid email address");
+            }
+
+            // Password validation
+            const password = passwordField.value.trim();
+            if (password === "") {
+                messages.push("Password is required");
+            } else if (password.length < 5) {
+                messages.push("Password must be at least 5 characters");
+            } else if (!/^[a-zA-Z0-9\-_!@#$%^&*()]+$/.test(password)) {
+                messages.push("Password can only contain letters, numbers, and special characters");
+            }
+
+            if (messages.length > 0) {
+                e.preventDefault();
+                errorElement.innerText = messages.join("\n");
+            }
+        });
+
+        // Real-time validation feedback
+        const validateField = (field, validationFn, errorMessage) => {
+            field.addEventListener("input", () => {
+                if (!validationFn(field.value.trim())) {
+                    field.style.borderColor = "#ff0000";
+                    field.title = errorMessage;
+                } else {
+                    field.style.borderColor = "";
+                    field.title = "";
+                }
+            });
+        };
+
+        // Username real-time validation
+        validateField(
+            usernameField,
+            value => value.length >= 5 && value.length <= 25 && /^[a-zA-Z0-9\-_]+$/.test(value),
+            "Username must be 5-25 characters and contain only letters, numbers, hyphens and underscores"
+        );
+
+        // Email real-time validation
+        validateField(
+            emailField,
+            value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+            "Please enter a valid email address"
+        );
+
+        // Password real-time validation
+        validateField(
+            passwordField,
+            value => value.length >= 5 && /^[a-zA-Z0-9\-_!@#$%^&*()]+$/.test(value),
+            "Password must be at least 5 characters and contain only letters, numbers, and special characters"
+        );
+    </script>
 </body>
-
 </html>
