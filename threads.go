@@ -40,6 +40,7 @@ type threadPageData struct {
 	ValidSes bool
 	UsrId    string
 	UsrNm    string
+	LoginURL string
 }
 
 // cleanString removes trailing and leading spaces and punctuation
@@ -78,16 +79,25 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		catsJson, _ := json.Marshal(removeDuplicates(strings.Fields(cleanString(rawCats))))
+		threadUrl := "/"
 
 		if content != "" {
-			_, err := db.Exec(`INSERT INTO posts (author, authorID, title, content, categories) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content, string(catsJson))
+			result, err := db.Exec(`INSERT INTO posts (author, authorID, title, content, categories) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content, string(catsJson))
 			if err != nil {
 				fmt.Println("Adding:", err.Error())
 				goToErrorPage("Error adding thread", http.StatusInternalServerError, w, r)
 				return
 			}
+
+			threadID, err := result.LastInsertId()
+			if err != nil {
+				fmt.Println("Failed to get last insert ID:", err.Error())
+			} else {
+				threadUrl = fmt.Sprintf("/thread/%d", threadID)
+			}
 		}
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		http.Redirect(w, r, threadUrl, http.StatusSeeOther)
 	}
 
 	if !valid {
@@ -315,6 +325,7 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
 		return
 	}
+
 	if r.Method != http.MethodGet && r.Method != http.MethodPost {
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
@@ -372,6 +383,7 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 		thread.DislikedNow = true
 	}
 
-	tpd := threadPageData{thread, validSes, usId, usName}
+	loginUrl := "/login?return_url=" + r.URL.Path
+	tpd := threadPageData{thread, validSes, usId, usName, loginUrl}
 	threadTmpl.Execute(w, tpd)
 }

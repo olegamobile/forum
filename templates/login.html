@@ -40,9 +40,9 @@
                 <input type="email" id="email" name="email" /><br>
                 <label for="pwd">Password:</label><br>
                 <input type="password" id="pwd" name="password" required /><br>
+                <input type="hidden" name="return_url" value="{{.ReturnURL}}">
                 <button type="submit" style="margin-top: 1rem;">Login</button>
                 <p class="">Don't have an account? <a href="/register">Register</a></p>
-
                 <p style="color:darkred;">{{.Message1}}</p>
             </form>
         </div>

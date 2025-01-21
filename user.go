@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/mail"
+	"strings"
 	"time"
 	"unicode"
 
@@ -15,11 +16,13 @@ import (
 )
 
 type loginData struct {
-	Message1 string
-	Message2 string
-	ValidSes bool
-	UsrId    string
-	UsrNm    string
+	Message1  string
+	Message2  string
+	ValidSes  bool
+	UsrId     string
+	UsrNm     string
+	ReturnURL string
+	LoginURL  string
 }
 
 // removeExpiredSessions deletes all expired sessions
@@ -99,6 +102,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var loginData loginData
 	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
+	loginData.LoginURL = "/login"
 
 	if loginData.ValidSes {
 		fmt.Println(loginData.UsrNm + " trying to create a new user while logged-in")
@@ -194,8 +198,11 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("username")
 	email := r.FormValue("email")
 	pass := r.FormValue("password")
+	returnUrl := r.FormValue("return_url")
+
 	var loginData loginData
 	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
+	loginData.ReturnURL = returnUrl
 
 	if loginData.ValidSes {
 		fmt.Println(loginData.UsrNm + "trying to log in while already logged-in")
@@ -259,8 +266,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-
+	http.Redirect(w, r, returnUrl, http.StatusSeeOther)
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -302,12 +308,18 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	// Determine the previous page
+	referer := r.Header.Get("Referer")
+	if referer == "" {
+		referer = "/"
+	}
+
+	http.Redirect(w, r, referer, http.StatusSeeOther)
 }
 
 // logInHandler handles user clicking log-in link
 func logInHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/login" {
+	if !strings.HasPrefix(r.URL.Path, "/login") {
 		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
 		return
 	}
@@ -318,5 +330,9 @@ func logInHandler(w http.ResponseWriter, r *http.Request) {
 
 	var loginData loginData
 	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
+	loginData.ReturnURL, loginData.LoginURL = r.URL.Query().Get("return_url"), "/login"
+	if loginData.ReturnURL == "" {
+		loginData.ReturnURL = "/"
+	}
 	logTmpl.Execute(w, loginData)
 }
