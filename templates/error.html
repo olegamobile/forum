@@ -9,25 +9,28 @@
 </head>
 
 <body>
+    <div class="wrapper">
+        {{ template "header" . }}
 
-    {{ template "header" . }}
-
-    <div class="container">
-        <div class="leftnav">
-            <p>leftnav: possible place to put categories</p>
+        <div class="container">
+            <div class="leftnav">
+                <p>leftnav: possible place to put categories</p>
+            </div>
+            <div class="content" style="text-align: center;">
+                <h2>ERROR {{.ErrorCode}}</h2>
+                <h3>{{.Message}}</h3>
+                <p>In the meantime, please enjoy this comic from <a href="https://xkcd.com/">xkcd</a>:</p>
+                <a href="https://xkcd.com/844/"><img src="https://imgs.xkcd.com/comics/good_code.png"
+                        alt="Good Code"></a>
+                <p></p>
+            </div>
+            <div class="rightnav">
+                <p>rightnav: placeholder for rightnav</p>
+            </div>
         </div>
-        <div class="content" style="text-align: center;">
-           <h2>ERROR {{.ErrorCode}}</h2>
-           <h3>{{.Message}}</h3>
-           <p>In the meantime, please enjoy this comic from <a href="https://xkcd.com/">xkcd</a>:</p>
-           <a href="https://xkcd.com/844/"><img src="https://imgs.xkcd.com/comics/good_code.png" alt="Good Code"></a>
-           <p></p>
-        </div>
-        <div class="rightnav">
-            <p>rightnav: placeholder for rightnav</p>
-        </div>
+        {{ template "footer" . }}
     </div>
-    {{ template "footer" . }}
+
     <script src="/static/ui-functions.js"></script>
     <script src="/static/home-functions.js"></script>
 
