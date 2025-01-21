@@ -9,91 +9,109 @@
 </head>
 
 <body>
+    <div class="wrapper">
+        {{ template "header" . }}
 
-    {{ template "header" . }}
-
-    <div class="container">
-        <div class="leftnav">
-            <p>leftnav: possible place to put categories</p>
-        </div>
-        <div class="content">
-            <!-- Form to start a thread -->
-            <div class="newpost">
-                {{if .ValidSes}}
-                <!-- Trigger/Open The Modal -->
-                <button id="modalBtn">Start a new thread</button>
-                <!-- The Modal -->
-                <div class="newpostModal" id="newpostModal">
-                    <!-- Modal content -->
-                    <div class="modal-content"> <span class="close">&times;</span>
-                        <h3>Start a new thread</h3>
-                        <form method="POST" action="/add">
-                            <input type="text" name="title" placeholder="Thread title" maxlength="{{.TitleMaxLen}}" required><br>
-                            <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}" required></textarea><br>
-                            <input type="text" name="categories" placeholder="List categories" maxlength="{{.CategoriesMaxLen}}" required><br>
-                            <input type="reset" value="Clear all" style="float: right;" /> <button type="submit">Start
-                                thread</button>
-                        </form>
-                    </div>
-                </div>
-                {{else}}
-                <p><a href="/login">Log in</a> to start posting!</p>
-                <p style="color:darkred;">{{.Message}}</p>
-                {{end}}
+        <div class="container">
+            <div class="leftnav">
+                <p>leftnav: possible place to put categories</p>
             </div>
-            <!-- All threads -->
-            <h2>Threads</h2>
-            <div class="filter">
-                <h3>Filter</h3>
-                <form method="POST" action="/">
-                    <button type="submit" name="reset" value="reset" style="float: right;">Reset filter</button>
-                    <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"
-                        placeholder="Search categories" maxlength="200">
-                    <input type="radio" id="any" name="multisearch" value="any" checked>
-                    <label for="any">Any</label>
-                    <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"}}checked="checked" {{end}}>
-                    <label for="all">All</label>
-                    <button type="submit" name="serchcat" value="search"><span
-                            class="material-symbols-outlined">search</span></button> <br>
+
+            <div class="content">
+                <!-- Form to start a thread -->
+                <div class="newpost">
                     {{if .ValidSes}}
-                    <label for="todisplay">Show:</label>
-                    <select name="todisplay" id="todisplay">
-                        <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
-                        <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created</option>
-                        <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
-                        <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked </option>
-                    </select>
-                    <button type="submit" name="updatesel" value="update">Apply filter</button>
+                    <!-- Trigger/Open The Modal -->
+                    <button id="modalBtn">Start a new thread</button>
+                    <!-- The Modal -->
+                    <div class="newpostModal" id="newpostModal">
+                        <!-- Modal content -->
+                        <div class="modal-content"> <span class="close">&times;</span>
+                            <h3>Start a new thread</h3>
+                            <form method="POST" action="/add">
+                                <input type="text" name="title" placeholder="Thread title" maxlength="{{.TitleMaxLen}}"
+                                    required><br>
+                                <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}"
+                                    required></textarea><br>
+                                <input type="text" name="categories" placeholder="List categories"
+                                    maxlength="{{.CategoriesMaxLen}}" required><br>
+                                <input type="reset" value="Clear all" style="float: right;" /> <button
+                                    type="submit">Start
+                                    thread</button>
+                            </form>
+                        </div>
+                    </div>
+                    {{else}}
+                    <p><a href="/login">Log in</a> to start posting!</p>
+                    <p style="color:darkred;">{{.Message}}</p>
                     {{end}}
-                </form>
-            </div>
-            <!-- Div for each post -->
-            <div class="allthreads"> 
-                {{range .Threads}}
-                <div class="threadbox">
-                    <ul>
-                        <li style="float: right;"><span class="material-symbols-outlined">comment</span>{{.RepliesN}}
-                        </li>
-                        <li>
-                            <h3><a href="/thread/{{.ID}}">{{.Title}}</a></h3>
-                        </li>
-                        <li><span class="material-symbols-outlined">person</span><b>{{.Author}}</b> posted on {{.CreatedDay}}
-                            {{.CreatedTime}}</li>
-                        <li><span class="material-symbols-outlined">category</span>{{ range .CatsSlice }}{{.}} {{ end }}
-                        </li>
-                    </ul>
                 </div>
-                {{end}}
+
+                <!-- All threads -->
+                <h2>Threads</h2>
+                <div class="filter">
+                    <h3>Filter</h3>
+                    <form method="POST" action="/">
+                        <button type="submit" name="reset" value="reset" style="float: right;">Reset filter</button>
+                        <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"
+                            placeholder="Search categories" maxlength="200">
+                        <input type="radio" id="any" name="multisearch" value="any" checked>
+                        <label for="any">Match any</label>
+                        <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"
+                            }}checked="checked" {{end}}>
+                        <label for="all">Match all&nbsp</label>
+                        <button type="submit" name="serchcat" value="search"><span
+                                class="material-symbols-outlined">search</span></button> <br>
+                        {{if .ValidSes}}
+                        <label for="todisplay">Show:</label>
+                        <select name="todisplay" id="todisplay">
+                            <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
+                            <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created</option>
+                            <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
+                            <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked </option>
+                        </select>
+                        <button type="submit" name="updatesel" value="update">Apply filter</button>
+                        {{end}}
+                    </form>
+                </div>
+                
+                <!-- Div for each post -->
+                <div class="allthreads">
+                    {{range .Threads}}
+                    <div class="threadbox">
+                        <ul>
+                            <li style="float: right;"><span
+                                    class="material-symbols-outlined">comment</span>{{.RepliesN}}
+                            </li>
+                            <li>
+                                <h3><a href="/thread/{{.ID}}">{{.Title}}</a></h3>
+                            </li>
+                            <li><span class="material-symbols-outlined">person</span><b>{{.Author}}</b> posted on
+                                {{.CreatedDay}}
+                                {{.CreatedTime}}</li>
+                            <li class="content-line"><span class="material-symbols-outlined">chat_bubble</span><span
+                                    class="truncate">{{.Content }}</span></li>
+                            <li class="categories"><span class="material-symbols-outlined">category</span>{{ range
+                                .CatsSlice }}{{.}} {{ end }}
+                            </li>
+                        </ul>
+                    </div>
+                    {{end}}
+                </div>
             </div>
+
+            <div class="rightnav">
+                <p>rightnav: placeholder for rightnav</p>
+            </div>
+
         </div>
-        <div class="rightnav">
-            <p>rightnav: placeholder for rightnav</p>
-        </div>
+
+        {{ template "footer" . }}
+
     </div>
-    {{ template "footer" . }}
+
     <script src="/static/ui-functions.js"></script>
     <script src="/static/home-functions.js"></script>
-
 </body>
 
 </html>

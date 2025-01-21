@@ -24,31 +24,33 @@
 
 
 <body>
-
-    {{ template "header" . }}
-    <div class="container">
-        <div class="leftnav">
-            <p>leftnav: possible place to put categories</p>
+    <div class="wrapper">
+        {{ template "header" . }}
+        <div class="container">
+            <div class="leftnav">
+                <p>leftnav: possible place to put categories</p>
+            </div>
+            <div class="content">
+                <h2>Register new user</h2>
+                <form method="POST" action="/register">
+                    <label for="username">Username:</label><br>
+                    <input type="text" id="username" name="username" required /><br>
+                    <label for="email">Email:</label><br>
+                    <input type="email" id="email" name="email" required /><br>
+                    <label for="pwd">Password:</label><br>
+                    <input type="password" id="pwd" name="password" required /><br>
+                    <button type="submit" style="margin-top: 1rem;">Register</button>
+                    <p class="">Already have an account? <a href="/login">Login</a></p>
+                    <p style="color:darkred;">{{.Message2}}</p>
+                </form>
+            </div>
+            <div class="rightnav">
+                <p>rightnav: placeholder for rightnav</p>
+            </div>
         </div>
-        <div class="content">
-            <h2>Register new user</h2>
-            <form method="POST" action="/register">
-                <label for="username">Username:</label><br>
-                <input type="text" id="username" name="username" required /><br>
-                <label for="email">Email:</label><br>
-                <input type="email" id="email" name="email" required /><br>
-                <label for="pwd">Password:</label><br>
-                <input type="password" id="pwd" name="password" required /><br>
-                <button type="submit" style="margin-top: 1rem;">Register</button>
-                <p class="">Already have an account? <a href="/login">Login</a></p>
-                <p style="color:darkred;">{{.Message2}}</p>
-            </form>
-        </div>
-        <div class="rightnav">
-            <p>rightnav: placeholder for rightnav</p>
-        </div>
+        {{ template "footer" . }}
     </div>
-    {{ template "footer" . }}
+    
     <script src="/static/ui-functions.js"></script>
 
 </body>
