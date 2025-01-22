@@ -3,6 +3,8 @@ const maxTotalSize = 20 * 1024 * 1024; // 20 MB
 let totalSize = 0;
 
 function updateFileList() {
+    alert('Alert');
+    console.log("Function called!");
   const input = document.getElementById("files");
   const warning = document.getElementById("warning");
   const submitButton = document.getElementById("submitButton");
