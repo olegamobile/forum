@@ -39,7 +39,7 @@ func makeTables() {
 	}
 
 	// Create sessions table if it doesn't exist
-	creatSessionsTableQuery := `
+	createSessionsTableQuery := `
 		CREATE TABLE IF NOT EXISTS sessions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id TEXT NOT NULL,
@@ -48,7 +48,7 @@ func makeTables() {
 		expires_at DATETIME NOT NULL,
 		FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 	);`
-	if _, err := db.Exec(creatSessionsTableQuery); err != nil {
+	if _, err := db.Exec(createSessionsTableQuery); err != nil {
 		fmt.Println("Error creating sessions table:", err)
 		return
 	}
