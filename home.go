@@ -92,6 +92,10 @@ func countReactions(id int) (int, int) {
 	return likes, dislikes
 }
 
+func fetchCategories(postId string) string {
+
+}
+
 // fetchThreads
 func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 	var threads []Thread
