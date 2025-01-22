@@ -99,13 +99,8 @@ input {
     resize: vertical;
     font-size: clamp(12px, 1vw, 18px);
 }
-
-input[type="file"] {
-    display: none;
-  }
   
-button,
-.custom-file-button{
+button{
     display: inline-block;
     text-align: center;
     text-decoration: none;
