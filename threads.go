@@ -78,22 +78,37 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		catsJson, _ := json.Marshal(removeDuplicates(strings.Fields(cleanString(rawCats))))
+		catsList := removeDuplicates(strings.Fields(cleanString(rawCats)))
 		threadUrl := "/"
 
 		if content != "" {
-			result, err := db.Exec(`INSERT INTO posts (author, authorID, title, content, categories) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content, string(catsJson))
+			threadResult, err := db.Exec(`INSERT INTO posts (author, authorID, title, content) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content)
 			if err != nil {
 				fmt.Println("Adding:", err.Error())
 				goToErrorPage("Error adding thread", http.StatusInternalServerError, w, r)
 				return
 			}
-
-			threadID, err := result.LastInsertId()
+			threadID, err := threadResult.LastInsertId()
 			if err != nil {
 				fmt.Println("Failed to get last insert ID:", err.Error())
 			} else {
 				threadUrl = fmt.Sprintf("/thread/%d", threadID)
+			}
+			for _, category := range catsList {
+
+				_, err := db.Exec(`INSERT OR IGNORE INTO categories (name) VALUES (?);`, category)
+				if err != nil {
+					fmt.Println("Adding:", err.Error())
+					goToErrorPage("Error adding categories", http.StatusInternalServerError, w, r)
+					return
+				}
+
+				_, err = db.Exec(`INSERT OR IGNORE INTO posts_categories (post_id, category_id) VALUES (?, (SELECT id FROM categories WHERE name=?));`, threadID, category)
+				if err != nil {
+					fmt.Println("Adding:", err.Error())
+					goToErrorPage("Error adding posts-categories relations", http.StatusInternalServerError, w, r)
+					return
+				}
 			}
 		}
 
@@ -270,6 +285,7 @@ func dataToThread(thread Thread) (Thread, error) {
 		fmt.Println(err.Error())
 		return thread, err
 	}
+
 	thread.Likes, thread.Dislikes = countReactions(thread.ID)
 	thread.BaseID, thread.ContentMaxLen = thread.ID, contentMaxLen
 	return thread, nil
