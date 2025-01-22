@@ -19,7 +19,6 @@
 
             <div class="content">
 
-
                 <!-- Form to start a thread -->
                 <div class="newpost">
 
@@ -50,36 +49,34 @@
                     {{else}}
                     <p><a href="/login">Log in</a> to start posting!</p>
                     <p style="color:darkred;">{{.Message}}</p>
-
                     {{end}}
                 </div>
 
+                <!-- Show filter button -->
                 <button class="thread-button" id="filter-button" style="margin: 10px 0px 20px;"><span
                         class="material-symbols-outlined">filter_alt</span>Show filter</button>
 
-                <!-- Trying a new filter layout-->
+                <!-- Filter -->
                 <div id="show-filter" style="display: none;">
                     <form method="POST" action="/">
                         <h3>Filter threads</h3>
                         <div class="flex-container">
 
-                            <!-- First -->
+                            <!-- First column -->
                             <div class="col">
                                 <div class="row"><input type="search" id="search-categories" name="usersearch"
                                         value="{{.Search}}" placeholder="Search categories" maxlength="200"></div>
-
                                 <div class="row"><input type="radio" id="any" name="multisearch" value="any" checked>
                                     <label for="any">Match any</label>
                                     <input type="radio" id="all" name="multisearch" value="all" {{if eq
                                         .Multisearch "all" }}checked="checked" {{end}}>
                                     <label for="all">Match all</label>
                                 </div>
-
                                 <div class="row"><button type="submit" name="searchcat" value="search">Search</button>
                                 </div>
                             </div>
 
-                            <!-- Second  -->
+                            <!-- Second column -->
                             {{if .ValidSes}}
                             <div class="col">
                                 <select name="todisplay" id="todisplay">
@@ -95,7 +92,7 @@
                             </div>
                             {{end}}
 
-                            <!-- Third  -->
+                            <!-- Third column -->
                             <div class="col">
                                 <p></p>
                                 <button type="submit" name="reset" value="reset" style="float: right;">Reset
