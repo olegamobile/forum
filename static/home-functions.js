@@ -24,3 +24,20 @@ window.onclick = function (event) {
     modal.style.display = "none";
   }
 }
+
+// Toggle filter div visibility with filter button
+document.addEventListener("DOMContentLoaded", function () {
+  const filterButton = document.getElementById("filter-button");
+  const filterDiv = document.getElementById("show-filter");
+
+  if (filterButton && filterDiv) {
+    filterButton.addEventListener("click", function () {
+      // Toggle the display of the target div
+      if (filterDiv.style.display === "none" || filterDiv.style.display === "") {
+        filterDiv.style.display = "block";
+      } else {
+        filterDiv.style.display = "none";
+      }
+    });
+  }
+});
