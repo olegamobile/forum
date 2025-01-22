@@ -48,13 +48,14 @@ body {
 .wrapper {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Fill the viewport for the sticky footer*/
+    min-height: 100vh;
+    /* Fill the viewport for the sticky footer*/
 }
 
 .container {
     display: -webkit-flex;
     display: flex;
-    flex : 1;
+    flex: 1;
 }
 
 .leftnav {
@@ -509,7 +510,6 @@ h1 a:hover {
     padding: 10px;
     text-align: center;
     max-width: 100%;
-    background-color: #ddd;
 }
 
 /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
@@ -540,7 +540,10 @@ h1 a:hover {
 }
 
 /* Dark Mode */
-.dark-mode {
+.dark-mode,
+.dark-mode .content,
+.dark-mode body,
+.dark-mode .modal-content {
     background-color: var(--dark1);
     color: var(--dark-text);
 }
@@ -551,14 +554,51 @@ h1 a:hover {
 }
 
 .dark-mode h1,
-.dark-mode .subtitle {
+.dark-mode .subtitle,
+.dark-mode p {
     color: var(--dark-text);
 }
 
-.dark-mode .topnav {
+.dark-mode .topnav ul {
     color: var(--light5);
+    background-color: var(--dark2);
+
+}
+
+.dark-mode .topnav li a,
+.dark-mode .topnav li button,
+.dark-mode .topnav input[type="button"],
+.dark-mode .topnav input[type="radio"] {
+    background-color: none;
+    color: var(--dark-text);
+
+}
+
+.topnav label {
+    margin-right: 6px;
+    color: var(--light5);
+    vertical-align: middle;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.dark-mode .topnav li a:hover,
+.dark-mode .topnav li button:hover,
+.dark-mode .topnav input[type="button"]:hover {
+    color: var(--dark-text);
+    background-color: var(--dark4);
+}
+
+.dark-mode button {
+    color: var(--dark-text);
+    background-color: var(--dark2);
+}
+
+.dark-mode button:hover {
+    color: var(--dark-text);
+    background-color: var(--dark4);
 }
 
 .dark-mode a {
-    color: yellow;
+    color: var(--light2);
 }
