@@ -131,7 +131,10 @@ textarea {
 }
 
 .newpost button {
-    display: inline-block;
+    /* display: inline-block; */
+    display: inline-flex;
+    align-items: center;
+    
     text-align: center;
     text-decoration: none;
     background: none;
@@ -144,6 +147,8 @@ textarea {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+
+    gap: 0.5rem; /* Add spacing between the icon and text */
 }
 
 input[type="reset"] {

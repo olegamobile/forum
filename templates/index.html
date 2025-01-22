@@ -20,9 +20,11 @@
             <div class="content">
                 <!-- Form to start a thread -->
                 <div class="newpost">
+
                     {{if .ValidSes}}
                     <!-- Trigger/Open The Modal -->
-                    <button id="modalBtn">Start a new thread</button>
+                        <button id="modalBtn" style="margin: 40px 0px 20px;"><span class="material-symbols-outlined">add</span>Start a new thread</button>
+
                     <!-- The Modal -->
                     <div class="newpostModal" id="newpostModal">
                         <!-- Modal content -->
@@ -34,19 +36,21 @@
                                 <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}"
                                     required></textarea><br>
                                 <input type="text" name="categories" placeholder="List categories"
-                                    maxlength="{{.CategoriesMaxLen}}" required><br>
+                                    maxlength="{{.CategoriesMaxLen}}" required><br><br>
                                 <input type="reset" value="Clear all" style="float: right;" /> <button
                                     type="submit">Start
                                     thread</button>
                             </form>
                         </div>
                     </div>
+
                     {{else}}
                     <p><a href="/login">Log in</a> to start posting!</p>
                     <p style="color:darkred;">{{.Message}}</p>
+
                     {{end}}
                 </div>
-                
+
                 <h2>Threads</h2>
 
                 <!-- Search Filter -->
@@ -75,7 +79,7 @@
                         {{end}}
                     </form>
                 </div>
-                
+
                 <!-- Div for each post -->
                 <div class="allthreads">
                     {{range .Threads}}
