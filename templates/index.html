@@ -14,16 +14,19 @@
 
         <div class="container">
             <div class="leftnav">
-                <p>leftnav: possible place to put categories</p>
+                <!-- <p>leftnav: possible place to put categories</p> -->
             </div>
 
             <div class="content">
+
+
                 <!-- Form to start a thread -->
                 <div class="newpost">
 
                     {{if .ValidSes}}
                     <!-- Trigger/Open The Modal -->
-                        <button id="modalBtn" style="margin: 40px 0px 20px;"><span class="material-symbols-outlined">add</span>Start a new thread</button>
+                    <button id="modalBtn" style="margin: 40px 0px 20px;"><span
+                            class="material-symbols-outlined">add</span>Start a new thread</button>
 
                     <!-- The Modal -->
                     <div class="newpostModal" id="newpostModal">
@@ -51,34 +54,58 @@
                     {{end}}
                 </div>
 
-                <h2>Threads</h2>
+                <button class="thread-button" id="filter-button" style="margin: 10px 0px 20px;"><span
+                        class="material-symbols-outlined">filter_alt</span>Show filter</button>
 
-                <!-- Search Filter -->
-                <div class="filter">
-                    <h3>Filter</h3>
+                <!-- Trying a new filter layout-->
+                <div id="show-filter" style="display: none;">
                     <form method="POST" action="/">
-                        <button type="submit" name="reset" value="reset" style="float: right;">Reset filter</button>
-                        <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"
-                            placeholder="Search categories" maxlength="200">
-                        <input type="radio" id="any" name="multisearch" value="any" checked>
-                        <label for="any">Match any</label>
-                        <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"
-                            }}checked="checked" {{end}}>
-                        <label for="all">Match all&nbsp</label>
-                        <button type="submit" name="searchcat" value="search"><span
-                                class="material-symbols-outlined">search</span></button> <br>
-                        {{if .ValidSes}}
-                        <label for="todisplay">Show:</label>
-                        <select name="todisplay" id="todisplay">
-                            <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
-                            <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created</option>
-                            <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
-                            <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked </option>
-                        </select>
-                        <button type="submit" name="updatesel" value="update">Apply filter</button>
-                        {{end}}
+                        <h3>Filter threads</h3>
+                        <div class="flex-container">
+
+                            <!-- First -->
+                            <div class="col">
+                                <div class="row"><input type="search" id="search-categories" name="usersearch"
+                                        value="{{.Search}}" placeholder="Search categories" maxlength="200"></div>
+
+                                <div class="row"><input type="radio" id="any" name="multisearch" value="any" checked>
+                                    <label for="any">Match any</label>
+                                    <input type="radio" id="all" name="multisearch" value="all" {{if eq
+                                        .Multisearch "all" }}checked="checked" {{end}}>
+                                    <label for="all">Match all</label>
+                                </div>
+
+                                <div class="row"><button type="submit" name="searchcat" value="search">Search</button>
+                                </div>
+                            </div>
+
+                            <!-- Second  -->
+                            {{if .ValidSes}}
+                            <div class="col">
+                                <select name="todisplay" id="todisplay">
+                                    <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
+                                    <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created
+                                    </option>
+                                    <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
+                                    <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked
+                                    </option>
+                                </select>
+                                <button type="submit" name="updatesel" value="update">Show
+                                    selection</button>
+                            </div>
+                            {{end}}
+
+                            <!-- Third  -->
+                            <div class="col">
+                                <p></p>
+                                <button type="submit" name="reset" value="reset" style="float: right;">Reset
+                                    filter</button>
+                            </div>
+                        </div>
                     </form>
                 </div>
+
+                <h2>Threads</h2>
 
                 <!-- Div for each post -->
                 <div class="allthreads">
@@ -106,7 +133,7 @@
             </div>
 
             <div class="rightnav">
-                <p>rightnav: placeholder for rightnav</p>
+                <!-- <p>rightnav: placeholder for rightnav</p> -->
             </div>
 
         </div>

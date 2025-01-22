@@ -48,13 +48,14 @@ body {
 .wrapper {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Fill the viewport for the sticky footer*/
+    min-height: 100vh;
+    /* Fill the viewport for the sticky footer*/
 }
 
 .container {
     display: -webkit-flex;
     display: flex;
-    flex : 1;
+    flex: 1;
 }
 
 .leftnav {
@@ -130,11 +131,11 @@ textarea {
     margin-bottom: 4px;
 }
 
-.newpost button {
+.newpost button,
+.thread-button {
     /* display: inline-block; */
     display: inline-flex;
     align-items: center;
-    
     text-align: center;
     text-decoration: none;
     background: none;
@@ -148,7 +149,8 @@ textarea {
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
 
-    gap: 0.5rem; /* Add spacing between the icon and text */
+    gap: 0.5rem;
+    /* Add spacing between the icon and text */
 }
 
 input[type="reset"] {
@@ -169,7 +171,8 @@ input[type="reset"] {
 }
 
 .newpost button:hover,
-input[type="reset"]:hover {
+input[type="reset"]:hover,
+.thread-button:hover {
     color: var(--light1);
     background-color: var(--light5);
 }
@@ -241,7 +244,7 @@ input[type="reset"]:hover {
 }
 
 /* Filter style */
-.filter select {
+/* .filter select {
     text-decoration: none;
     border: none;
     border-radius: 4px;
@@ -272,6 +275,80 @@ input[type="reset"]:hover {
 .filter input[type="button"]:hover {
     background-color: var(--light5);
     color: var(--light1);
+}
+
+.filter input[type="search"] {
+    text-decoration: none;
+    border: none;
+    height: 40px;
+    border-radius: 4px;
+    margin: 0;
+    padding: 10px;
+    width: 300px;
+    top: 0;
+} */
+
+/* Filter layout flexbox */
+.flex-container {
+    display: flex;
+    /* flex-direction: column; */
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    /* Space between elements */
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 50px;
+    border: 1px solid lightgrey;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    /* Rows are horizontal */
+    gap: 10px;
+    /* Space between columns */
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    /* Space between nested rows */
+    padding: 10px;
+    /* background-color: #eaeaea; */
+}
+
+.flex-container  select {
+    border: none;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: "Space Grotesk", serif;
+    width: 100%;
+}
+
+.flex-container  button,
+.flex-container  input[type="button"] {
+    background-color: var(--light2);
+    color: var(--light5);
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.flex-container button:hover,
+.flex-container input[type="button"]:hover {
+    background-color: var(--light5);
+    color: var(--light1);
+}
+
+.flex-container input[type="search"] {
+    border: none;
+    height: 40px;
+    border-radius: 4px;
+    width: 100%;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
 }
 
 /* Div post */
@@ -489,17 +566,6 @@ h1 a:hover {
     background-color: var(--light5);
     cursor: pointer;
     border-radius: 4px;
-}
-
-.filter input[type="search"] {
-    text-decoration: none;
-    border: none;
-    height: 40px;
-    border-radius: 4px;
-    margin: 0;
-    padding: 10px;
-    width: 300px;
-    top: 0;
 }
 
 /* Footer */
