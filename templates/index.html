@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>grit:lab Fika Café</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/image_upload_style.css">
 </head>
 
 <body>
@@ -38,10 +39,15 @@
                                 <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}"
                                     required></textarea><br>
                                 <input type="text" name="categories" placeholder="List categories"
-                                    maxlength="{{.CategoriesMaxLen}}" required><br><br>
-                                <input type="reset" value="Clear all" style="float: right;" /> <button
-                                    type="submit">Start
-                                    thread</button>
+                                    maxlength="{{.CategoriesMaxLen}}" required><br>
+
+                                    <label for="files" class="custom-file-button">Add Image</label>
+                                    <button type="submit" id="submitButton" style="float: right;" >Start thread</button>
+                                    <input type="reset" value="Clear all" style="float: right;" />
+                                    <input type="file" id="files" name="files" multiple accept="image/*" onchange="updateFileList()">
+                                    <p id="warning" class="warning"></p>
+                                    <div id="previewContainer" class="preview-container"></div>
+
                             </form>
                         </div>
                     </div>
@@ -141,6 +147,7 @@
 
     <script src="/static/ui-functions.js"></script>
     <script src="/static/home-functions.js"></script>
+    <script src="/static/image_upload.js"></script>
 </body>
 
 </html>
