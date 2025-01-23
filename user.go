@@ -87,7 +87,7 @@ func createSession() (string, error) {
 	return sessionUUID.String(), nil
 }
 
-func saveSession(db *sql.DB, userID, usname, sessionToken string, expiresAt time.Time) error {
+func saveSession(userID, usname, sessionToken string, expiresAt time.Time) error {
 	query := `INSERT INTO sessions (user_id, username, session_token, expires_at) VALUES (?, ?, ?, ?)`
 	_, err := db.Exec(query, userID, usname, sessionToken, expiresAt)
 	return err
@@ -165,6 +165,9 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Log user in
+		sessionAndToken(&w, r, userId.String(), name)
+
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 	default:
@@ -181,6 +184,33 @@ func deleteSession(w http.ResponseWriter, r *http.Request, usrId string) {
 		goToErrorPage("Failed to delete old session", http.StatusInternalServerError, w, r)
 		return
 	}
+}
+
+// sessionAndToken creates and puts a new session token into the database and into a user cookie
+func sessionAndToken(w *http.ResponseWriter, r *http.Request, userID, username string) {
+	// New session token
+	sessionToken, err := createSession()
+	if err != nil {
+		goToErrorPage("Unable to create session: "+err.Error(), http.StatusInternalServerError, *w, r)
+		return
+	}
+	expiresAt := time.Now().Add(30 * time.Minute)
+
+	// Token into database
+	err = saveSession(userID, username, sessionToken, expiresAt)
+	if err != nil {
+		fmt.Println("Error saving session", err.Error())
+		goToErrorPage("Unable to save session"+err.Error(), http.StatusInternalServerError, *w, r)
+		return
+	}
+
+	// Token into cookie
+	http.SetCookie(*w, &http.Cookie{
+		Name:     "session_token",
+		Value:    sessionToken,
+		Expires:  expiresAt,
+		HttpOnly: true,
+	})
 }
 
 func logUserInHandler(w http.ResponseWriter, r *http.Request) {
@@ -236,29 +266,8 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Remove any old sessions
 	deleteSession(w, r, userID)
-
-	// Create new session
-	sessionToken, err := createSession()
-	if err != nil {
-		goToErrorPage("Unable to create session: "+err.Error(), http.StatusInternalServerError, w, r)
-		return
-	}
-	expiresAt := time.Now().Add(30 * time.Minute)
-
-	err = saveSession(db, userID, username, sessionToken, expiresAt)
-	if err != nil {
-		fmt.Println("Error saving session", err.Error())
-		goToErrorPage("Unable to save session"+err.Error(), http.StatusInternalServerError, w, r)
-		return
-	}
-
-	// Set the session token as a cookie
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    sessionToken,
-		Expires:  expiresAt,
-		HttpOnly: true,
-	})
+	// Create new session and token
+	sessionAndToken(&w, r, userID, username)
 
 	http.Redirect(w, r, returnUrl, http.StatusSeeOther)
 }

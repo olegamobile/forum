@@ -32,7 +32,7 @@
 
         <div class="container">
             <div class="leftnav">
-                <p>leftnav: possible place to put categories</p>
+                <!-- <p>leftnav: possible place to put categories</p> -->
             </div>
             <!-- Thread starter -->
             <div class="content">
@@ -48,7 +48,7 @@
                                 <input type="hidden" name="post_type" value="thread">
 
                                 {{if .Thread.LikedNow}}
-                                <button type="submit" title="Like" class="like-button" style="color: darkgreen;">
+                                <button type="submit" title="Like" class="like-button" style="color: rgb(0, 165, 0);">
                                     <span class="material-symbols-outlined">thumb_up</span>
                                     {{.Thread.Likes}}</button>
                                 {{else}}
@@ -63,7 +63,8 @@
                                 <input type="hidden" name="post_type" value="thread">
 
                                 {{if .Thread.DislikedNow}}
-                                <button type="submit" title="Dislike" class="dislike-button" style="color:darkred">
+                                <button type="submit" title="Dislike" class="dislike-button"
+                                    style="color:rgb(227, 10, 21)">
                                     <span class="material-symbols-outlined">thumb_down</span>
                                     {{.Thread.Dislikes}}</button>
                                 {{else}}
@@ -122,16 +123,28 @@
             </div>
 
             <div class="rightnav">
-                <p>rightnav: placeholder for rightnav</p>
+                <!-- <p>rightnav: placeholder for rightnav</p> -->
             </div>
 
         </div>
-
-        {{ template "footer" . }}
-
     </div>
 
     <script src="/static/ui-functions.js"></script>
+    <script>
+        // Store the scroll position before the page unloads
+        window.addEventListener("beforeunload", () => {
+            // use document title as key so other pages don't restore same position
+            sessionStorage.setItem(`scrollPos-${document.title}`, window.scrollY);
+        });
+
+        // Restore the scroll position after the page loads
+        window.addEventListener("load", () => {
+            const scrollPosition = sessionStorage.getItem(`scrollPos-${document.title}`);
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition, 10));
+            }
+        });
+    </script>
 
 </body>
 
