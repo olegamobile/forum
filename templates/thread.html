@@ -48,7 +48,7 @@
                                 <input type="hidden" name="post_type" value="thread">
 
                                 {{if .Thread.LikedNow}}
-                                <button type="submit" title="Like" class="like-button" style="color: darkgreen;">
+                                <button type="submit" title="Like" class="like-button" style="color: rgb(0, 165, 0);">
                                     <span class="material-symbols-outlined">thumb_up</span>
                                     {{.Thread.Likes}}</button>
                                 {{else}}
@@ -63,7 +63,7 @@
                                 <input type="hidden" name="post_type" value="thread">
 
                                 {{if .Thread.DislikedNow}}
-                                <button type="submit" title="Dislike" class="dislike-button" style="color:darkred">
+                                <button type="submit" title="Dislike" class="dislike-button" style="color:rgb(227, 10, 21)">
                                     <span class="material-symbols-outlined">thumb_down</span>
                                     {{.Thread.Dislikes}}</button>
                                 {{else}}
