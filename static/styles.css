@@ -145,6 +145,7 @@ textarea {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+    margin: 10px 0;
 }
 
 input[type="reset"] {
@@ -155,13 +156,14 @@ input[type="reset"] {
     border: none;
     outline: none;
     cursor: pointer;
-    background-color: lightgray;
+    background-color: #dddddd91;
     color: var(--light5);
     padding: 10px;
     width: auto;
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+    margin: 10px;
 }
 
 .newpost button:hover,
