@@ -190,7 +190,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 			search = ""
 		}
 
-		if r.FormValue("serchcat") == "search" {
+		if r.FormValue("searchcat") == "search" {
 			searches := strings.Fields(cleanString(html.EscapeString(strings.ToLower(search))))
 
 			selectQuery := getMultipleSearch(multisearch, searches)

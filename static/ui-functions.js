@@ -28,10 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
   buttons.forEach(button => {
     button.addEventListener("click", function () {
       // Find the closest thread and then look for the reply-form-container sibling
-      const formContainer = this.closest(".reply-and-form").querySelector(".reply-form-container");      
-
-      //console.log(formContainer);
-      console.log(formContainer.style.display);
+      const formContainer = this.closest(".reply-and-form").querySelector(".reply-form-container");
 
       // Toggle the display of the form container
       if (formContainer.style.display === "none" || formContainer.style.display === "") {
