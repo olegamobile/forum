@@ -560,6 +560,7 @@ h1 a:hover {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 .filter input[type="search"] {
     text-decoration: none;
     border: none;
@@ -572,6 +573,9 @@ h1 a:hover {
 }
 
 
+=======
+/* Footer */
+>>>>>>> 384592057d5de5712207767cfe0db08aca7bee0a
 footer {
 padding: 20px;
 background-color: var(--light1);
@@ -651,10 +655,13 @@ transform: scale(1.1);
 
 /* Dark Mode */
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 /* Dark Mode */
 =======
 >>>>>>> 0d11c2965274505cdc1622d80355439ff3b7a962
+=======
+>>>>>>> 384592057d5de5712207767cfe0db08aca7bee0a
 .dark-mode,
 .dark-mode .content,
 .dark-mode body,
