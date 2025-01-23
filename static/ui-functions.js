@@ -39,18 +39,3 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
-
-// Store the scroll position before the page unloads
-window.addEventListener("beforeunload", () => {
-  // use document title as key so other pages don't restore same position
-  sessionStorage.setItem(`scrollPos-${document.title}`, window.scrollY);  
-});
-
-// Restore the scroll position after the page loads
-window.addEventListener("load", () => {
-  const scrollPosition = sessionStorage.getItem(`scrollPos-${document.title}`);
-  if (scrollPosition) {
-    window.scrollTo(0, parseInt(scrollPosition, 10));
-  }
-});
-
