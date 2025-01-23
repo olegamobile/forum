@@ -131,8 +131,11 @@ textarea {
     margin-bottom: 4px;
 }
 
-.newpost button {
-    display: inline-block;
+.newpost button,
+.thread-button {
+    /* display: inline-block; */
+    display: inline-flex;
+    align-items: center;
     text-align: center;
     text-decoration: none;
     background: none;
@@ -145,6 +148,9 @@ textarea {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+
+    gap: 0.5rem;
+    /* Add spacing between the icon and text */
 }
 
 input[type="reset"] {
@@ -165,7 +171,8 @@ input[type="reset"] {
 }
 
 .newpost button:hover,
-input[type="reset"]:hover {
+input[type="reset"]:hover,
+.thread-button:hover {
     color: var(--light1);
     background-color: var(--light5);
 }
@@ -236,38 +243,76 @@ input[type="reset"]:hover {
     cursor: pointer;
 }
 
-/* Filter style */
-.filter select {
-    text-decoration: none;
-    border: none;
-    border-radius: 4px;
-    margin-top: 10px;
-    padding: 10px;
-    top: 0;
-    font-family: "Space Grotesk", serif;
+/* Filter layout flexbox */
+
+#show-filter {
+    max-height: 0;
+    transition: max-height 0.5s ease, margin 0.5s ease, opacity 1.0s ease;
+    margin-bottom: 0px;
+    overflow: hidden;
 }
 
-.filter button,
-.filter input[type="button"] {
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-    background: none;
+#show-filter.visible {
+    max-height: 400px;
+    /* Anything larger than expected: animation doesn't work with 'auto' */
+    margin-bottom: 40px;
+}
+
+.filter-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    /* Space between elements */
+    width: 100%;
+    padding: 10px;
+    border: 1px solid lightgrey;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    /* Space between columns */
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+}
+
+.filter-container select {
     border: none;
-    outline: none;
-    cursor: pointer;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: "Space Grotesk", serif;
+    width: 100%;
+}
+
+.filter-container button,
+.filter-container input[type="button"] {
     background-color: var(--light2);
     color: var(--light5);
-    padding: 10px;
-    border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
 }
 
-.filter button:hover,
-.filter input[type="button"]:hover {
+.filter-container button:hover,
+.filter-container input[type="button"]:hover {
     background-color: var(--light5);
     color: var(--light1);
+}
+
+.filter-container input[type="search"] {
+    border: none;
+    height: 40px;
+    border-radius: 4px;
+    width: 100%;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
 }
 
 /* Div post */
@@ -485,17 +530,6 @@ h1 a:hover {
     background-color: var(--light5);
     cursor: pointer;
     border-radius: 4px;
-}
-
-.filter input[type="search"] {
-    text-decoration: none;
-    border: none;
-    height: 40px;
-    border-radius: 4px;
-    margin: 0;
-    padding: 10px;
-    width: 300px;
-    top: 0;
 }
 
 /* Footer */
