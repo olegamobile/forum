@@ -496,45 +496,47 @@ h1 a:hover {
     width: 300px;
     top: 0;
 }
-/* Footer */
+
+
 footer {
-    padding: 20px;
-    background-color: var(--light1);
-    border-top: 2px solid  lightgrey; 
-    text-align: center; 
+padding: 20px;
+background-color: var(--light1);
+border-top: 2px solid  lightgrey; 
+text-align: center; 
 }
 
 .footer-text {
-    font-size: 20px; 
-    margin-bottom: 10px; 
-    color: black; 
+font-size: 20px; 
+margin-bottom: 10px; 
+color: black; 
 }
 
 #author-container {
-    padding-top: 1px solid lightgrey;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
+padding-top: 1px solid lightgrey;
+display: flex;
+justify-content: center;
+gap: 20px;
+margin-top: 20px;
 }
 
 .authors {
-    display: inline-block;
-    font-size: 14px;
-    padding: 10px 20px;
-    text-decoration: none;
-    color: black;
-    background-color: lightgray;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s, transform 0.2s;
+display: inline-block;
+font-size: 14px;
+padding: 10px 20px;
+text-decoration: none;
+color: black;
+background-color: lightgray;
+border-radius: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+transition: background-color 0.3s, transform 0.2s;
 }
 
 .authors:hover {
-    background-color: var(--light5);
-    color: lightgray;
-    transform: scale(1.1);
+background-color: var(--light5);
+color: lightgray;
+transform: scale(1.1);
 }
+
 
 
 /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
@@ -565,63 +567,91 @@ footer {
 }
 
 /* Dark Mode */
-.dark-mode {
+
+/* Dark Mode */
+.dark-mode,
+.dark-mode .content,
+.dark-mode body,
+.dark-mode .modal-content {
     background-color: var(--dark1);
     color: var(--dark-text);
 }
-
+/* Dark Mode */
 .dark-mode footer {
-   /* Footer for Dark Mode */
-   footer {
-    padding: 20px;
-    background-color: var(--dark2);
-    border-top: 2px solid var(--dark-shadow); 
-    text-align: center;
-}
-
-.footer-text {
-    font-size: 20px;
-    margin-bottom: 10px;
-    color: var(--dark-text);
-}
-
-#author-container {
-    padding-top: 1px solid var(--dark-shadow);
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.authors {
-    display: inline-block;
-    font-size: 14px;
-    padding: 10px 20px;
-    text-decoration: none;
-    color: var(--dark-text);
     background-color: var(--dark1);
-    border-radius: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.authors:hover {
-    background-color: var(--dark3);
-    color: var(--dark2);
-    transform: scale(1.1);
-}
-
-}
-
+    border-top: 2px solid var(--dark2);
+    }
+    
+    .dark-mode .footer-text {
+    color: var(--dark-text);
+    }
+    
+    .dark-mode #author-container {
+    border-top-color: var(--dark2);
+    }
+    
+    .dark-mode .authors {
+    color: var(--dark-text);
+    background-color: var(--dark2);
+    box-shadow: 0 4px 6px var(--dark-shadow);
+    }
+    
+    .dark-mode .authors:hover {
+    background-color: var(--dark4);
+    color: var(--dark-text);
+    }
+    
 .dark-mode h1,
-.dark-mode .subtitle {
+.dark-mode .subtitle,
+.dark-mode p {
     color: var(--dark-text);
 }
 
-.dark-mode .topnav {
+.dark-mode .topnav ul {
     color: var(--light5);
+    background-color: var(--dark2);
+
 }
+
+.dark-mode .topnav li a,
+.dark-mode .topnav li button,
+.dark-mode .topnav input[type="button"],
+.dark-mode .topnav input[type="radio"] {
+    background-color: none;
+    color: var(--dark-text);
+
+}
+
+.topnav label {
+    margin-right: 6px;
+    color: var(--light5);
+    vertical-align: middle;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.dark-mode .topnav li a:hover,
+.dark-mode .topnav li button:hover,
+.dark-mode .topnav input[type="button"]:hover {
+    color: var(--dark-text);
+    background-color: var(--dark4);
+}
+
+.dark-mode button {
+    color: var(--dark-text);
+    background-color: var(--dark2);
+}
+
+.dark-mode button:hover {
+    color: var(--dark-text);
+    background-color: var(--dark4);
+}
+
+.dark-mode input[type="reset"]:hover {
+    background-color: var(--dark4);
+    }
+    
 
 .dark-mode a {
-    color: yellow;
+    color: var(--light2);
 }
