@@ -48,13 +48,14 @@ body {
 .wrapper {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Fill the viewport for the sticky footer*/
+    min-height: 100vh;
+    /* Fill the viewport for the sticky footer*/
 }
 
 .container {
     display: -webkit-flex;
     display: flex;
-    flex : 1;
+    flex: 1;
 }
 
 .leftnav {
@@ -99,6 +100,14 @@ input {
     font-size: clamp(12px, 1vw, 18px);
 }
 
+.red-alert {
+    color:rgb(227, 10, 21);
+}
+
+.dark-mode .red-alert {
+    color:rgb(227, 10, 21);
+}
+
 button {
     display: inline-block;
     text-align: center;
@@ -113,6 +122,24 @@ button {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+}
+
+button:hover {
+    background-color: var(--light5);
+    color: var(--light1);
+}
+
+button.dislike-button,
+button.like-button,
+.dark-mode button.dislike-button,
+.dark-mode button.like-button {
+    background-color: transparent;
+}
+
+button:hover.dislike-button,
+button:hover.like-button {
+    background-color: #ffbc31;
+    color: var(--light5);
 }
 
 .newpostModal input[type="text"],
@@ -130,8 +157,11 @@ textarea {
     margin-bottom: 4px;
 }
 
-.newpost button {
-    display: inline-block;
+.newpost button,
+.thread-button {
+    /* display: inline-block; */
+    display: inline-flex;
+    align-items: center;
     text-align: center;
     text-decoration: none;
     background: none;
@@ -144,6 +174,9 @@ textarea {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+
+    gap: 0.5rem;
+    /* Add spacing between the icon and text */
 }
 
 input[type="reset"] {
@@ -164,7 +197,8 @@ input[type="reset"] {
 }
 
 .newpost button:hover,
-input[type="reset"]:hover {
+input[type="reset"]:hover,
+.thread-button:hover {
     color: var(--light1);
     background-color: var(--light5);
 }
@@ -235,39 +269,78 @@ input[type="reset"]:hover {
     cursor: pointer;
 }
 
-/* Filter style */
-.filter select {
-    text-decoration: none;
-    border: none;
-    border-radius: 4px;
-    margin-top: 10px;
-    padding: 10px;
-    top: 0;
-    font-family: "Space Grotesk", serif;
+/* Filter layout flexbox */
+
+#show-filter {
+    max-height: 0;
+    transition: max-height 0.5s ease, margin 0.5s ease, opacity 1.0s ease;
+    margin-bottom: 0px;
+    overflow: hidden;
 }
 
-.filter button,
-.filter input[type="button"] {
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-    background: none;
+#show-filter.visible {
+    max-height: 400px;
+    /* Anything larger than expected: animation doesn't work with 'auto' */
+    margin-bottom: 40px;
+}
+
+.filter-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    /* Space between elements */
+    width: 100%;
+    padding: 10px;
+    border: 1px solid lightgrey;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    /* Space between columns */
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+}
+
+.filter-container select, .filter-container input[type="search"] {
     border: none;
-    outline: none;
-    cursor: pointer;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: "Space Grotesk", serif;
+    width: 100%;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.filter-container button,
+.filter-container input[type="button"] {
     background-color: var(--light2);
     color: var(--light5);
-    padding: 10px;
-    border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
 }
 
-.filter button:hover,
-.filter input[type="button"]:hover {
+.filter-container button:hover,
+.filter-container input[type="button"]:hover {
     background-color: var(--light5);
     color: var(--light1);
 }
+/* 
+.filter-container input[type="search"] {
+    border: none;
+    height: 40px;
+    border-radius: 4px;
+    width: 100%;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+} */
 
 /* Div post */
 .allthreads {
@@ -497,6 +570,13 @@ h1 a:hover {
     top: 0;
 }
 
+
+footer {
+padding: 20px;
+background-color: var(--light1);
+border-top: 2px solid  lightgrey; 
+text-align: center; 
+}
 /* Footer */
 .footer {
     align-items: center;
@@ -504,13 +584,46 @@ h1 a:hover {
     padding: 10px;
     text-align: center;
     max-width: 100%;
-    background-color: #ddd;
 }
+
+.footer-text {
+font-size: 20px; 
+margin-bottom: 10px; 
+color: black; 
+}
+
+#author-container {
+padding-top: 1px solid lightgrey;
+display: flex;
+justify-content: center;
+gap: 20px;
+margin-top: 20px;
+}
+
+.authors {
+display: inline-block;
+font-size: 14px;
+padding: 10px 20px;
+text-decoration: none;
+color: black;
+background-color: lightgray;
+border-radius: 20px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+transition: background-color 0.3s, transform 0.2s;
+}
+
+.authors:hover {
+background-color: var(--light5);
+color: lightgray;
+transform: scale(1.1);
+}
+
+
 
 /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 800px) {
     input[type="search"] {
-        max-width: 100px;
+        max-width: 100%;
     }
 
     .container {
@@ -523,7 +636,7 @@ h1 a:hover {
 
 @media screen and (max-width: 300px) {
     input[type="search"] {
-        max-width: 100px;
+        max-width: 100%;
     }
 
     .container {
@@ -534,26 +647,91 @@ h1 a:hover {
     }
 }
 
+
 /* Dark Mode */
-.dark-mode {
+.dark-mode,
+.dark-mode .content,
+.dark-mode body,
+.dark-mode .modal-content {
     background-color: var(--dark1);
     color: var(--dark-text);
 }
-
+/* Dark Mode */
 .dark-mode footer {
-    background-color: var(--dark5);
+    background-color: var(--dark1);
+    border-top: 2px solid var(--dark2);
+    }
+    
+    .dark-mode .footer-text {
     color: var(--dark-text);
-}
-
+    }
+    
+    .dark-mode #author-container {
+    border-top-color: var(--dark2);
+    }
+    
+    .dark-mode .authors {
+    color: var(--dark-text);
+    background-color: var(--dark2);
+    box-shadow: 0 4px 6px var(--dark-shadow);
+    }
+    
+    .dark-mode .authors:hover {
+    background-color: var(--dark4);
+    color: var(--dark-text);
+    }
+    
 .dark-mode h1,
-.dark-mode .subtitle {
+.dark-mode .subtitle,
+.dark-mode p {
     color: var(--dark-text);
 }
 
-.dark-mode .topnav {
+.dark-mode .topnav ul {
     color: var(--light5);
+    background-color: var(--dark2);
+
 }
+
+.dark-mode .topnav li a,
+.dark-mode .topnav li button,
+.dark-mode .topnav input[type="button"],
+.dark-mode .topnav input[type="radio"] {
+    background-color: none;
+    color: var(--dark-text);
+
+}
+
+.topnav label {
+    margin-right: 6px;
+    color: var(--light5);
+    vertical-align: middle;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.dark-mode .topnav li a:hover,
+.dark-mode .topnav li button:hover,
+.dark-mode .topnav input[type="button"]:hover {
+    color: var(--dark-text);
+    background-color: var(--dark4);
+}
+
+.dark-mode button {
+    color: var(--dark-text);
+    background-color: var(--dark2);
+}
+
+.dark-mode button:hover {
+    color: var(--dark-text);
+    background-color: var(--dark4);
+}
+
+.dark-mode input[type="reset"]:hover {
+    background-color: var(--dark4);
+    }
+    
 
 .dark-mode a {
-    color: yellow;
+    color: var(--light2);
 }
