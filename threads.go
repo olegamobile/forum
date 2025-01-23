@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"html"
 	"net/http"
@@ -82,7 +81,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 		threadUrl := "/"
 
 		if content != "" {
-			threadResult, err := db.Exec(`INSERT INTO posts (author, authorID, title, content) VALUES (?, ?, ?, ?, ?);`, author, authID, title, content)
+			threadResult, err := db.Exec(`INSERT INTO posts (author, authorID, title, content) VALUES (?, ?, ?, ?);`, author, authID, title, content)
 			if err != nil {
 				fmt.Println("Adding:", err.Error())
 				goToErrorPage("Error adding thread", http.StatusInternalServerError, w, r)
@@ -280,11 +279,12 @@ func dataToThread(thread Thread) (Thread, error) {
 	if err != nil {
 		return thread, err
 	}
-	err = json.Unmarshal([]byte(thread.Categories), &thread.CatsSlice)
-	if err != nil {
-		fmt.Println(err.Error())
-		return thread, err
-	}
+	// err = json.Unmarshal([]byte(thread.Categories),
+	thread.CatsSlice = strings.Fields(thread.Categories)
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// 	return thread, err
+	// }
 
 	thread.Likes, thread.Dislikes = countReactions(thread.ID)
 	thread.BaseID, thread.ContentMaxLen = thread.ID, contentMaxLen
@@ -293,11 +293,12 @@ func dataToThread(thread Thread) (Thread, error) {
 
 func findThread(db *sql.DB, id int) (Thread, error) {
 	var thread Thread
-	selectQueryThread := `SELECT id, author, title, content, created_at, categories FROM posts WHERE id = ?;`
-	err := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created, &thread.Categories)
+	selectQueryThread := `SELECT id, author, title, content, created_at FROM posts WHERE id = ?;`
+	err := db.QueryRow(selectQueryThread, id).Scan(&thread.ID, &thread.Author, &thread.Title, &thread.Content, &thread.Created)
 	if err != nil {
 		return thread, err
 	}
+	thread.Categories = fetchCategories(id)
 
 	thread, err = dataToThread(thread)
 	selectQueryReplies := `SELECT id, base_id, author, content, created_at FROM posts WHERE parent_id = ?;`

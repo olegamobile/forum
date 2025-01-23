@@ -92,8 +92,31 @@ func countReactions(id int) (int, int) {
 	return likes, dislikes
 }
 
-func fetchCategories(postId string) string {
+func fetchCategories(postId int) string {
+	selectQuery := `SELECT categories.name AS category FROM categories JOIN posts_categories ON posts_categories.category_id = categories.id WHERE post_id = ?;`
+	rowsCategories, err := db.Query(selectQuery, postId)
+	if err != nil {
+		fmt.Println("fetchCategories selectQuery failed", err.Error())
+		return ""
+	}
+	defer rowsCategories.Close()
 
+	var category, categories string
+	for rowsCategories.Next() {
+		err = rowsCategories.Scan(&category)
+		if err != nil {
+			fmt.Println("Error reading category:", err.Error())
+			return categories
+		}
+		categories += category + " "
+	}
+	if err := rowsCategories.Err(); err != nil {
+		fmt.Println("Error iterating through rows:", err.Error())
+	}
+	if len(categories) > 0 {
+		categories = categories[:len(categories)-1]
+	}
+	return categories
 }
 
 // fetchThreads
@@ -101,17 +124,16 @@ func fetchThreads(rowsThreads *sql.Rows) ([]Thread, error) {
 	var threads []Thread
 	for rowsThreads.Next() {
 		var th Thread
-		err := rowsThreads.Scan(&th.ID, &th.Author, &th.Title, &th.Content, &th.Created, &th.Categories)
+		err := rowsThreads.Scan(&th.ID, &th.Author, &th.Title, &th.Content, &th.Created)
 		if err != nil {
 			fmt.Println("fetchThreads rows scanning:", err.Error())
 			return nil, err
 		}
-
+		th.Categories = fetchCategories(th.ID)
 		th, err = dataToThread(th)
 		if err != nil {
 			return nil, err
 		}
-
 		threads = append(threads, th)
 	}
 
@@ -124,18 +146,18 @@ func getMultipleSearch(multisearch string, searches []string) string {
 	searchesCount := len(searches)
 	for i := range searches {
 		searches[i] = "'" + searches[i] + "'"
+		// Should we add escaping here ^^^ or somewhere else?
 	}
 
 	if multisearch == "any" {
-		query = fmt.Sprintf(`SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s);`, strings.Join(searches, ", "))
+		query = fmt.Sprintf(`SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at FROM posts p JOIN posts_categories pc ON pc.post_id = p.id JOIN categories cats ON cats.id = pc.category_id WHERE cats.name IN (%s);`, strings.Join(searches, ", "))
 	} else {
-		query = fmt.Sprintf(`SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p, json_each(p.categories) WHERE LOWER(json_each.value) IN (%s) GROUP BY p.id HAVING COUNT(DISTINCT LOWER(json_each.value)) = %v;`, strings.Join(searches, ", "), searchesCount)
+		query = fmt.Sprintf(`SELECT DISTINCT p.id, p.author, p.title, p.content, p.created_at FROM posts p JOIN posts_categories pc ON pc.post_id = p.id JOIN categories cats ON cats.id = pc.category_id WHERE cats.name IN (%s) GROUP BY p.id, p.author, p.title, p.content, p.created_at HAVING COUNT(DISTINCT cats.name) = %v;`, strings.Join(searches, ", "), searchesCount)
 		// HAVING COUNT to have equal number of matching categories to search terms
 	}
 
 	// json_each expands the JSON array in p.categories into rows, allowing filtering by category strings
 	// DISTINCT to avoid duplicates in case of repeated category in post
-
 	return query
 }
 
@@ -164,7 +186,7 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 	multisearch := r.FormValue("multisearch")
 
 	// Find all threads by default
-	selectQuery := `SELECT id, author, title, content, created_at, categories FROM posts WHERE title != "";`
+	selectQuery := `SELECT id, author, title, content, created_at FROM posts WHERE title != "";`
 	rowsThreads, err := db.Query(selectQuery)
 	if err != nil {
 		fmt.Println("findThreads selectQuery failed", err.Error())
@@ -177,11 +199,11 @@ func findThreads(r *http.Request) ([]Thread, string, string, string, error) {
 		if validSes && (r.FormValue("updatesel") == "update" && (selection == "created" || selection == "liked" || selection == "disliked")) {
 			switch selection {
 			case "created":
-				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p WHERE title != "" AND authorID = ?;`
+				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at FROM posts p WHERE title != "" AND authorID = ?;`
 			case "liked":
-				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p JOIN post_reactions pr ON p.id = pr.post_id WHERE p.title != "" AND pr.reaction_type = 'like' AND pr.user_id = ?`
+				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at FROM posts p JOIN post_reactions pr ON p.id = pr.post_id WHERE p.title != "" AND pr.reaction_type = 'like' AND pr.user_id = ?`
 			case "disliked":
-				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at, p.categories FROM posts p JOIN post_reactions pr ON p.id = pr.post_id WHERE p.title != "" AND pr.reaction_type = 'dislike' AND pr.user_id = ?`
+				selectQuery = `SELECT p.id, p.author, p.title, p.content, p.created_at FROM posts p JOIN post_reactions pr ON p.id = pr.post_id WHERE p.title != "" AND pr.reaction_type = 'dislike' AND pr.user_id = ?`
 			}
 
 			rowsThreads, err = db.Query(selectQuery, usId)
