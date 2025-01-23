@@ -68,7 +68,4 @@ document.addEventListener("DOMContentLoaded", function () {
     if (span) span.textContent = iconName; // Update the icon
     filterButton.lastChild.textContent = ` ${text}`; // Update the text after the icon
   }
-
-
-
 });
