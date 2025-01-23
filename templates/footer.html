@@ -1,5 +1,12 @@
 {{define "footer"}}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>footer</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
 <footer>
+    <div class="footer-text">Created in 2025 by</div>
     <div id="author-container">
         <a href="https://github.com/MarkusYPA" class="authors" id="author-1">Markus</a>
         <a href="https://github.com/jeeeeedi" class="authors" id="author-2">Jedi</a>
@@ -7,36 +14,5 @@
         <a href="https://github.com/cmbigk" class="authors" id="author-4">Chan</a>
         <a href="https://github.com/olegamobile" class="authors" id="author-5">Oleg</a>
     </div>
-
-    <style>
-        footer {
-            padding: 20px;
-            background-color: #faf7ef;
-        }
-
-        #author-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .authors {
-            display: inline-block;
-            font-size: 18px;
-            padding: 10px 20px;
-            text-decoration: none;
-            color: black;
-            background-color: #ffbc31;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        .authors:hover {
-            background-color:#0e1342;
-            transform: scale(1.1);
-        }
-    </style>
 </footer>
 {{end}}
