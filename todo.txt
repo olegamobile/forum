@@ -43,7 +43,7 @@ x error page
 
 - category items to (search?) links
 x remove e-mail from login page (combined field for user name or email)
-- redirect to thread page after it's creation (not to the list of threads)
+x redirect to thread page after it's creation (not to the list of threads)
 - categories table?
 
 Frontend (jedi):
