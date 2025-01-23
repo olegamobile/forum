@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Message}}</title>
+    <title>Fika Café {{.Message}}</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -17,11 +17,12 @@
                 <p>leftnav: possible place to put categories</p>
             </div>
             <div class="content" style="text-align: center;">
-                <h2>ERROR {{.ErrorCode}}</h2>
-                <h3>{{.Message}}</h3>
+                <h2 class="red-alert">ERROR {{.ErrorCode}}</h2>
+                <h3 class="red-alert">{{.Message}}</h3>
+                <hr>
                 <p>In the meantime, please enjoy this comic from <a href="https://xkcd.com/">xkcd</a>:</p>
                 <a href="https://xkcd.com/844/"><img src="https://imgs.xkcd.com/comics/good_code.png"
-                        alt="Good Code"></a>
+                        alt="Good Code" style="max-width: 100%; height: auto;"></a>
                 <p></p>
             </div>
             <div class="rightnav">

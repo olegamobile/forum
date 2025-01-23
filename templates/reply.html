@@ -14,7 +14,7 @@
                         <input type="hidden" name="post_type" value="reply">
 
                         {{if .LikedNow}}
-                        <button type="submit" title="Like" class="like-button" style="color: darkgreen">
+                        <button type="submit" title="Like" class="like-button" style="color: rgb(0, 165, 0)">
                             <span class="material-symbols-outlined">thumb_up</span>
                             {{.Likes}}</button>
                         {{else}}
@@ -30,7 +30,7 @@
                         <input type="hidden" name="post_type" value="reply">
 
                         {{if .DislikedNow}}
-                        <button type="submit" title="Dislike" class="dislike-button" style="color:darkred">
+                        <button type="submit" title="Dislike" class="dislike-button" style="color:rgb(227, 10, 21)">
                             <span class="material-symbols-outlined">thumb_down</span>
                             {{.Dislikes}}</button>
                         {{else}}
@@ -65,7 +65,7 @@
             <textarea name="content" rows="4" placeholder="Message" maxlength="{{.ContentMaxLen}}" required></textarea><br>
             <input type="hidden" name="parentId" value="{{.ID}}">
             <input type="hidden" name="baseId" value="{{.BaseID}}">
-            <button type="submit">Submit Reply</button>
+            <button type="submit">Submit reply</button>
             <input type="reset" value="Clear" style="float: right;">
         </form>
     </div>

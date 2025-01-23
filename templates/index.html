@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum</title>
+    <title>grit:lab Fika Café</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 
@@ -14,15 +14,19 @@
 
         <div class="container">
             <div class="leftnav">
-                <p>leftnav: possible place to put categories</p>
+                <!-- <p>leftnav: possible place to put categories</p> -->
             </div>
 
             <div class="content">
+
                 <!-- Form to start a thread -->
                 <div class="newpost">
+
                     {{if .ValidSes}}
                     <!-- Trigger/Open The Modal -->
-                    <button id="modalBtn">Start a new thread</button>
+                    <button id="modalBtn" style="margin: 40px 0px 20px;"><span
+                            class="material-symbols-outlined">add</span>Start a new thread</button>
+
                     <!-- The Modal -->
                     <div class="newpostModal" id="newpostModal">
                         <!-- Modal content -->
@@ -34,48 +38,72 @@
                                 <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}"
                                     required></textarea><br>
                                 <input type="text" name="categories" placeholder="List categories"
-                                    maxlength="{{.CategoriesMaxLen}}" required><br>
+                                    maxlength="{{.CategoriesMaxLen}}" required><br><br>
                                 <input type="reset" value="Clear all" style="float: right;" /> <button
                                     type="submit">Start
                                     thread</button>
                             </form>
                         </div>
                     </div>
+
                     {{else}}
                     <p><a href="/login">Log in</a> to start posting!</p>
-                    <p style="color:darkred;">{{.Message}}</p>
+                    <p class="red-alert">{{.Message}}</p>
                     {{end}}
                 </div>
-                
-                <h2>Threads</h2>
 
-                <!-- Search Filter -->
-                <div class="filter">
-                    <h3>Filter</h3>
+                <!-- Show filter button -->
+                <button class="thread-button" id="filter-button" style="margin: 10px 0px 20px;"><span
+                        class="material-symbols-outlined">filter_alt</span>Show filter</button>
+
+                <!-- Filter -->
+                <div id="show-filter">
                     <form method="POST" action="/">
-                        <button type="submit" name="reset" value="reset" style="float: right;">Reset filter</button>
-                        <input type="search" id="search-categories" name="usersearch" value="{{.Search}}"
-                            placeholder="Search categories" maxlength="200">
-                        <input type="radio" id="any" name="multisearch" value="any" checked>
-                        <label for="any">Match any</label>
-                        <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all"
-                            }}checked="checked" {{end}}>
-                        <label for="all">Match all&nbsp</label>
-                        <button type="submit" name="serchcat" value="search"><span
-                                class="material-symbols-outlined">search</span></button> <br>
-                        {{if .ValidSes}}
-                        <label for="todisplay">Show:</label>
-                        <select name="todisplay" id="todisplay">
-                            <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
-                            <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created</option>
-                            <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
-                            <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked </option>
-                        </select>
-                        <button type="submit" name="updatesel" value="update">Apply filter</button>
-                        {{end}}
+                        <h3>Filter threads</h3>
+                        <div class="filter-container">
+
+                            <!-- First column -->
+                            <div class="col">
+                                <div class="row"><input type="search" id="search-categories" name="usersearch"
+                                        value="{{.Search}}" placeholder="Search categories" maxlength="200"></div>
+                                <div class="row"><input type="radio" id="any" name="multisearch" value="any" checked>
+                                    <label for="any">Match any</label>
+                                    <input type="radio" id="all" name="multisearch" value="all" {{if eq
+                                        .Multisearch "all" }}checked="checked" {{end}}>
+                                    <label for="all">Match all</label>
+                                </div>
+                                <div class="row"><button type="submit" name="searchcat" value="search">Search</button>
+                                </div>
+                            </div>
+
+                            <!-- Second column -->
+                            {{if .ValidSes}}
+                            <div class="col">
+                                <select name="todisplay" id="todisplay">
+                                    <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
+                                    <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created by me
+                                    </option>
+                                    <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked by me</option>
+                                    <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked by me
+                                    </option>
+                                </select>
+                                <button type="submit" name="updatesel" value="update">Show
+                                    selection</button>
+                            </div>
+                            {{end}}
+
+                            <!-- Third column -->
+                            <div class="col">
+                                <p></p>
+                                <button type="submit" name="reset" value="reset" style="float: right;">Reset
+                                    filter</button>
+                            </div>
+                        </div>
                     </form>
                 </div>
-                
+
+                <h2>Threads</h2>
+
                 <!-- Div for each post -->
                 <div class="allthreads">
                     {{range .Threads}}
@@ -102,7 +130,7 @@
             </div>
 
             <div class="rightnav">
-                <p>rightnav: placeholder for rightnav</p>
+                <!-- <p>rightnav: placeholder for rightnav</p> -->
             </div>
 
         </div>
