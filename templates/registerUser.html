@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum Registering</title>
+    <title>Fika Café Registering</title>
     <link rel="stylesheet" href="/static/styles.css">
     <style>
         #username, #email, #pwd {
@@ -28,10 +28,10 @@
                     <input type="email" id="email" name="email" required /><br>
                     <label for="pwd">Password:</label><br>
                     <input type="password" id="pwd" name="password" required /><br>
-                    <div id="error" style="color:darkred; margin-top: 0.5rem;"></div>
+                    <div id="error" class="red-alert" style="margin-top: 0.5rem;"></div>
                     <button type="submit" style="margin-top: 1rem;">Register</button>
                     <p>Already have an account? <a href="/login">Login</a></p>
-                    <p style="color:darkred;">{{.Message2}}</p>
+                    <p class="red-alert">{{.Message2}}</p>
                 </form>
             </div>
             <div class="rightnav">
