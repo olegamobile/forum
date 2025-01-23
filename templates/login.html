@@ -27,10 +27,10 @@
                 <label for="pwd">Password:</label><br>
                 <input type="password" id="pwd" name="password" required /><br>
                 <input type="hidden" name="return_url" value="{{.ReturnURL}}">
-                <div id="error" style="color:darkred; margin-top: 0.5rem;"></div>
+                <div id="error" class="red-alert" style="margin-top: 0.5rem;"></div>
                 <button type="submit" style="margin-top: 1rem;">Login</button>
                 <p>Don't have an account? <a href="/register">Register</a></p>
-                <p style="color:darkred;">{{.Message1}}</p>
+                <p class="red-alert">{{.Message1}}</p>
             </form>
         </div>
         <div class="rightnav">
