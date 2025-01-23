@@ -38,23 +38,37 @@ document.addEventListener("DOMContentLoaded", function () {
     // Check localStorage for the visibility state
     const savedState = localStorage.getItem("filter-visible");
     if (savedState === "true") {
-      filterDiv.style.display = "block";
+      filterDiv.classList.add("visible");
+      updateButton(filterButton, "filter_alt_off", "Hide filter");
     } else {
-      filterDiv.style.display = "none";
+      filterDiv.classList.remove("visible");
+      updateButton(filterButton, "filter_alt", "Show filter");
     }
   }
 
   if (filterButton && filterDiv) {
     filterButton.addEventListener("click", function () {
-      
-      // Toggle the display of the target div
-      if (filterDiv.style.display === "none" || filterDiv.style.display === "") {
-        filterDiv.style.display = "block";
-        localStorage.setItem("filter-visible", "true");
-      } else {
-        filterDiv.style.display = "none";
+
+      // Toggle the visibility class
+      if (filterDiv.classList.contains("visible")) {
+        filterDiv.classList.remove("visible");
         localStorage.setItem("filter-visible", "false");
+        updateButton(filterButton, "filter_alt", "Show filter");
+      } else {
+        filterDiv.classList.add("visible");
+        localStorage.setItem("filter-visible", "true");
+        updateButton(filterButton, "filter_alt_off", "Hide filter");
       }
     });
   }
+
+  // Function to update button content
+  function updateButton(button, iconName, text) {
+    const span = button.querySelector("span.material-symbols-outlined"); // Find the icon span
+    if (span) span.textContent = iconName; // Update the icon
+    filterButton.lastChild.textContent = ` ${text}`; // Update the text after the icon
+  }
+
+
+
 });
