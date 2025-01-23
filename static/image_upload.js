@@ -3,12 +3,12 @@ const maxTotalSize = 20 * 1024 * 1024; // 20 MB
 let totalSize = 0;
 
 function updateFileList() {
-    alert('Alert');
-    console.log("Function called!");
   const input = document.getElementById("files");
   const warning = document.getElementById("warning");
   const submitButton = document.getElementById("submitButton");
   const previewContainer = document.getElementById("previewContainer");
+  previewContainer.style.display = "block"
+  warning.style.display = "block"
 
   for (const file of input.files) {
     if (selectedFiles.has(file.name)) continue;
@@ -41,7 +41,7 @@ function updateFileList() {
       size.classList.add("image-info-size");
 
       const deleteButton = document.createElement("button");
-      deleteButton.textContent = "x";
+      deleteButton.textContent = "×";
       deleteButton.classList.add("delete-button");
       deleteButton.onclick = () => deleteFile(file.name, previewDiv);
 
@@ -60,7 +60,8 @@ function updateFileList() {
   input.value = "";
 
   if (totalSize > maxTotalSize) {
-    warning.textContent = "Total file size exceeds 20 MB. Please delete some files.";
+    showElement("warning");
+    warning.textContent = "Total file size exceeds 20 MB. Please remove some files.";
     submitButton.disabled = true;
   } else {
     warning.textContent = "";
@@ -79,6 +80,7 @@ function deleteFile(fileName, previewDiv) {
   const submitButton = document.getElementById("submitButton");
 
   if (totalSize > maxTotalSize) {
+    showElement("warning");
     warning.textContent = "Total file size exceeds 20 MB. Please delete some files.";
     submitButton.disabled = true;
   } else {

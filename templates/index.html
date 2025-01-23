@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forum</title>
     <link rel="stylesheet" href="/static/styles.css">
-    <link rel="image_upload_style" href="/statis/image_upload_style.css">
+    <link rel="stylesheet" href="/static/image_upload_style.css">
 </head>
 
 <body>
@@ -36,15 +36,14 @@
                                     required></textarea><br>
                                 <input type="text" name="categories" placeholder="List categories"
                                     maxlength="{{.CategoriesMaxLen}}" required><br>
-                                    <p>Select image files. Max size 20 MB.</p>
+
+                                    <label for="files" class="custom-file-button">Add Image</label>
+                                    <button type="submit" id="submitButton" style="float: right;" >Start thread</button>
+                                    <input type="reset" value="Clear all" style="float: right;" />
                                     <input type="file" id="files" name="files" multiple accept="image/*" onchange="updateFileList()">
-                                    <br><br>
                                     <p id="warning" class="warning"></p>
                                     <div id="previewContainer" class="preview-container"></div>
 
-                                <input type="reset" value="Clear all" style="float: right;" /> <button
-                                    type="submit" id="submitButton">Start
-                                    thread</button>
                             </form>
                         </div>
                     </div>

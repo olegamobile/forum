@@ -1,13 +1,15 @@
-.warning {
+  .warning {
     color: red;
     font-weight: bold;
+    display: none;
   }
   
   .preview-container {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
-    margin-top: 15px;
+    margin: 15px 0 15px 0;
+    display: none;
   }
   
   .preview-container div {
@@ -35,10 +37,10 @@
   
   .image-info-box {
     text-align: center;
-    margin-top: 5px;
   }
   
   .image-info-title {
+    margin: 10px 0 1px 0 !important;
     font-weight: bold;
     font-size: 14px;
     overflow: hidden;
@@ -47,19 +49,40 @@
   }
   
   .image-info-size {
+    margin: 3px 0 3px 0 !important;
     color: gray;
     font-size: 12px;
   }
 
   .delete-button {
-    color: red;
-    font-size: 18px;
+    color: #aaaaaa !important;
+    font-size: 18px !important;
     font-weight: bold;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    padding: 0px !important;
+    margin: 0px !important;
+    flex: 2;
+    font-optical-sizing: auto;
+  }
+
+  .custom-file-button {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
     background: none;
     border: none;
+    outline: none;
     cursor: pointer;
+    background-color: #ffe4ac;
+    color: var(--light5);
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
   }
   
-  .delete-button:hover {
-    color: darkred;
+  /* Hide the file input */
+  input[type="file"] {
+    display: none;
   }
+
+  
