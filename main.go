@@ -54,8 +54,9 @@ func setHandlers() {
 	http.Handle("/static/styles.css", http.StripPrefix("/static/", fileServer))
 	http.Handle("/static/ui-functions.js", http.StripPrefix("/static/", fileServer))
 	http.Handle("/static/home-functions.js", http.StripPrefix("/static/", fileServer))
-
-	http.Handle("/favicon.ico", http.NotFoundHandler()) //accessing favicon will cause 404
+	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "static/favicon.ico")
+	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		indexHandler(w, r, "")
@@ -102,5 +103,5 @@ func main() {
 
 	// Start the server
 	fmt.Println("Server running on http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	log.Fatal(http.ListenAndServe(":8080", nil)) // Logs the error and exits.
 }

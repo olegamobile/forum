@@ -48,13 +48,14 @@ body {
 .wrapper {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Fill the viewport for the sticky footer*/
+    min-height: 100vh;
+    /* Fill the viewport for the sticky footer*/
 }
 
 .container {
     display: -webkit-flex;
     display: flex;
-    flex : 1;
+    flex: 1;
 }
 
 .leftnav {
@@ -99,6 +100,14 @@ input {
     font-size: clamp(12px, 1vw, 18px);
 }
 
+.red-alert {
+    color:rgb(227, 10, 21);
+}
+
+.dark-mode .red-alert {
+    color:rgb(227, 10, 21);
+}
+
 button {
     display: inline-block;
     text-align: center;
@@ -113,6 +122,24 @@ button {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+}
+
+button:hover {
+    background-color: var(--light5);
+    color: var(--light1);
+}
+
+button.dislike-button,
+button.like-button,
+.dark-mode button.dislike-button,
+.dark-mode button.like-button {
+    background-color: transparent;
+}
+
+button:hover.dislike-button,
+button:hover.like-button {
+    background-color: #ffbc31;
+    color: var(--light5);
 }
 
 .newpostModal input[type="text"],
@@ -130,8 +157,11 @@ textarea {
     margin-bottom: 4px;
 }
 
-.newpost button {
-    display: inline-block;
+.newpost button,
+.thread-button {
+    /* display: inline-block; */
+    display: inline-flex;
+    align-items: center;
     text-align: center;
     text-decoration: none;
     background: none;
@@ -144,6 +174,9 @@ textarea {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
+
+    gap: 0.5rem;
+    /* Add spacing between the icon and text */
 }
 
 input[type="reset"] {
@@ -164,7 +197,8 @@ input[type="reset"] {
 }
 
 .newpost button:hover,
-input[type="reset"]:hover {
+input[type="reset"]:hover,
+.thread-button:hover {
     color: var(--light1);
     background-color: var(--light5);
 }
@@ -235,39 +269,78 @@ input[type="reset"]:hover {
     cursor: pointer;
 }
 
-/* Filter style */
-.filter select {
-    text-decoration: none;
-    border: none;
-    border-radius: 4px;
-    margin-top: 10px;
-    padding: 10px;
-    top: 0;
-    font-family: "Space Grotesk", serif;
+/* Filter layout flexbox */
+
+#show-filter {
+    max-height: 0;
+    transition: max-height 0.5s ease, margin 0.5s ease, opacity 1.0s ease;
+    margin-bottom: 0px;
+    overflow: hidden;
 }
 
-.filter button,
-.filter input[type="button"] {
-    display: inline-block;
-    text-align: center;
-    text-decoration: none;
-    background: none;
+#show-filter.visible {
+    max-height: 400px;
+    /* Anything larger than expected: animation doesn't work with 'auto' */
+    margin-bottom: 40px;
+}
+
+.filter-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    /* Space between elements */
+    width: 100%;
+    padding: 10px;
+    border: 1px solid lightgrey;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    /* Space between columns */
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+}
+
+.filter-container select, .filter-container input[type="search"] {
     border: none;
-    outline: none;
-    cursor: pointer;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: "Space Grotesk", serif;
+    width: 100%;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.filter-container button,
+.filter-container input[type="button"] {
     background-color: var(--light2);
     color: var(--light5);
-    padding: 10px;
-    border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
 }
 
-.filter button:hover,
-.filter input[type="button"]:hover {
+.filter-container button:hover,
+.filter-container input[type="button"]:hover {
     background-color: var(--light5);
     color: var(--light1);
 }
+/* 
+.filter-container input[type="search"] {
+    border: none;
+    height: 40px;
+    border-radius: 4px;
+    width: 100%;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+} */
 
 /* Div post */
 .allthreads {
@@ -486,6 +559,7 @@ h1 a:hover {
     border-radius: 4px;
 }
 
+<<<<<<< HEAD
 .filter input[type="search"] {
     text-decoration: none;
     border: none;
@@ -503,6 +577,15 @@ padding: 20px;
 background-color: var(--light1);
 border-top: 2px solid  lightgrey; 
 text-align: center; 
+=======
+/* Footer */
+.footer {
+    align-items: center;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+    max-width: 100%;
+>>>>>>> 0d11c2965274505cdc1622d80355439ff3b7a962
 }
 
 .footer-text {
@@ -542,7 +625,7 @@ transform: scale(1.1);
 /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 800px) {
     input[type="search"] {
-        max-width: 100px;
+        max-width: 100%;
     }
 
     .container {
@@ -555,7 +638,7 @@ transform: scale(1.1);
 
 @media screen and (max-width: 300px) {
     input[type="search"] {
-        max-width: 100px;
+        max-width: 100%;
     }
 
     .container {
@@ -567,8 +650,11 @@ transform: scale(1.1);
 }
 
 /* Dark Mode */
+<<<<<<< HEAD
 
 /* Dark Mode */
+=======
+>>>>>>> 0d11c2965274505cdc1622d80355439ff3b7a962
 .dark-mode,
 .dark-mode .content,
 .dark-mode body,
