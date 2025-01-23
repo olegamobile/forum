@@ -48,7 +48,7 @@
 
                     {{else}}
                     <p><a href="/login">Log in</a> to start posting!</p>
-                    <p style="color:darkred;">{{.Message}}</p>
+                    <p class="red-alert">{{.Message}}</p>
                     {{end}}
                 </div>
 
@@ -81,10 +81,10 @@
                             <div class="col">
                                 <select name="todisplay" id="todisplay">
                                     <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
-                                    <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created
+                                    <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created by me
                                     </option>
-                                    <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked</option>
-                                    <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked
+                                    <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked by me</option>
+                                    <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked by me
                                     </option>
                                 </select>
                                 <button type="submit" name="updatesel" value="update">Show
