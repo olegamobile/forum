@@ -68,21 +68,21 @@ func makeTables() {
 		return
 	}
 
-// Create reactions table if it doesn't exist
-createCategoriesTableQuery := `
+	// Create categories table if it doesn't exist
+	createCategoriesTableQuery := `
 CREATE TABLE IF NOT EXISTS categories (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	name TEXT NOT NULL,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE (name)  -- Prevents duplicate categories
 );`
-if _, err := db.Exec(createCategoriesTableQuery); err != nil {
-	fmt.Println("Error creating reactions table:", err)
-	return
-}
+	if _, err := db.Exec(createCategoriesTableQuery); err != nil {
+		fmt.Println("Error creating reactions table:", err)
+		return
+	}
 
-// Create reactions table if it doesn't exist
-createPostsCategoriesTableQuery := `
+	// Create posts_categories table if it doesn't exist
+	createPostsCategoriesTableQuery := `
 CREATE TABLE IF NOT EXISTS posts_categories (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	post_id INTEGER NOT NULL,
@@ -92,9 +92,26 @@ CREATE TABLE IF NOT EXISTS posts_categories (
 	FOREIGN KEY (category_id) REFERENCES categories(id),
 	UNIQUE (post_id, category_id) 
 );`
-if _, err := db.Exec(createPostsCategoriesTableQuery); err != nil {
-	fmt.Println("Error creating reactions table:", err)
-	return
-}
+	if _, err := db.Exec(createPostsCategoriesTableQuery); err != nil {
+		fmt.Println("Error creating reactions table:", err)
+		return
+	}
+
+	// Create images table if it doesn't exist
+	createImagesTableQuery := `
+CREATE TABLE IF NOT EXISTS images (
+	id TEXT PRIMARY KEY,  -- includes file extension (like [UUID].jpg)
+	post_id INTEGER DEFAULT NULL,  -- if NOT NULL it is a post image, 
+	user_id INTEGER NOT NULL,
+	original_name TEXT,
+	file_size INT,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (post_id) REFERENCES posts(id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);`
+	if _, err := db.Exec(createImagesTableQuery); err != nil {
+		fmt.Println("Error creating reactions table:", err)
+		return
+	}
 
 }
