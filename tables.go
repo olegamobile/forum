@@ -68,30 +68,30 @@ func makeTables() {
 		return
 	}
 
-	// Create categories table if it doesn't exist
+	// Create reactions table if it doesn't exist
 	createCategoriesTableQuery := `
-CREATE TABLE IF NOT EXISTS categories (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	name TEXT NOT NULL,
-	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	UNIQUE (name)  -- Prevents duplicate categories
-);`
+	CREATE TABLE IF NOT EXISTS categories (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		UNIQUE (name)  -- Prevents duplicate categories
+	);`
 	if _, err := db.Exec(createCategoriesTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
 		return
 	}
 
-	// Create posts_categories table if it doesn't exist
+	// Create reactions table if it doesn't exist
 	createPostsCategoriesTableQuery := `
-CREATE TABLE IF NOT EXISTS posts_categories (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	post_id INTEGER NOT NULL,
-	category_id INTEGER NOT NULL,
-	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (post_id) REFERENCES posts(id),
-	FOREIGN KEY (category_id) REFERENCES categories(id),
-	UNIQUE (post_id, category_id) 
-);`
+	CREATE TABLE IF NOT EXISTS posts_categories (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		post_id INTEGER NOT NULL,
+		category_id INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (post_id) REFERENCES posts(id),
+		FOREIGN KEY (category_id) REFERENCES categories(id),
+		UNIQUE (post_id, category_id) 
+	);`
 	if _, err := db.Exec(createPostsCategoriesTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
 		return
