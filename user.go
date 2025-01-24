@@ -230,7 +230,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 
 	var loginData loginData
 	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
-	loginData.ReturnURL = returnUrl
+	loginData.ReturnURL, loginData.LoginURL = returnUrl, "/login?return_url="+returnUrl
 
 	if loginData.ValidSes {
 		fmt.Println(loginData.UsrNm + " trying to log in while already logged-in")
@@ -243,7 +243,6 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	if !nameOremailExists(db, nameOremail) {
 		fmt.Println("User not found")
 		loginData.Message1 = "Invalid username/email or password"
-		loginData.ReturnURL = "/login"
 		logTmpl.Execute(w, loginData)
 		return
 	}
@@ -340,5 +339,6 @@ func logInHandler(w http.ResponseWriter, r *http.Request) {
 	if loginData.ReturnURL == "" {
 		loginData.ReturnURL = "/"
 	}
+
 	logTmpl.Execute(w, loginData)
 }
