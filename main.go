@@ -50,12 +50,14 @@ func initTemplates() {
 }
 
 func setHandlers() {
-	fileServer := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/styles.css", http.StripPrefix("/static/", fileServer))
-	http.Handle("/static/ui-functions.js", http.StripPrefix("/static/", fileServer))
-	http.Handle("/static/home-functions.js", http.StripPrefix("/static/", fileServer))
-	http.Handle("/static/image_upload_style.css", http.StripPrefix("/static/", fileServer))
-	http.Handle("/static/image_upload.js", http.StripPrefix("/static/", fileServer))
+	fileServer := http.FileServer(http.Dir("./"))
+	http.Handle("/static/css/styles.css", fileServer)
+	http.Handle("/static/css/darkmode.css", fileServer)
+	http.Handle("/static/css/headerfooter.css", fileServer)
+	http.Handle("/static/css/image_upload_style.css", fileServer)
+	http.Handle("/static/home-functions.js", fileServer)
+	http.Handle("/static/ui-functions.js", fileServer)
+	http.Handle("/static/image_upload.js", fileServer)
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/favicon.ico")
 	})
