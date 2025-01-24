@@ -97,4 +97,21 @@ func makeTables() {
 		return
 	}
 
+	// Create images table if it doesn't exist
+	createImagesTableQuery := `
+CREATE TABLE IF NOT EXISTS images (
+	id TEXT PRIMARY KEY,  -- includes file extension (like [UUID].jpg)
+	post_id INTEGER DEFAULT NULL,  -- if NOT NULL it is a post image, 
+	user_id INTEGER NOT NULL,
+	original_name TEXT,
+	file_size INT,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (post_id) REFERENCES posts(id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);`
+	if _, err := db.Exec(createImagesTableQuery); err != nil {
+		fmt.Println("Error creating reactions table:", err)
+		return
+	}
+
 }

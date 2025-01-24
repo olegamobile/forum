@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fika Café Registering</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <style>
-        #username, #email, #pwd {
+        #username,
+        #email,
+        #pwd {
             width: 50ch;
         }
     </style>
@@ -38,8 +41,9 @@
                 <p>rightnav: placeholder for rightnav</p>
             </div>
         </div>
+        {{ template "footer" .}}
     </div>
-    
+
     <script src="/static/ui-functions.js"></script>
     <script>
         const registerForm = document.getElementById("registerForm");
@@ -122,4 +126,5 @@
         );
     </script>
 </body>
+
 </html>

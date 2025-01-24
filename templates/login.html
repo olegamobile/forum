@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fika Café Log-In</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <style>
-        #username-or-email, #pwd {
+        #username-or-email,
+        #pwd {
             width: 50ch;
         }
     </style>
@@ -14,31 +16,32 @@
 
 <body>
     <div class="wrapper">
-    {{ template "header" . }}
-    <div class="container">
-        <div class="leftnav">
-            <p>leftnav: possible place to put categories</p>
+        {{ template "header" . }}
+        <div class="container">
+            <div class="leftnav">
+                <p>leftnav: possible place to put categories</p>
+            </div>
+            <div class="content">
+                <h2>Log in with your username or email</h2>
+                <form method="POST" action="/loguserin" id="loginForm">
+                    <label for="username-or-email">Username or Email:</label><br>
+                    <input type="text" id="username-or-email" name="username-or-email" required /><br>
+                    <label for="pwd">Password:</label><br>
+                    <input type="password" id="pwd" name="password" required /><br>
+                    <input type="hidden" name="return_url" value="{{.ReturnURL}}">
+                    <div id="error" class="red-alert" style="margin-top: 0.5rem;"></div>
+                    <button type="submit" style="margin-top: 1rem;">Login</button>
+                    <p>Don't have an account? <a href="/register">Register</a></p>
+                    <p class="red-alert">{{.Message1}}</p>
+                </form>
+            </div>
+            <div class="rightnav">
+                <p>rightnav: placeholder for rightnav</p>
+            </div>
         </div>
-        <div class="content">
-            <h2>Log in with your username or email</h2>
-            <form method="POST" action="/loguserin" id="loginForm">
-                <label for="username-or-email">Username or Email:</label><br>
-                <input type="text" id="username-or-email" name="username-or-email" required/><br>
-                <label for="pwd">Password:</label><br>
-                <input type="password" id="pwd" name="password" required /><br>
-                <input type="hidden" name="return_url" value="{{.ReturnURL}}">
-                <div id="error" class="red-alert" style="margin-top: 0.5rem;"></div>
-                <button type="submit" style="margin-top: 1rem;">Login</button>
-                <p>Don't have an account? <a href="/register">Register</a></p>
-                <p class="red-alert">{{.Message1}}</p>
-            </form>
-        </div>
-        <div class="rightnav">
-            <p>rightnav: placeholder for rightnav</p>
-        </div>
+        {{ template "footer" .}}
     </div>
-    </div>
-    
+
     <script src="/static/ui-functions.js"></script>
     <script>
         const loginForm = document.getElementById("loginForm");
@@ -82,4 +85,5 @@
         });
     </script>
 </body>
+
 </html>
