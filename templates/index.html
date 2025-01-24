@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>grit:lab Fika Café</title>
     <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/categories.css">
 </head>
 
 <body>
@@ -68,8 +69,7 @@
                                         value="{{.Search}}" placeholder="Search categories" maxlength="200"></div>
                                 <div class="row"><input type="radio" id="any" name="multisearch" value="any" checked>
                                     <label for="any">Match any</label>
-                                    <input type="radio" id="all" name="multisearch" value="all" {{if eq
-                                        .Multisearch "all" }}checked="checked" {{end}}>
+                                    <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all" }}checked="checked" {{end}}>
                                     <label for="all">Match all</label>
                                 </div>
                                 <div class="row"><button type="submit" name="searchcat" value="search">Search</button>
@@ -107,23 +107,17 @@
                 <!-- Div for each post -->
                 <div class="allthreads">
                     {{range .Threads}}
-                    <div class="threadbox">
-                        <ul>
-                            <li style="float: right;"><span
-                                    class="material-symbols-outlined">comment</span>{{.RepliesN}}
-                            </li>
-                            <li>
-                                <h3><a href="/thread/{{.ID}}">{{.Title}}</a></h3>
-                            </li>
-                            <li><span class="material-symbols-outlined">person</span><b>{{.Author}}</b> posted on
-                                {{.CreatedDay}}
-                                {{.CreatedTime}}</li>
-                            <li class="content-line"><span class="material-symbols-outlined">chat_bubble</span><span
-                                    class="truncate">{{.Content }}</span></li>
-                            <li class="categories"><span class="material-symbols-outlined">category</span>{{ range
-                                .CatsSlice }}{{.}} {{ end }}
-                            </li>
-                        </ul>
+                        <div class="thread">
+                            <div style="float: right;"><a href="/thread/{{.ID}}"><span class="material-symbols-outlined">comment</span>{{.RepliesN}}</a></div>
+                            <div class="thread-title"><a href="/thread/{{.ID}}">{{.Title}}</a></div>
+                            <div class="thread-meta"><span class="material-symbols-outlined">person</span> {{.Author}} posted on {{.CreatedDay}} {{.CreatedTime}}</div>
+                            <div class="thread-content"> <span class="truncate">{{.Content }}</span></div>
+                            <form method="POST" action="/">
+                                <input type="hidden" name="searchcat" value="search">
+                                <div class="tags"><span class="material-symbols-outlined">category</span>
+                                    {{ range .CatsSlice }}<button type="submit" class="tag" name="usersearch" value="{{.}}">{{.}}</button>{{ end }}
+                                </div>
+                            </form>
                     </div>
                     {{end}}
                 </div>
