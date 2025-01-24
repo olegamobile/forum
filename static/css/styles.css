@@ -15,6 +15,7 @@
     --light1: #faf7ef;
     /* gritlab bg */
     --light2: #ffbc31;
+    --light6: #ffe4ac;
     /* gritlab yellow */
     --light3: #ea5f69;
     /* gritlab red */
@@ -26,6 +27,7 @@
     /* dark mode */
     --dark1: rgb(60, 60, 60);
     --dark2: rgb(40, 40, 40);
+    --dark6: rgb(40, 40, 40);
     --dark3: rgb(20, 20, 20);
     --dark4: black;
     --dark-shadow: rgba(255, 255, 255, 0.05);
@@ -90,6 +92,13 @@ body {
     font-size: clamp(12px, 1vw, 18px);
     padding: 2rem clamp(20px, 3, 32px);
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.rows {
+    flex-direction: row;
 }
 
 input {
@@ -166,10 +175,27 @@ button:hover.like-button {
     border-radius: 4px;
     font-family: "Space Grotesk", serif;
     font-size: clamp(12px, 1vw, 18px);
-    margin: 10px 0;
-
+    margin: 10px 0 0;
+    float: right;
     gap: 0.5rem;
     /* Add spacing between the icon and text */
+}
+
+.filter-button {
+    background-color: var(--light6) !important;
+}
+
+.fl-left {
+    float: left;
+    display: block;
+    flex: 1;
+}
+
+.fl-right {
+    float: right;
+    display: block;
+    flex: 1;
+    
 }
 
 input[type="reset"] {
@@ -203,14 +229,6 @@ input[type="reset"]:hover,
     align-items: center;
     /* Center vertically */
 }
-
-/* .truncate {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    display: block;
-    max-width: 100%;
-} */
 
 .truncate {
     display: -webkit-box;
@@ -300,7 +318,7 @@ textarea {
 #show-filter.visible {
     max-height: 400px;
     /* Anything larger than expected: animation doesn't work with 'auto' */
-    margin-bottom: 40px;
+    /* margin-bottom: 40px; */
 }
 
 .filter-container {
@@ -312,6 +330,7 @@ textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid lightgrey;
+    border-radius: 10px;
 }
 
 .row {
@@ -355,7 +374,7 @@ textarea {
 
 /* Div post */
 .allthreads {
-    margin-top: 10px;
+    /* margin-top: 10px; */
 }
 
 .allthreads ul,
@@ -408,7 +427,7 @@ ul {
 
 /* Link styles */
 a {
-    /* color: #007bff; */
+    color: var(--light4);
     text-decoration: none;
 }
 
