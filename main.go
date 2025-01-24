@@ -55,6 +55,7 @@ func setHandlers() {
 	http.Handle("/static/css/darkmode.css", fileServer)
 	http.Handle("/static/css/headerfooter.css", fileServer)
 	http.Handle("/static/css/image_upload_style.css", fileServer)
+	http.Handle("/static/css/categories.css", fileServer)
 	http.Handle("/static/home-functions.js", fileServer)
 	http.Handle("/static/ui-functions.js", fileServer)
 	http.Handle("/static/image_upload.js", fileServer)
