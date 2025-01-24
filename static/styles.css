@@ -376,6 +376,7 @@ input[type="reset"]:hover,
     border-bottom: 1px solid lightgrey;
     padding: 8px;
     margin: 4px;
+    margin-bottom: 10px;
 }
 
 .thread .material-symbols-outlined {
