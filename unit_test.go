@@ -73,7 +73,7 @@ func TestSaveSession(t *testing.T) {
 		t.Fatalf("failed to create sessions table: %v", err)
 	}
 
-	err = saveSession(db, "userID", "username", "sessionToken", time.Now())
+	err = saveSession("userID", "username", "sessionToken", time.Now())
 	if err != nil {
 		t.Errorf("saveSession returned error: %v", err)
 	}
