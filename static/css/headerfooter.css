@@ -1,0 +1,171 @@
+/* Header */
+.header {
+    position: sticky;
+    align-items: center;
+    margin: 0;
+    margin-bottom: 10px;
+    padding: 0;
+    text-align: center;
+    max-width: 100%;
+}
+
+h1 {
+    font-family: "Major Mono Display", serif;
+    font-weight: 700;
+    font-style: normal;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 0%;
+    text-align: center;
+    font-size: clamp(1.5rem, 5vw, 3rem);
+}
+
+h1 a {
+    color: black;
+}
+
+h1 a:hover {
+    color: rgb(59, 80, 109);
+    text-decoration: none;
+    /* No underline */
+}
+
+.subtitle {
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 0%;
+    text-align: center;
+    font-size: clamp(.3rem, 3vw, 1rem);
+}
+
+
+.topnav {
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    vertical-align: middle;
+}
+
+.topnav ul {
+    list-style-type: none;
+    grid-auto-flow: column;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    background-color: var(--light2);
+    position: sticky;
+    max-height: fit-content;
+}
+
+.topnav li {
+    float: left;
+    display: flex;
+    /* Ensures child elements align uniformly */
+    justify-content: center;
+    align-items: center;
+}
+
+.topnav li a,
+.topnav li button,
+.topnav input[type="button"],
+.topnav input[type="radio"] {
+    display: inline-block;
+    text-decoration: none;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    background-color: none;
+    margin: 6px;
+    padding: 10px;
+    color: var(--light5);
+    vertical-align: middle;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.topnav label {
+    margin-right: 6px;
+    color: var(--light5);
+    vertical-align: middle;
+    font-family: "Space Grotesk", serif;
+    font-size: clamp(12px, 1vw, 18px);
+}
+
+.topnav li a:hover,
+.topnav li button:hover,
+.topnav input[type="button"]:hover {
+    color: var(--light1);
+    background-color: var(--light5);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+
+/* Footer */
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+
+    padding: 2rem;
+    max-width: 100%;
+    border-top: 1px solid lightgrey;
+    text-align: center;
+}
+
+.footer-text {
+    text-align: center;
+    font-size: clamp(10px, 0.75vw, 12px);
+    margin-bottom: 10px;
+    color: var(--light5);
+}
+
+.footer ul {
+    list-style-type: none;
+    grid-auto-flow: column;
+    overflow: hidden;
+    position: sticky;
+    max-height: fit-content;
+}
+
+.footer li {
+    float: left;
+    display: flex;
+    /* Ensures child elements align uniformly */
+    justify-content: center;
+    align-items: center;
+}
+
+#author-container {
+    padding-top: 1px solid lightgrey;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.authors {
+    display: inline-block;
+    font-size: clamp(12px, 0.75vw, 14px);
+    margin: 10px;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: var(--light5);
+    background-color: lightgray;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.dark-mode .authors {
+    box-shadow: var(--dark-shadow);
+}
+
+.authors:hover {
+    text-decoration: none;
+    background-color: var(--light5);
+    color: lightgray;
+    transform: scale(1.1);
+}

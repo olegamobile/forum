@@ -1,0 +1,86 @@
+/* Dark Mode */
+.dark-mode,
+.dark-mode .content,
+.dark-mode body,
+.dark-mode .modal-content {
+    background-color: var(--dark1);
+    color: var(--dark-text);
+}
+
+.dark-mode footer {
+    background-color: var(--dark1);
+    border-top: 2px solid var(--dark2);
+}
+
+.dark-mode .footer-text {
+    color: var(--dark-text);
+}
+
+.dark-mode #author-container {
+    border-top-color: var(--dark2);
+}
+
+.dark-mode .authors {
+    color: var(--dark-text);
+    background-color: var(--dark2);
+    box-shadow: 0 4px 6px var(--dark-shadow);
+}
+
+.dark-mode .authors:hover {
+    background-color: var(--dark4);
+    color: var(--dark-text);
+}
+
+.dark-mode h1,
+.dark-mode .subtitle,
+.dark-mode p {
+    color: var(--dark-text);
+}
+
+.dark-mode .topnav ul {
+    color: var(--light5);
+    background-color: var(--dark2);
+
+}
+
+.dark-mode .topnav li a,
+.dark-mode .topnav li button,
+.dark-mode .topnav input[type="button"],
+.dark-mode .topnav input[type="radio"] {
+    background-color: none;
+    color: var(--dark-text);
+
+}
+
+
+.dark-mode .topnav li a:hover,
+.dark-mode .topnav li button:hover,
+.dark-mode .topnav input[type="button"]:hover {
+    color: var(--dark-text);
+    background-color: var(--dark4);
+}
+
+.dark-mode button, .dark-mode button.modalBtn {
+    color: var(--dark-text);
+    background-color: var(--dark2);
+}
+
+.dark-mode button:hover, .dark-mode button.modalBtn:hover, .dark-mode input[type="reset"]:hover, .dark-mode button.dislike-button:hover,
+.dark-mode button.like-button:hover  {
+    color: var(--dark-text);
+    background-color: var(--dark4);
+}
+
+.dark-mode a {
+    color: var(--light2);
+}
+
+.dark-mode button.dislike-button,
+.dark-mode button.like-button {
+    background-color: transparent;
+}
+
+
+.dark-mode .red-alert {
+    color: rgb(227, 10, 21);
+}
