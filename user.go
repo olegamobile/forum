@@ -219,6 +219,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodPost {
+		fmt.Println("Bad method on logUserInHandler:", r.Method)
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
@@ -229,7 +230,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 
 	var loginData loginData
 	loginData.UsrId, loginData.UsrNm, loginData.ValidSes = validateSession(r)
-	loginData.ReturnURL = returnUrl
+	loginData.ReturnURL, loginData.LoginURL = returnUrl, "/login?return_url="+returnUrl
 
 	if loginData.ValidSes {
 		fmt.Println(loginData.UsrNm + " trying to log in while already logged-in")
@@ -327,6 +328,7 @@ func logInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodGet {
+		fmt.Println("Disallowed method at logInHandler:", r.Method)
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
@@ -337,5 +339,6 @@ func logInHandler(w http.ResponseWriter, r *http.Request) {
 	if loginData.ReturnURL == "" {
 		loginData.ReturnURL = "/"
 	}
+
 	logTmpl.Execute(w, loginData)
 }
