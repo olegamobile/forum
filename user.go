@@ -219,6 +219,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodPost {
+		fmt.Println("Bad method on logUserInHandler:", r.Method)
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
@@ -242,6 +243,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	if !nameOremailExists(db, nameOremail) {
 		fmt.Println("User not found")
 		loginData.Message1 = "Invalid username/email or password"
+		loginData.ReturnURL = "/login"
 		logTmpl.Execute(w, loginData)
 		return
 	}
@@ -327,6 +329,7 @@ func logInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodGet {
+		fmt.Println("Disallowed method at logInHandler:", r.Method)
 		goToErrorPage("Method not allowed", http.StatusMethodNotAllowed, w, r)
 		return
 	}
