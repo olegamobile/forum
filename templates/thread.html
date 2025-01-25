@@ -31,69 +31,74 @@
 
         {{ template "header" . }}
 
-        <div class="container">
+        <div class="container">            
             <div class="leftnav">
                 <!-- <p>leftnav: possible place to put categories</p> -->
             </div>
-            <!-- Thread starter -->
+
+            <!-- Middle section -->
             <div class="content">
 
-                <div class="thread">
-                    <ul>
+                <!-- Thread starter -->
+                <div> <!-- this stretches the "thread" div to full width on a short messages -->
+                    <div class="thread">
+                        <ul>
+                            {{if .ValidSes}}
+                            <li class="like-dislike-cell" style="float: right;">
+                                <form action="/like" method="POST" class="like-form">
+                                    <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
+                                    <input type="hidden" name="post_id" value="{{.Thread.ID}}">
+                                    <input type="hidden" name="post_type" value="thread">
 
-                        {{if .ValidSes}}
-                        <li class="like-dislike-cell" style="float: right;">
-                            <form action="/like" method="POST" class="like-form">
-                                <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
-                                <input type="hidden" name="post_id" value="{{.Thread.ID}}">
-                                <input type="hidden" name="post_type" value="thread">
+                                    {{if .Thread.LikedNow}}
+                                    <button type="submit" title="Like" class="like-button"
+                                        style="color: rgb(0, 165, 0);">
+                                        <span class="material-symbols-outlined">thumb_up</span>
+                                        {{.Thread.Likes}}</button>
+                                    {{else}}
+                                    <button type="submit" title="Like" class="like-button">
+                                        <span class="material-symbols-outlined">thumb_up</span>
+                                        {{.Thread.Likes}}</button>
+                                    {{end}}
+                                </form>
+                                <form action="/dislike" method="POST" class="dislike-form">
+                                    <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
+                                    <input type="hidden" name="post_id" value="{{.Thread.ID}}">
+                                    <input type="hidden" name="post_type" value="thread">
 
-                                {{if .Thread.LikedNow}}
-                                <button type="submit" title="Like" class="like-button" style="color: rgb(0, 165, 0);">
-                                    <span class="material-symbols-outlined">thumb_up</span>
-                                    {{.Thread.Likes}}</button>
-                                {{else}}
-                                <button type="submit" title="Like" class="like-button">
-                                    <span class="material-symbols-outlined">thumb_up</span>
-                                    {{.Thread.Likes}}</button>
-                                {{end}}
+                                    {{if .Thread.DislikedNow}}
+                                    <button type="submit" title="Dislike" class="dislike-button"
+                                        style="color:rgb(227, 10, 21)">
+                                        <span class="material-symbols-outlined">thumb_down</span>
+                                        {{.Thread.Dislikes}}</button>
+                                    {{else}}
+                                    <button type="submit" title="Dislike" class="dislike-button">
+                                        <span class="material-symbols-outlined">thumb_down</span>
+                                        {{.Thread.Dislikes}}</button>
+                                    {{end}}
+                                </form>
+                            </li>
+                            {{else}}
+                            <li style="float: right;">
+                                <span class="material-symbols-outlined">thumb_up</span>{{.Thread.Likes}}
+                                <span class="material-symbols-outlined">thumb_down</span>{{.Thread.Dislikes}}
+                            </li>
+                            {{end}}
+                            <li>
+                                <h2>{{.Thread.Title}}</h2>
+                            </li>
+                            <li><span class="material-symbols-outlined">person</span><b>{{.Thread.Author}}</b> posted on
+                                {{.Thread.CreatedDay}} {{.Thread.CreatedTime}}</li>
+                            <li style="white-space: pre-wrap;">{{.Thread.Content}}</li>
+                            <form method="POST" action="/">
+                                <input type="hidden" name="searchcat" value="search">
+                                <div class="tags"><span class="material-symbols-outlined">category</span>
+                                    {{ range .Thread.CatsSlice }}<button type="submit" class="tag" name="usersearch"
+                                        value="{{.}}">{{.}}</button>{{ end }}
+                                </div>
                             </form>
-                            <form action="/dislike" method="POST" class="dislike-form">
-                                <input type="hidden" name="base_id" value="{{.Thread.BaseID}}">
-                                <input type="hidden" name="post_id" value="{{.Thread.ID}}">
-                                <input type="hidden" name="post_type" value="thread">
-
-                                {{if .Thread.DislikedNow}}
-                                <button type="submit" title="Dislike" class="dislike-button"
-                                    style="color:rgb(227, 10, 21)">
-                                    <span class="material-symbols-outlined">thumb_down</span>
-                                    {{.Thread.Dislikes}}</button>
-                                {{else}}
-                                <button type="submit" title="Dislike" class="dislike-button">
-                                    <span class="material-symbols-outlined">thumb_down</span>
-                                    {{.Thread.Dislikes}}</button>
-                                {{end}}
-                            </form>
-                        </li>
-                        {{else}}
-                        <li style="float: right;">
-                            <span class="material-symbols-outlined">thumb_up</span>{{.Thread.Likes}}
-                            <span class="material-symbols-outlined">thumb_down</span>{{.Thread.Dislikes}}
-                        </li>
-                        {{end}}
-                        <li>
-                            <h2>{{.Thread.Title}}</h2>
-                        </li>
-                        <li><span class="material-symbols-outlined">person</span><b>{{.Thread.Author}}</b> posted on
-                            {{.Thread.CreatedDay}} {{.Thread.CreatedTime}}</li>
-                        <li style="white-space: pre-wrap;">{{.Thread.Content}}</li>
-                        <form method="POST" action="/">
-                            <input type="hidden" name="searchcat" value="search">
-                            <div class="tags"><span class="material-symbols-outlined">category</span>
-                                {{ range .Thread.CatsSlice }}<button type="submit" class="tag" name="usersearch" value="{{.}}">{{.}}</button>{{ end }}
-                            </div>
-                        </form>
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- Generate tree of replies recursively -->

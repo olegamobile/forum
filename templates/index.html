@@ -19,40 +19,51 @@
             </div>
 
             <div class="content">
+
                 <div class="rows">
-                <!-- Show filter button -->
-                <div class="fl-right"><button class="thread-button filter-button" id="filter-button"><span class="material-symbols-outlined">filter_alt</span>Show filter</button></div>
-                {{if .ValidSes}}
-                <!-- Trigger/Open The Modal -->
-                <div class="fl-left"><button class="thread-button" id="modalBtn"><span class="material-symbols-outlined">add</span>Start a new thread</button></div>
-                <!-- The Modal -->
-                <div class="newpost">
-                    <!-- Form to start a thread -->
-                    <div class="newpostModal" id="newpostModal">
-                        <!-- Modal content -->
-                        <div class="modal-content"> <span class="close">&times;</span>
-                            <h3>Start a new thread</h3>
-                            <form method="POST" action="/add" enctype="multipart/form-data">
-                                <input type="text" name="title" placeholder="Thread title" maxlength="{{.TitleMaxLen}}" required><br>
-                                <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}" required></textarea><br>
-                                <input type="text" name="categories" placeholder="List categories" maxlength="{{.CategoriesMaxLen}}" required><br>
+                    <!-- Show filter button -->
+                    <div class="fl-right"><button class="thread-button filter-button" id="filter-button"><span
+                                class="material-symbols-outlined">filter_alt</span>Show filter</button></div>
+
+                    {{if .ValidSes}}
+                    <!-- Trigger/Open The Modal -->
+                    <div class="fl-left"><button class="thread-button" id="modalBtn"><span
+                                class="material-symbols-outlined">add</span>Start a new thread</button></div>
+
+                    <!-- The Modal -->
+                    <div class="newpost">
+                        <!-- Form to start a thread -->
+                        <div class="newpostModal" id="newpostModal">
+                            <!-- Modal content -->
+                            <div class="modal-content"> <span class="close">&times;</span>
+                                <h3>Start a new thread</h3>
+                                <form method="POST" action="/add" enctype="multipart/form-data">
+                                    <input type="text" name="title" placeholder="Thread title"
+                                        maxlength="{{.TitleMaxLen}}" required><br>
+                                    <textarea name="content" placeholder="Message" rows="6"
+                                        maxlength="{{.ContentMaxLen}}" required></textarea><br>
+                                    <input type="text" name="categories" placeholder="List categories"
+                                        maxlength="{{.CategoriesMaxLen}}" required><br>
                                     <label for="files" class="custom-file-button">Add Image</label>
-                                    <button type="submit" id="submitButton" style="float: right;" >Start thread</button>
+                                    <button type="submit" id="submitButton" style="float: right;">Start thread</button>
                                     <input type="reset" value="Clear all" style="float: right;" />
-                                    <input type="file" id="files" name="files" multiple accept="image/*" onchange="updateFileList()">
+                                    <input type="file" id="files" name="files" multiple accept="image/*"
+                                        onchange="updateFileList()">
                                     <p id="warning" class="warning"></p>
                                     <div id="previewContainer" class="preview-container"></div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
+
+                    {{else}}
+                    <div class="fl-left">
+                        <p><a href="/login">Log in</a> to start posting!</p>
+                        <p class="red-alert">{{.Message}}</p>
+                    </div>
+                    {{end}}
                 </div>
 
-                {{else}}
-                    <div class="fl-left">
-                    <p><a href="/login">Log in</a> to start posting!</p>
-                    <p class="red-alert">{{.Message}}</p></div>
-                {{end}}
-            </div>
                 <!-- Filter -->
                 <div id="show-filter">
                     <form method="POST" action="/">
@@ -65,7 +76,8 @@
                                         value="{{.Search}}" placeholder="Search categories" maxlength="200"></div>
                                 <div class="row"><input type="radio" id="any" name="multisearch" value="any" checked>
                                     <label for="any">Match any</label>
-                                    <input type="radio" id="all" name="multisearch" value="all" {{if eq .Multisearch "all" }}checked="checked" {{end}}>
+                                    <input type="radio" id="all" name="multisearch" value="all" {{if eq
+                                        .Multisearch "all" }}checked="checked" {{end}}>
                                     <label for="all">Match all</label>
                                 </div>
                                 <div class="row"><button type="submit" name="searchcat" value="search">Search</button>
@@ -79,8 +91,10 @@
                                     <option value="all" {{if eq .Selection "all" }}selected{{end}}>All</option>
                                     <option value="created" {{if eq .Selection "created" }}selected{{end}}>Created by me
                                     </option>
-                                    <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked by me</option>
-                                    <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked by me
+                                    <option value="liked" {{if eq .Selection "liked" }}selected{{end}}>Liked by me
+                                    </option>
+                                    <option value="disliked" {{if eq .Selection "disliked" }}selected{{end}}>Disliked by
+                                        me
                                     </option>
                                 </select>
                                 <button type="submit" name="updatesel" value="update">Show
@@ -97,23 +111,26 @@
                         </div>
                     </form>
                 </div>
-            
+
                 <!-- <h2>Threads</h2> -->
 
                 <!-- Div for each post -->
                 <div class="allthreads">
                     {{range .Threads}}
-                        <div class="thread">
-                            <div style="float: right;"><a href="/thread/{{.ID}}"><span class="material-symbols-outlined">comment</span>{{.RepliesN}}</a></div>
-                            <div class="thread-title"><a href="/thread/{{.ID}}">{{.Title}}</a></div>
-                            <div class="thread-meta"><span class="material-symbols-outlined">person</span> {{.Author}} posted on {{.CreatedDay}} {{.CreatedTime}}</div>
-                            <div class="thread-content"> <span class="truncate">{{.Content }}</span></div>
-                            <form method="POST" action="/">
-                                <input type="hidden" name="searchcat" value="search">
-                                <div class="tags"><span class="material-symbols-outlined">category</span>
-                                    {{ range .CatsSlice }}<button type="submit" class="tag" name="usersearch" value="{{.}}">{{.}}</button>{{ end }}
-                                </div>
-                            </form>
+                    <div class="thread">
+                        <div style="float: right;"><a href="/thread/{{.ID}}"><span
+                                    class="material-symbols-outlined">comment</span>{{.RepliesN}}</a></div>
+                        <div class="thread-title"><a href="/thread/{{.ID}}">{{.Title}}</a></div>
+                        <div class="thread-meta"><span class="material-symbols-outlined">person</span> {{.Author}}
+                            posted on {{.CreatedDay}} {{.CreatedTime}}</div>
+                        <div class="thread-content"> <span class="truncate">{{.Content }}</span></div>
+                        <form method="POST" action="/">
+                            <input type="hidden" name="searchcat" value="search">
+                            <div class="tags"><span class="material-symbols-outlined">category</span>
+                                {{ range .CatsSlice }}<button type="submit" class="tag" name="usersearch"
+                                    value="{{.}}">{{.}}</button>{{ end }}
+                            </div>
+                        </form>
                     </div>
                     {{end}}
                 </div>
