@@ -69,12 +69,3 @@ document.addEventListener("DOMContentLoaded", function () {
     filterButton.lastChild.textContent = ` ${text}`; // Update the text after the icon
   }
 });
-
-// category links make the filter visible
-var tags = document.getElementsByClassName("tag");
-var i;
-for (i = 0; i < tags.length; i++) {
-  tags[i].addEventListener("click", function () {
-    sessionStorage.setItem("filter-visible", "true");
-  });
-}
