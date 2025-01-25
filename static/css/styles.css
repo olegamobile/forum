@@ -94,7 +94,7 @@ body {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: start;
 }
 
 .rows {
