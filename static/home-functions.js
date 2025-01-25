@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const filterDiv = document.getElementById("show-filter");
 
   if (filterDiv) {
-    // Check localStorage for the visibility state
-    const savedState = localStorage.getItem("filter-visible");
+    // Check sessionStorage for the visibility state
+    const savedState = sessionStorage.getItem("filter-visible");
     if (savedState === "true") {
       filterDiv.classList.add("visible");
       updateButton(filterButton, "filter_alt_off", "Hide filter");
@@ -52,11 +52,11 @@ document.addEventListener("DOMContentLoaded", function () {
       // Toggle the visibility class
       if (filterDiv.classList.contains("visible")) {
         filterDiv.classList.remove("visible");
-        localStorage.setItem("filter-visible", "false");
+        sessionStorage.setItem("filter-visible", "false");
         updateButton(filterButton, "filter_alt", "Show filter");
       } else {
         filterDiv.classList.add("visible");
-        localStorage.setItem("filter-visible", "true");
+        sessionStorage.setItem("filter-visible", "true");
         updateButton(filterButton, "filter_alt_off", "Hide filter");
       }
     });
@@ -69,3 +69,12 @@ document.addEventListener("DOMContentLoaded", function () {
     filterButton.lastChild.textContent = ` ${text}`; // Update the text after the icon
   }
 });
+
+// category links make the filter visible
+var tags = document.getElementsByClassName("tag");
+var i;
+for (i = 0; i < tags.length; i++) {
+  tags[i].addEventListener("click", function () {
+    sessionStorage.setItem("filter-visible", "true");
+  });
+}
