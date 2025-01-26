@@ -59,6 +59,7 @@ func setHandlers() {
 	http.Handle("/static/home-functions.js", fileServer)
 	http.Handle("/static/ui-functions.js", fileServer)
 	http.Handle("/static/image_upload.js", fileServer)
+	http.Handle("/images/", fileServer)
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/favicon.ico")
 	})
