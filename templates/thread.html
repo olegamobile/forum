@@ -90,6 +90,17 @@
                             <li><span class="material-symbols-outlined">person</span><b>{{.Thread.Author}}</b> posted on
                                 {{.Thread.CreatedDay}} {{.Thread.CreatedTime}}</li>
                             <li style="white-space: pre-wrap;">{{.Thread.Content}}</li>
+
+                            <!-- Displaying images below the post -->
+                            
+                            {{if .Images}}
+                            <div class="images">
+                                {{range .Images}}
+                                <img src="{{.}}" alt="Thread Image" class="thread-image" style="max-width: 100%; margin: 10px 0;">
+                                {{end}}
+                            </div>
+                            {{end}}
+
                             <form method="POST" action="/">
                                 <input type="hidden" name="searchcat" value="search">
                                 <div class="tags"><span class="material-symbols-outlined">category</span>
