@@ -4,11 +4,18 @@ import (
 	"database/sql"
 	"fmt"
 	"html"
+	"io"
+	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/gofrs/uuid"
 )
 
 type Reply struct {
@@ -40,6 +47,7 @@ type threadPageData struct {
 	UsrId    string
 	UsrNm    string
 	LoginURL string
+	Images   []string // Added image field!
 }
 
 // cleanString removes trailing and leading spaces and punctuation
@@ -93,6 +101,14 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				threadUrl = fmt.Sprintf("/thread/%d", threadID)
 			}
+
+			err, errMsg := ImageUploadHandler(r, threadID, authID, w)
+			if err != nil {
+				fmt.Println(errMsg, err.Error())
+				goToErrorPage(errMsg, http.StatusInternalServerError, w, r)
+				return
+			}
+
 			for _, category := range catsList {
 
 				_, err := db.Exec(`INSERT OR IGNORE INTO categories (name) VALUES (?);`, category)
@@ -369,6 +385,13 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 		goToErrorPage("Thread not found", http.StatusNotFound, w, r)
 		return
 	}
+	// Get linked images for the thread
+	images, err := GetThreadImageURL(threadID)
+	if err != nil {
+		fmt.Println("Error finding images:", err.Error())
+		goToErrorPage("Error loading images", http.StatusInternalServerError, w, r)
+		return
+	}
 
 	usId, usName, validSes := validateSession(r)
 
@@ -407,6 +430,119 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	loginUrl := "/login?return_url=" + r.URL.Path
-	tpd := threadPageData{thread, validSes, usId, usName, loginUrl}
+	tpd := threadPageData{thread, validSes, usId, usName, loginUrl, images}
 	threadTmpl.Execute(w, tpd)
+}
+
+// Image upldoad
+func ImageUploadHandler(r *http.Request, postID int64, userID string, w http.ResponseWriter) (error, string) {
+	maxTotalSize := int(20 * 1024 * 1024) // 20 MB
+	errMsg := ""
+	err := r.ParseMultipartForm(int64(maxTotalSize))
+	//not sure if have to make this double check. Checked already in image_upload.js
+	if err != nil {
+		errMsg = "The total size is too large."
+		return err, errMsg
+	}
+	files := r.MultipartForm.File["files"]
+	fmt.Println(len(files))
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			errMsg = "File cannot be opened."
+			return err, errMsg
+		}
+		if !ImageType(fileHeader.Filename) {
+			errMsg = "Invalid file type."
+			return err, errMsg
+		}
+		fileID, err := UniqueFileName(fileHeader.Filename)
+		if err != nil {
+			errMsg = "Error while saving file"
+			return err, errMsg
+		}
+		fmt.Println(fileID)
+		SaveImageData(fileID, postID, userID, fileHeader.Filename, int(fileHeader.Size), w, file)
+		defer file.Close()
+	}
+	return nil, ""
+}
+func ImageType(file string) bool {
+	extensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webm"}
+	imageExtensions := make(map[string]bool)
+	for _, ext := range extensions {
+		imageExtensions[ext] = true
+	}
+	ext := strings.ToLower(filepath.Ext(file))
+	return imageExtensions[ext]
+}
+
+func UniqueFileName(file string) (string, error) {
+	fileExt := filepath.Ext(file)
+	UUID, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+	fileID := UUID.String() + fileExt
+	return fileID, nil
+}
+
+func SaveImageData(fileID string, postID int64, userID, originalName string, fileSize int, w http.ResponseWriter, uploadedFile multipart.File) (error, string) {
+	imageUploadDir := "images"
+	err := os.MkdirAll(imageUploadDir, 0777)
+	if err != nil {
+		log.Println("Error creating directory:", err)
+		errMsg := "Internal error"
+		return err, errMsg
+	}
+	filePath := filepath.Join(imageUploadDir, fileID)
+	os.Chmod(filePath, 0644)
+	savedFile, err := os.Create(filePath)
+	if err != nil {
+		errMsg := "Error while crreating a file."
+		return err, errMsg
+	}
+	defer savedFile.Close()
+	_, err = io.Copy(savedFile, uploadedFile)
+	if err != nil {
+		errMsg := "Error while saving file content."
+		return err, errMsg
+	}
+
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		log.Println("File does not exist immediately after save")
+	}
+	if err != nil {
+		log.Println("Error writing to file:", err)
+		errMsg := "Error while saving file content."
+		return err, errMsg
+	}
+
+	_, err = db.Exec(`INSERT INTO images (id, post_id, user_id, original_name, file_size) VALUES (?, ?, ?, ?, ?)`,
+		fileID, postID, userID, originalName, fileSize)
+	if err != nil {
+		log.Println("Error inserting into DB:", err)
+		errMsg := "Internal error"
+		return err, errMsg
+	}
+	return nil, ""
+}
+func GetThreadImageURL(threadID int) ([]string, error) {
+	rows, err := db.Query(`SELECT id FROM images WHERE post_id = ?`, threadID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var images []string
+	for rows.Next() {
+		var imageID string
+		err := rows.Scan(&imageID)
+		if err != nil {
+			log.Println("Error scanning image ID:", err)
+			return nil, err
+		}
+		imageURL := "/images/" + imageID
+		images = append(images, imageURL)
+	}
+	return images, nil
 }
