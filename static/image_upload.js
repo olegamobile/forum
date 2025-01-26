@@ -57,7 +57,7 @@ function updateFileList() {
     reader.readAsDataURL(file);
   }
 
-  input.value = "";
+  // input.value = "";
 
   if (totalSize > maxTotalSize) {
     showElement("warning");
