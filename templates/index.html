@@ -38,17 +38,22 @@
                             <div class="modal-content"> <span class="close">&times;</span>
                                 <h3>Start a new thread</h3>
                                 <form method="POST" action="/add" enctype="multipart/form-data">
-                                    <input type="text" name="title" placeholder="Thread title"
-                                        maxlength="{{.TitleMaxLen}}" required><br>
-                                    <textarea name="content" placeholder="Message" rows="6"
-                                        maxlength="{{.ContentMaxLen}}" required></textarea><br>
-                                    <input type="text" name="categories" placeholder="List categories"
-                                        maxlength="{{.CategoriesMaxLen}}" required><br>
+                                    <input type="text" name="title" placeholder="Thread title" maxlength="{{.TitleMaxLen}}" required><br>
+                                    <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}" required></textarea><br>
+                                    <div class ="row">
+                                    <select name="categorySelector" id="categorySelector" onchange="updateCategory()">
+                                        <option value="" disabled selected>Choose category</option>
+                                        {{range .CategoriesList}}
+                                        <option value="{{.}}">{{.}}</option>
+                                        {{end}}
+                                    </select>
+                                    <input type="text" name="categories" id="categories" placeholder="List categories" maxlength="{{.CategoriesMaxLen}}" required>
+                                    </div><br>
                                     <label for="files" class="custom-file-button">Add Image</label>
                                     <button type="submit" id="submitButton" style="float: right;">Start thread</button>
                                     <input type="reset" value="Clear all" style="float: right;" />
-                                    <input type="file" id="files" name="files" multiple accept="image/*"
-                                        onchange="updateFileList()">
+                                    <input type="file" id="files" name="files" multiple accept="image/*" onchange="updateFileList()">
+                                    <input type="hidden" id="selectedFileNames" name="selectedFileNames">
                                     <p id="warning" class="warning"></p>
                                     <div id="previewContainer" class="preview-container"></div>
                                 </form>
@@ -149,6 +154,7 @@
     <script src="/static/ui-functions.js"></script>
     <script src="/static/home-functions.js"></script>
     <script src="/static/image_upload.js"></script>
+    <script src="/static/categories.js"></script>
 </body>
 
 </html>
