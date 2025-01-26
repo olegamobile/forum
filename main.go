@@ -51,15 +51,9 @@ func initTemplates() {
 
 func setHandlers() {
 	fileServer := http.FileServer(http.Dir("./"))
-	http.Handle("/static/css/styles.css", fileServer)
-	http.Handle("/static/css/darkmode.css", fileServer)
-	http.Handle("/static/css/headerfooter.css", fileServer)
-	http.Handle("/static/css/image_upload_style.css", fileServer)
-	http.Handle("/static/css/categories.css", fileServer)
-	http.Handle("/static/home-functions.js", fileServer)
-	http.Handle("/static/ui-functions.js", fileServer)
-	http.Handle("/static/image_upload.js", fileServer)
+	http.Handle("/static/", fileServer)
 	http.Handle("/images/", fileServer)
+
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "static/favicon.ico")
 	})

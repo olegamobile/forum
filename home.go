@@ -42,6 +42,7 @@ type PageData struct {
 	ContentMaxLen    int
 	CategoriesMaxLen int
 	LoginURL         string
+	CategoriesList   []string
 }
 
 type errorData struct {
@@ -93,7 +94,13 @@ func countReactions(id int) (int, int) {
 }
 
 func fetchCategories(postId int) string {
-	selectQuery := `SELECT categories.name AS category FROM categories JOIN posts_categories ON posts_categories.category_id = categories.id WHERE post_id = ?;`
+	var selectQuery string
+	if postId == -1 {
+		selectQuery = `SELECT categories.name FROM posts_categories JOIN categories ON posts_categories.category_id = categories.id GROUP BY posts_categories.category_id ORDER BY COUNT(posts_categories.post_id) DESC;`
+	} else {
+		selectQuery = `SELECT categories.name AS category FROM categories JOIN posts_categories ON posts_categories.category_id = categories.id WHERE post_id = ?;`
+	}
+
 	rowsCategories, err := db.Query(selectQuery, postId)
 	if err != nil {
 		fmt.Println("fetchCategories selectQuery failed", err.Error())
@@ -292,6 +299,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 
 	sortByRecentInteraction(&threads, w, r)
 
+	categories := strings.Fields(fetchCategories(-1))
+
 	data := PageData{
 		Threads:          threads,
 		ValidSes:         validSes,
@@ -305,6 +314,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		ContentMaxLen:    contentMaxLen,
 		CategoriesMaxLen: categoriesMaxLen,
 		LoginURL:         "/login",
+		CategoriesList:   categories,
 	}
 	indexTmpl.Execute(w, data)
 }
