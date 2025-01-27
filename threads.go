@@ -102,7 +102,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 				threadUrl = fmt.Sprintf("/thread/%d", threadID)
 			}
 
-			err, errMsg := ImageUploadHandler(r, threadID, authID, w)
+			errMsg, err := ImageUploadHandler(r, threadID, authID, w)
 			if err != nil {
 				fmt.Println(errMsg, err.Error())
 				goToErrorPage(errMsg, http.StatusInternalServerError, w, r)
@@ -435,14 +435,14 @@ func threadPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Image upldoad
-func ImageUploadHandler(r *http.Request, postID int64, userID string, w http.ResponseWriter) (error, string) {
+func ImageUploadHandler(r *http.Request, postID int64, userID string, w http.ResponseWriter) (string, error) {
 	maxTotalSize := int(20 * 1024 * 1024) // 20 MB
 	errMsg := ""
 	err := r.ParseMultipartForm(int64(maxTotalSize))
 	//not sure if have to make this double check. Checked already in image_upload.js
 	if err != nil {
 		errMsg = "The total size is too large."
-		return err, errMsg
+		return errMsg, err
 	}
 	files := r.MultipartForm.File["files"]
 	fmt.Println(len(files))
@@ -450,22 +450,22 @@ func ImageUploadHandler(r *http.Request, postID int64, userID string, w http.Res
 		file, err := fileHeader.Open()
 		if err != nil {
 			errMsg = "File cannot be opened."
-			return err, errMsg
+			return errMsg, err
 		}
 		if !ImageType(fileHeader.Filename) {
 			errMsg = "Invalid file type."
-			return err, errMsg
+			return errMsg, err
 		}
 		fileID, err := UniqueFileName(fileHeader.Filename)
 		if err != nil {
 			errMsg = "Error while saving file"
-			return err, errMsg
+			return errMsg, err
 		}
 		fmt.Println(fileID)
 		SaveImageData(fileID, postID, userID, fileHeader.Filename, int(fileHeader.Size), w, file)
 		defer file.Close()
 	}
-	return nil, ""
+	return "", nil
 }
 func ImageType(file string) bool {
 	extensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webm"}
@@ -487,35 +487,37 @@ func UniqueFileName(file string) (string, error) {
 	return fileID, nil
 }
 
-func SaveImageData(fileID string, postID int64, userID, originalName string, fileSize int, w http.ResponseWriter, uploadedFile multipart.File) (error, string) {
+func SaveImageData(fileID string, postID int64, userID, originalName string, fileSize int, w http.ResponseWriter, uploadedFile multipart.File) (string, error) {
 	imageUploadDir := "images"
 	err := os.MkdirAll(imageUploadDir, 0777)
 	if err != nil {
 		log.Println("Error creating directory:", err)
 		errMsg := "Internal error"
-		return err, errMsg
+		return errMsg, err
 	}
 	filePath := filepath.Join(imageUploadDir, fileID)
 	os.Chmod(filePath, 0644)
 	savedFile, err := os.Create(filePath)
 	if err != nil {
 		errMsg := "Error while crreating a file."
-		return err, errMsg
+		return errMsg, err
 	}
 	defer savedFile.Close()
 	_, err = io.Copy(savedFile, uploadedFile)
 	if err != nil {
 		errMsg := "Error while saving file content."
-		return err, errMsg
+		return errMsg, err
 	}
 
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+	_, err = os.Stat(filePath)
+	if os.IsNotExist(err) {
 		log.Println("File does not exist immediately after save")
 	}
+
 	if err != nil {
 		log.Println("Error writing to file:", err)
 		errMsg := "Error while saving file content."
-		return err, errMsg
+		return errMsg, err
 	}
 
 	_, err = db.Exec(`INSERT INTO images (id, post_id, user_id, original_name, file_size) VALUES (?, ?, ?, ?, ?)`,
@@ -523,9 +525,9 @@ func SaveImageData(fileID string, postID int64, userID, originalName string, fil
 	if err != nil {
 		log.Println("Error inserting into DB:", err)
 		errMsg := "Internal error"
-		return err, errMsg
+		return errMsg, err
 	}
-	return nil, ""
+	return "", nil
 }
 func GetThreadImageURL(threadID int) ([]string, error) {
 	rows, err := db.Query(`SELECT id FROM images WHERE post_id = ?`, threadID)
