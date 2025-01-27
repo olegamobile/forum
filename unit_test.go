@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func TestCheckString(t *testing.T) {
+func TestCheckUsername(t *testing.T) {
 	Testinit()
 	defer db.Close()
 	tests := []struct {
@@ -22,9 +22,30 @@ func TestCheckString(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := checkString(test.input)
+		result := checkUsername(test.input)
 		if result != test.expected {
-			t.Errorf("checkString(%v) = %v; want %v", test.input, result, test.expected)
+			t.Errorf("checkUsername(%v) = %v; want %v", test.input, result, test.expected)
+		}
+	}
+}
+
+func TestCheckPassword(t *testing.T) {
+	Testinit()
+	defer db.Close()
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"valid123", true},
+		{"short", true},
+		{"four", false},
+		{"validNow!", true},
+	}
+
+	for _, test := range tests {
+		result := checkPassword(test.input)
+		if result != test.expected {
+			t.Errorf("checkUsername(%v) = %v; want %v", test.input, result, test.expected)
 		}
 	}
 }
