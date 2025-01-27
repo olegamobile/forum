@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/mail"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -54,6 +55,16 @@ func validateSession(r *http.Request) (string, string, bool) {
 	}
 
 	return userID, userName, validSes
+}
+
+func checkUserName(s string) bool {
+	re := regexp.MustCompile(`/^[a-zA-Z0-9\-_]{5,25}$/`)
+	return re.MatchString(s)
+}
+
+func checkPassword(s string) bool {
+	re := regexp.MustCompile(`/^[a-zA-Z0-9\-_!@#$%^&*()]{5,25}$/`)
+	return re.MatchString(s)
 }
 
 func checkString(s string) bool {
@@ -120,12 +131,13 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		email := html.EscapeString(r.FormValue("email"))
 		pass := html.EscapeString(r.FormValue("password"))
 
-		nameOk, passOk := checkString(name), checkString(pass)
+		//nameOk, passOk := checkString(name), checkString(pass)
+		nameOk, passOk := checkUserName(name), checkPassword(pass)
 		_, emailErr := mail.ParseAddress(email)
 
 		if !nameOk || !passOk {
 			fmt.Println("Minimum 5 chars, limited chars")
-			loginData.Message2 = "Minimum 5 characters in username and password. Only letters, numbers and symbols allowed."
+			loginData.Message2 = "5-25 characters in username and password. Only letters, numbers and symbols allowed."
 			registerTmpl.Execute(w, loginData)
 			return
 		}
