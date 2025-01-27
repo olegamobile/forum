@@ -15,11 +15,11 @@
 
                         {{if .LikedNow}}
                         <button type="submit" title="Like" class="like-button" style="color: rgb(0, 165, 0)">
-                            <span class="material-symbols-outlined">thumb_up</span>
+                            <span class="material-symbols-outlined">sentiment_satisfied</span>
                             {{.Likes}}</button>
                         {{else}}
                         <button type="submit" title="Like" class="like-button">
-                            <span class="material-symbols-outlined">thumb_up</span>
+                            <span class="material-symbols-outlined">sentiment_satisfied</span>
                             {{.Likes}}</button>
                         {{end}}
 
@@ -31,11 +31,11 @@
 
                         {{if .DislikedNow}}
                         <button type="submit" title="Dislike" class="dislike-button" style="color:rgb(227, 10, 21)">
-                            <span class="material-symbols-outlined">thumb_down</span>
+                            <span class="material-symbols-outlined">sentiment_dissatisfied</span>
                             {{.Dislikes}}</button>
                         {{else}}
                         <button type="submit" title="Dislike" class="dislike-button">
-                            <span class="material-symbols-outlined">thumb_down</span>
+                            <span class="material-symbols-outlined">sentiment_dissatisfied</span>
                             {{.Dislikes}}</button>
                         {{end}}
 
@@ -43,8 +43,8 @@
                 </li>
                 {{else}}
                 <li style="float: right;">
-                    <span class="material-symbols-outlined">thumb_up</span>{{.Likes}}
-                    <span class="material-symbols-outlined">thumb_down</span>{{.Dislikes}}
+                    <span class="material-symbols-outlined">sentiment_satisfied</span>{{.Likes}}
+                    <span class="material-symbols-outlined">sentiment_dissatisfied</span>{{.Dislikes}}
                     </li>
                 {{end}}
                 <li><span class="material-symbols-outlined">person</span><b>{{.Author}}</b> posted on {{.CreatedDay}}
