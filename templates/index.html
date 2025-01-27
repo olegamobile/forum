@@ -61,8 +61,7 @@
                                     <textarea name="content" placeholder="Message" rows="6"
                                         maxlength="{{.ContentMaxLen}}" required></textarea><br>
                                     <div class="row">
-                                        <select name="categorySelector" id="categorySelector"
-                                            onchange="updateCategory()">
+                                        <select name="categorySelector" id="categorySelector" onchange="updateCategory('categories', 'categorySelector')">
                                             <option value="" disabled selected>Choose category</option>
                                             {{range .CategoriesList}}
                                             <option value="{{.}}">{{.}}</option>
@@ -100,8 +99,15 @@
 
                             <!-- First column -->
                             <div class="col">
-                                <div class="row"><input type="search" id="search-categories" name="usersearch"
-                                        value="{{.Search}}" placeholder="Search categories" maxlength="200"></div>
+                                 <div class="row">
+                                    <select name="categorySelector" id="fCatSelect" onchange="updateCategory('usersearch', 'fCatSelect')">
+                                        <option value="" disabled selected>Choose category</option>
+                                        {{range .CategoriesList}}
+                                        <option value="{{.}}">{{.}}</option>
+                                        {{end}}
+                                    </select>
+                                    <input type="text" name="usersearch" id="usersearch" placeholder="Search categories">
+                                </div>
                                 <div class="row"><input type="radio" id="any" name="multisearch" value="any" checked>
                                     <label for="any">Match any</label>
                                     <input type="radio" id="all" name="multisearch" value="all" {{if eq
