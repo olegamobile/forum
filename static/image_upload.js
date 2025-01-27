@@ -7,7 +7,7 @@ function updateFileList() {
   const warning = document.getElementById("warning");
   const submitButton = document.getElementById("submitButton");
   const previewContainer = document.getElementById("previewContainer");
-  previewContainer.style.display = "block"
+  previewContainer.style.display = "flex"
   warning.style.display = "block"
 
   for (const file of input.files) {
@@ -40,7 +40,7 @@ function updateFileList() {
       size.textContent = formatSize(file.size);
       size.classList.add("image-info-size");
 
-      const deleteButton = document.createElement("button");
+      const deleteButton = document.createElement("div");
       deleteButton.textContent = "×";
       deleteButton.classList.add("delete-button");
       deleteButton.onclick = () => deleteFile(file.name, previewDiv);
