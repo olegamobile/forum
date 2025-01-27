@@ -414,6 +414,9 @@ select,
 
 .likes {
     max-width: fit-content;
+    font-size: 1em !important;
+    vertical-align: bottom !important;
+    line-height: 1;
 }
 
 /* Thread page */
