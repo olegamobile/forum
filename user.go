@@ -7,10 +7,8 @@ import (
 	"log"
 	"net/http"
 	"net/mail"
-	"regexp"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -57,24 +55,27 @@ func validateSession(r *http.Request) (string, string, bool) {
 	return userID, userName, validSes
 }
 
-func checkUserName(s string) bool {
-	re := regexp.MustCompile(`/^[a-zA-Z0-9\-_]{5,25}$/`)
-	return re.MatchString(s)
+func checkUsername(s string) bool {
+	if len(s) < 5 || len(s) > 25 {
+		return false
+	}
+	for _, char := range s {
+		if (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') && (char < '0' || char > '9') && char != '-' && char != '_' {
+			return false
+		}
+	}
+	return true
 }
 
 func checkPassword(s string) bool {
-	re := regexp.MustCompile(`/^[a-zA-Z0-9\-_!@#$%^&*()]{5,25}$/`)
-	return re.MatchString(s)
-}
-
-func checkString(s string) bool {
-	if len(s) < 5 {
+	if len(s) < 5 || len(s) > 25 {
 		return false
 	}
-	for _, ch := range s {
-		if !unicode.IsLetter(ch) && !unicode.IsDigit(ch) && !unicode.IsSymbol(ch) {
-			fmt.Println("Only letters, numbers and symbols allowed:", string(ch))
-			return false
+	for _, char := range s {
+		if (char < 'a' || char > 'z') && (char < 'A' || char > 'Z') && (char < '0' || char > '9') {
+			if char != '-' && char != '_' && char != '!' && char != '@' && char != '#' && char != '$' && char != '%' && char != '^' && char != '&' && char != '*' && char != '(' && char != ')' {
+				return false
+			}
 		}
 	}
 	return true
@@ -132,7 +133,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		pass := html.EscapeString(r.FormValue("password"))
 
 		//nameOk, passOk := checkString(name), checkString(pass)
-		nameOk, passOk := checkUserName(name), checkPassword(pass)
+		nameOk, passOk := checkUsername(name), checkPassword(pass)
 		_, emailErr := mail.ParseAddress(email)
 
 		if !nameOk || !passOk {
@@ -225,6 +226,7 @@ func sessionAndToken(w *http.ResponseWriter, r *http.Request, userID, username s
 	})
 }
 
+// logUserInHandler starts a session for the user if login is succesful
 func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/loguserin" {
 		goToErrorPage("Page does not exist", http.StatusNotFound, w, r)
@@ -236,7 +238,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nameOremail := r.FormValue("username-or-email")
+	nameOrEmail := r.FormValue("username-or-email")
 	pass := r.FormValue("password")
 	returnUrl := r.FormValue("return_url")
 
@@ -251,8 +253,8 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Checking if user 0r email exists
-	if !nameOremailExists(db, nameOremail) {
+	// Checking if user or email exists
+	if !nameOremailExists(db, nameOrEmail) {
 		fmt.Println("User not found")
 		loginData.Message1 = "Invalid username/email or password"
 		logTmpl.Execute(w, loginData)
@@ -262,7 +264,7 @@ func logUserInHandler(w http.ResponseWriter, r *http.Request) {
 	// Get user information and check password
 	var storedHashedPass, userID, username string
 	query := `SELECT password, id, username FROM users WHERE username = ? OR email = ?`
-	err := db.QueryRow(query, nameOremail, nameOremail).Scan(&storedHashedPass, &userID, &username)
+	err := db.QueryRow(query, nameOrEmail, nameOrEmail).Scan(&storedHashedPass, &userID, &username)
 	if err != nil {
 		loginData.Message1 = "Invalid username/email or password"
 		logTmpl.Execute(w, loginData)
