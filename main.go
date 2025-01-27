@@ -75,6 +75,15 @@ func setHandlers() {
 	})
 }
 
+// removeUnusedCategories removes unused categories
+func removeUnusedCategories() {
+	delUnusedCatsQuery := `DELETE FROM categories WHERE id NOT IN (SELECT DISTINCT category_id	FROM posts_categories);`
+	_, err := db.Exec(delUnusedCatsQuery)
+	if err != nil {
+		log.Printf("Error deleting unused categories: %v\n", err.Error())
+	}
+}
+
 // sessionCleanup removes expired sessions every given time interval
 func sessionCleanup(interval time.Duration) {
 	ticker := time.NewTicker(interval)
@@ -82,6 +91,7 @@ func sessionCleanup(interval time.Duration) {
 		for range ticker.C {
 			log.Println("Running session cleanup...")
 			removeExpiredSessions()
+			removeUnusedCategories()
 		}
 	}()
 }
@@ -97,7 +107,7 @@ func main() {
 	defer db.Close()
 
 	makeTables()
-	sessionCleanup(time.Hour) // Remove expired sessions every hour
+	sessionCleanup(2 * time.Hour) // Clean up sessions and categories every 2 hours
 	initTemplates()
 	setHandlers()
 
