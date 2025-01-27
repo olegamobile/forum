@@ -152,13 +152,21 @@
                         <div class="thread-meta"><span class="material-symbols-outlined">person</span>
                             <b>{{.Author}}</b> posted on {{.CreatedDay}} {{.CreatedTime}}</div>
                         <div class="thread-content"> <span class="truncate">{{.Content }}</span></div>
-                        <form method="POST" action="/">
-                            <input type="hidden" name="searchcat" value="search">
-                            <div class="tags"><span class="material-symbols-outlined">category</span>
-                                {{ range .CatsSlice }}<button type="submit" class="tag" name="usersearch"
-                                    value="{{.}}">{{.}}</button>{{ end }}
+                        <div class="row">
+                            <div class="fl-left">
+                                <form method="POST" action="/">
+                                    <input type="hidden" name="searchcat" value="search">
+                                    <div class="tags"><span class="material-symbols-outlined">category</span>
+                                        {{ range .CatsSlice }}<button type="submit" class="tag" name="usersearch"
+                                            value="{{.}}">{{.}}</button>{{ end }}
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                            <div class="fl-right tags likes">
+                                <span class="material-symbols-outlined">Sentiment_Satisfied</span>{{.Likes}}
+                                <span class="material-symbols-outlined">Sentiment_Dissatisfied</span>{{.Dislikes}}
+                            </div>
+                        </div>
                     </div>
                     {{end}}
                 </div>

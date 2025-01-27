@@ -12,18 +12,12 @@
 
 /* Pseudo-class for variables */
 :root {
-    /* light mode */
     --light1: #faf7ef;
-    /* gritlab bg */
     --light2: #ffbc31;
     --light6: #ffe4ac;
-    /* gritlab yellow */
     --light3: #ea5f69;
-    /* gritlab red */
     --light4: #5562eb;
-    /* gritlab purple */
     --light5: #0e1342;
-    /* gritlab blue */
     --light-shadow: rgba(104, 104, 104, 0.244);
     /* dark mode */
     --dark1: rgb(60, 60, 60);
@@ -416,6 +410,10 @@ select,
 
 .threadbox h3 {
     margin-right: 10%;
+}
+
+.likes {
+    max-width: fit-content;
 }
 
 /* Thread page */

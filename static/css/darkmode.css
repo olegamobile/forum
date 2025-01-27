@@ -38,7 +38,7 @@
 }
 
 .dark-mode .thread {
-background-color: var(--dark1);
+background-color: var(--dark-shadow);
 }
 
 .dark-mode .truncate {
