@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fika Café Registering</title>
+    <title>Fika Café Registration</title>
     <link rel="stylesheet" href="/static/css/styles.css">
     <style>
         #username,
@@ -20,7 +20,7 @@
         {{ template "header" . }}
         <div class="container">
             <div class="leftnav">
-                <p>leftnav: possible place to put categories</p>
+                <!-- <p>leftnav: possible place to put categories</p> -->
             </div>
             <div class="content">
                 <h2>Register new user</h2>
@@ -33,12 +33,12 @@
                     <input type="password" id="pwd" name="password" required /><br>
                     <div id="error" class="red-alert" style="margin-top: 0.5rem;"></div>
                     <button type="submit" style="margin-top: 1rem;">Register</button>
-                    <p>Already have an account? <a href="/login">Login</a></p>
+                    <p>Already have an account? <a href="/login">Log in</a></p>
                     <p class="red-alert">{{.Message2}}</p>
                 </form>
             </div>
             <div class="rightnav">
-                <p>rightnav: placeholder for rightnav</p>
+                <!-- <p>rightnav: placeholder for rightnav</p> -->
             </div>
         </div>
         {{ template "footer" .}}

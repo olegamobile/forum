@@ -129,7 +129,7 @@ func addThreadHandler(w http.ResponseWriter, r *http.Request) {
 
 		//easteregg error 418 teapot
 		if title == "tea" && content == "tea" && rawCats == "tea" {
-			goToErrorPage("I'm a teapot. I refuse to brew coffee!", http.StatusTeapot, w, r)
+			goToErrorPage(`<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/418">I'm a teapot. I refuse to brew coffee!</a>`, http.StatusTeapot, w, r)
 			return
 		}
 
