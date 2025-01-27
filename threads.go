@@ -445,7 +445,6 @@ func ImageUploadHandler(r *http.Request, postID int64, userID string, w http.Res
 		return errMsg, err
 	}
 	files := r.MultipartForm.File["files"]
-	fmt.Println(len(files))
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
@@ -461,7 +460,6 @@ func ImageUploadHandler(r *http.Request, postID int64, userID string, w http.Res
 			errMsg = "Error while saving file"
 			return errMsg, err
 		}
-		fmt.Println(fileID)
 		SaveImageData(fileID, postID, userID, fileHeader.Filename, int(fileHeader.Size), w, file)
 		defer file.Close()
 	}

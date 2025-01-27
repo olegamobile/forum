@@ -63,6 +63,7 @@
     margin: 0px !important;
     flex: 2;
     font-optical-sizing: auto;
+    cursor: pointer;
   }
 
   .custom-file-button {
