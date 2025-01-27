@@ -394,7 +394,7 @@ select,
 
 /* Div post */
 .allthreads {
-    /* margin-top: 10px; */
+    margin-top: 10px;
 }
 
 .allthreads ul,
@@ -423,8 +423,11 @@ select,
     list-style: none;
     border-bottom: 1px solid lightgrey;
     padding: 20px;
-    margin: 4px;
+    /* margin: 4px; */
     margin-bottom: 10px;
+    /* margin: 20px auto; */
+    background: #ffffff;
+    border-radius: 8px;
 }
 
 .thread .material-symbols-outlined {
