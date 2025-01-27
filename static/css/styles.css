@@ -4,6 +4,7 @@
 @import "darkmode.css";
 @import "headerfooter.css";
 @import "image_upload_style.css";
+@import "categories.css";
 
 * {
     box-sizing: border-box;
@@ -70,6 +71,24 @@ body {
     padding: 10px;
     margin-left: 0;
     overflow-y: auto;
+}
+
+.leftcats {
+    float: left;
+    display: flex;
+    /* Ensures child elements align uniformly */
+    justify-content: center;
+    align-items: center;
+    grid-auto-flow: column;
+    list-style-type: none;
+    margin: 4px;
+}
+
+.leftnav button[type="submit"] {
+    background-color: var(--light6);
+}
+.leftnav button[type="submit"]:hover {
+    background-color: var(--light5);
 }
 
 .rightnav {
@@ -159,7 +178,7 @@ button:hover.like-button {
 }
 
 .newpost button,
-.thread-button {
+.thread-button, .filter-button {
     /* display: inline-block; */
     display: inline-flex;
     align-items: center;
@@ -181,9 +200,9 @@ button:hover.like-button {
     /* Add spacing between the icon and text */
 }
 
-.filter-button {
+/* .filter-button {
     background-color: var(--light6) !important;
-}
+} */
 
 .fl-left {
     float: left;
@@ -198,7 +217,7 @@ button:hover.like-button {
     
 }
 
-input[type="reset"] {
+input[type="reset"], button[type="submit"].reset{
     display: inline-block;
     text-align: center;
     text-decoration: none;
@@ -217,8 +236,8 @@ input[type="reset"] {
 }
 
 .newpost button:hover,
-input[type="reset"]:hover,
-.thread-button:hover {
+input[type="reset"]:hover, button[type="submit"].reset:hover,
+.thread-button:hover, .filter-button:hover {
     color: var(--light1);
     background-color: var(--light5);
 }
@@ -330,7 +349,7 @@ textarea {
     /* Space between elements */
     width: 100%;
     padding: 10px;
-    border: 1px solid lightgrey;
+    border: 3px solid lightgrey;
     border-radius: 10px;
 }
 
@@ -349,13 +368,13 @@ textarea {
     padding: 10px;
 }
 
-.filter-container select,
+select,
 .filter-container input[type="search"] {
     border: none;
     border-radius: 4px;
     padding: 10px;
     font-family: "Space Grotesk", serif;
-    width: 100%;
+    max-width: 300px;
     font-size: clamp(12px, 1vw, 18px);
 }
 
@@ -403,7 +422,7 @@ textarea {
 .thread {
     list-style: none;
     border-bottom: 1px solid lightgrey;
-    padding: 8px;
+    padding: 20px;
     margin: 4px;
     margin-bottom: 10px;
 }
@@ -413,7 +432,7 @@ textarea {
 }
 
 .thread li {
-    padding-top: 8px;
+    padding: 10px;
     vertical-align: middle;
 }
 
