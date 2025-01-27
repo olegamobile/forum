@@ -62,7 +62,7 @@
             } else if (username.length < 5) {
                 messages.push("Username must be at least 5 characters");
             } else if (username.length > 25) {
-                messages.push("Username must be less than 25 characters");
+                messages.push("Username must be less than 26 characters");
             } else if (!/^[a-zA-Z0-9\-_]+$/.test(username)) {
                 messages.push("Username can only contain letters, numbers, hyphens and underscores");
             }
@@ -81,6 +81,8 @@
                 messages.push("Password is required");
             } else if (password.length < 5) {
                 messages.push("Password must be at least 5 characters");
+            } else if (password.length > 25) {
+                messages.push("Password must be less than 26 characters");
             } else if (!/^[a-zA-Z0-9\-_!@#$%^&*()]+$/.test(password)) {
                 messages.push("Password can only contain letters, numbers, and special characters");
             }
