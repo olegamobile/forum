@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>grit:lab Fika Café</title>
     <link rel="stylesheet" href="/static/css/styles.css">
-    <link rel="stylesheet" href="/static/css/categories.css">
 </head>
 
 <body>
@@ -15,14 +14,33 @@
 
         <div class="container">
             <div class="leftnav">
-                <!-- <p>leftnav: possible place to put categories</p> -->
+                <h2>Categories</h2>
+
+                <form method="POST" action="/">
+                    <input type="hidden" name="searchcat" value="search">
+                    <div class="tags">
+                        {{range .CategoriesList}}
+                        <button type="submit" class="tag" name="usersearch"
+                            value="{{.}}">{{.}}</button>
+                            {{ end }}
+                    </div>
+                </form>
+<!-- 
+                <div class="tags">
+                    <ul>
+                        {{range .CategoriesList}}
+                        <li class="leftcats"><button type="submit" class="tag" name="usersearch"
+                                value="{{.}}">{{.}}</button></li>
+                        {{end}}
+                    </ul>
+                </div> -->
             </div>
 
             <div class="content">
 
                 <div class="rows">
                     <!-- Show filter button -->
-                    <div class="fl-right"><button class="thread-button filter-button" id="filter-button"><span
+                    <div class="fl-right"><button class="filter-button" id="filter-button"><span
                                 class="material-symbols-outlined">filter_alt</span>Show filter</button></div>
 
                     {{if .ValidSes}}
@@ -38,21 +56,26 @@
                             <div class="modal-content"> <span class="close">&times;</span>
                                 <h3>Start a new thread</h3>
                                 <form method="POST" action="/add" enctype="multipart/form-data">
-                                    <input type="text" name="title" placeholder="Thread title" maxlength="{{.TitleMaxLen}}" required><br>
-                                    <textarea name="content" placeholder="Message" rows="6" maxlength="{{.ContentMaxLen}}" required></textarea><br>
-                                    <div class ="row">
-                                    <select name="categorySelector" id="categorySelector" onchange="updateCategory()">
-                                        <option value="" disabled selected>Choose category</option>
-                                        {{range .CategoriesList}}
-                                        <option value="{{.}}">{{.}}</option>
-                                        {{end}}
-                                    </select>
-                                    <input type="text" name="categories" id="categories" placeholder="List categories" maxlength="{{.CategoriesMaxLen}}" required>
+                                    <input type="text" name="title" placeholder="Thread title"
+                                        maxlength="{{.TitleMaxLen}}" required><br>
+                                    <textarea name="content" placeholder="Message" rows="6"
+                                        maxlength="{{.ContentMaxLen}}" required></textarea><br>
+                                    <div class="row">
+                                        <select name="categorySelector" id="categorySelector"
+                                            onchange="updateCategory()">
+                                            <option value="" disabled selected>Choose category</option>
+                                            {{range .CategoriesList}}
+                                            <option value="{{.}}">{{.}}</option>
+                                            {{end}}
+                                        </select>
+                                        <input type="text" name="categories" id="categories"
+                                            placeholder="List categories" maxlength="{{.CategoriesMaxLen}}" required>
                                     </div><br>
                                     <label for="files" class="custom-file-button">Add Image</label>
                                     <button type="submit" id="submitButton" style="float: right;">Start thread</button>
                                     <input type="reset" value="Clear all" style="float: right;" />
-                                    <input type="file" id="files" name="files" multiple accept="image/*" onchange="updateFileList()">
+                                    <input type="file" id="files" name="files" multiple accept="image/*"
+                                        onchange="updateFileList()">
                                     <input type="hidden" id="selectedFileNames" name="selectedFileNames">
                                     <p id="warning" class="warning"></p>
                                     <div id="previewContainer" class="preview-container"></div>
@@ -63,7 +86,7 @@
 
                     {{else}}
                     <div class="fl-left">
-                        <p><a href="/login">Log in</a> to start posting!</p>
+                        <p><a href="/login">Log in</a> or <a href="/register">register</a> to start posting!</p>
                         <p class="red-alert">{{.Message}}</p>
                     </div>
                     {{end}}
@@ -110,8 +133,8 @@
                             <!-- Third column -->
                             <div class="col">
                                 <p></p>
-                                <button type="submit" name="reset" value="reset" style="float: right;">Reset
-                                    filter</button>
+                                <button type="submit" name="reset" value="reset" class="reset"
+                                    style="float: right;">Reset filter</button>
                             </div>
                         </div>
                     </form>
@@ -126,8 +149,8 @@
                         <div style="float: right;"><a href="/thread/{{.ID}}"><span
                                     class="material-symbols-outlined">comment</span>{{.RepliesN}}</a></div>
                         <div class="thread-title"><a href="/thread/{{.ID}}">{{.Title}}</a></div>
-                        <div class="thread-meta"><span class="material-symbols-outlined">person</span> {{.Author}}
-                            posted on {{.CreatedDay}} {{.CreatedTime}}</div>
+                        <div class="thread-meta"><span class="material-symbols-outlined">person</span>
+                            <b>{{.Author}}</b> posted on {{.CreatedDay}} {{.CreatedTime}}</div>
                         <div class="thread-content"> <span class="truncate">{{.Content }}</span></div>
                         <form method="POST" action="/">
                             <input type="hidden" name="searchcat" value="search">
