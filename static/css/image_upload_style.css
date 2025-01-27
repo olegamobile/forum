@@ -79,6 +79,11 @@
     border-radius: 4px;
     margin: 10px 0 0;
   }
+
+  .custom-file-button:hover {
+    color: var(--light1);
+    background-color: var(--light5);
+  }
   
   /* Hide the file input */
   input[type="file"] {

@@ -37,6 +37,18 @@
     color: var(--dark-text);
 }
 
+.dark-mode .thread {
+background-color: var(--dark1);
+}
+
+.dark-mode .truncate {
+    color: var(--dark-text);
+}
+
+.dark-mode .thread-meta {
+    color: var(--dark-text);
+}
+
 .dark-mode .topnav ul {
     color: var(--light5);
     background-color: var(--dark2);
@@ -49,9 +61,7 @@
 .dark-mode .topnav input[type="radio"] {
     background-color: none;
     color: var(--dark-text);
-
 }
-
 
 .dark-mode .topnav li a:hover,
 .dark-mode .topnav li button:hover,
@@ -60,13 +70,14 @@
     background-color: var(--dark4);
 }
 
-.dark-mode button, .dark-mode button.modalBtn {
+.dark-mode button, .dark-mode button.modalBtn, .dark-mode .newpost button,
+.dark-mode .thread-button, .dark-mode .filter-button, .dark-mode .leftnav button[type="submit"] {
     color: var(--dark-text);
     background-color: var(--dark2);
 }
 
-.dark-mode button:hover, .dark-mode button.modalBtn:hover, .dark-mode input[type="reset"]:hover, .dark-mode button.dislike-button:hover,
-.dark-mode button.like-button:hover  {
+.dark-mode button:hover, .dark-mode button.modalBtn:hover, .dark-mode input[type="reset"]:hover, .dark-mode button[type="submit"].reset:hover, .dark-mode button.dislike-button:hover,
+.dark-mode button.like-button:hover, .dark-mode .leftnav button[type="submit"]:hover {
     color: var(--dark-text);
     background-color: var(--dark4);
 }

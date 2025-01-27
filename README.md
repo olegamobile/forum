@@ -169,7 +169,7 @@ docker container run -p <port> --detach --name <container_name> <image_name>
 
 Finally, open your browser and navigate to `http://localhost:8080` to see the app in action!
 
-![Sample forum_gif](./forum_gif.gif)
+<!-- ![Sample forum_gif](./forum_gif.gif) -->
 
 ## Members
 
