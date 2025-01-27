@@ -68,7 +68,7 @@ func makeTables() {
 		return
 	}
 
-	// Create reactions table if it doesn't exist
+	// Create categories table if it doesn't exist
 	createCategoriesTableQuery := `
 	CREATE TABLE IF NOT EXISTS categories (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,7 +81,7 @@ func makeTables() {
 		return
 	}
 
-	// Create reactions table if it doesn't exist
+	// Create table to connect posts and categories if it doesn't exist
 	createPostsCategoriesTableQuery := `
 	CREATE TABLE IF NOT EXISTS posts_categories (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
