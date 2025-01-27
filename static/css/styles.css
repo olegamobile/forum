@@ -420,6 +420,23 @@ select,
 }
 
 /* Thread page */
+
+.like-dislike-cell {
+    padding: 0px;
+    padding-left: 5px;
+    white-space: nowrap;
+}
+
+.like-form,
+.dislike-form {
+    display: inline;
+}
+
+.like-button,
+.dislike-button {
+    cursor: pointer;
+}
+
 .thread {
     list-style: none;
     border-bottom: 1px solid lightgrey;
