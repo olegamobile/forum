@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"time"
 )
 
 func makeTables() {
@@ -114,4 +116,33 @@ CREATE TABLE IF NOT EXISTS images (
 		return
 	}
 
+}
+
+// removeExpiredSessions deletes all expired sessions, runs with dataCleanup()
+func removeExpiredSessions() {
+	_, err := db.Exec("DELETE FROM sessions WHERE expires_at < ?", time.Now())
+	if err != nil {
+		log.Printf("Error deleting expired sessions: %v\n", err.Error())
+	}
+}
+
+// removeUnusedCategories deletes unused categories, runs with dataCleanup()
+func removeUnusedCategories() {
+	delUnusedCatsQuery := `DELETE FROM categories WHERE id NOT IN (SELECT DISTINCT category_id	FROM posts_categories);`
+	_, err := db.Exec(delUnusedCatsQuery)
+	if err != nil {
+		log.Printf("Error deleting unused categories: %v\n", err.Error())
+	}
+}
+
+// dataCleanup removes expired sessions or unused categories every given time interval
+func dataCleanup(interval time.Duration, f func(), name string) {
+	ticker := time.NewTicker(interval)
+	f() // run cleanup at the start
+	go func() {
+		for range ticker.C {
+			log.Println("Running", name, "cleanup...")
+			f()
+		}
+	}()
 }
