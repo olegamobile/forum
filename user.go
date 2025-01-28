@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"html"
-	"log"
 	"net/http"
 	"net/mail"
 	"strings"
@@ -22,14 +21,6 @@ type loginData struct {
 	UsrNm     string
 	ReturnURL string
 	LoginURL  string
-}
-
-// removeExpiredSessions deletes all expired sessions
-func removeExpiredSessions() {
-	_, err := db.Exec("DELETE FROM sessions WHERE expires_at < ?", time.Now())
-	if err != nil {
-		log.Printf("Error deleting expired sessions: %v\n", err.Error())
-	}
 }
 
 // validateSession returns user id, name and if session is (still) valid
