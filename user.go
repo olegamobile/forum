@@ -25,8 +25,6 @@ type loginData struct {
 
 // validateSession returns user id, name and if session is (still) valid
 func validateSession(r *http.Request) (string, string, bool) {
-	//removeExpiredSessions()	// Doing this every hour instead from main()
-
 	validSes := true
 	var userID string
 	var userName string
@@ -36,7 +34,6 @@ func validateSession(r *http.Request) (string, string, bool) {
 		query := `SELECT user_id, username FROM sessions WHERE session_token = ? AND expires_at > ?`
 		err := db.QueryRow(query, cookie.Value, time.Now()).Scan(&userID, &userName)
 		if err != nil { // invalid session
-			//fmt.Println("Invalid session:", err.Error())
 			validSes = false
 		}
 	} else {
