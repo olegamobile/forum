@@ -62,7 +62,8 @@ func makeTables() {
 		post_id INTEGER NOT NULL,          -- ID of the thread or reply
 		reaction_type TEXT NOT NULL,       -- 'like' or 'dislike'
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 		UNIQUE (user_id, post_id)  -- Prevents duplicate reactions for the same post type (no simultaneous like and dislike)
 	);`
 	if _, err := db.Exec(createReactionsTableQuery); err != nil {
@@ -90,8 +91,8 @@ func makeTables() {
 		post_id INTEGER NOT NULL,
 		category_id INTEGER NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (category_id) REFERENCES categories(id),
+		FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+		FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
 		UNIQUE (post_id, category_id) 
 	);`
 	if _, err := db.Exec(createPostsCategoriesTableQuery); err != nil {
@@ -108,8 +109,8 @@ CREATE TABLE IF NOT EXISTS images (
 	original_name TEXT,
 	file_size INT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (post_id) REFERENCES posts(id),
-	FOREIGN KEY (user_id) REFERENCES users(id)
+	FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );`
 	if _, err := db.Exec(createImagesTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
