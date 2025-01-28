@@ -14,11 +14,12 @@ func makeTables() {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			base_id INTEGER DEFAULT 0,
 			author TEXT NOT NULL,
-			authorID TEXT NOT NULL,
+			authorID TEXT,
 			title TEXT DEFAULT '',
 			content TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-			parent_id INTEGER DEFAULT 0
+			parent_id INTEGER DEFAULT 0,
+			FOREIGN KEY (authorID) REFERENCES users(id) ON DELETE SET NULL
 		);`
 	if _, err := db.Exec(createPostsTableQuery); err != nil {
 		fmt.Println("Error creating posts table:", err)
@@ -58,12 +59,12 @@ func makeTables() {
 	createReactionsTableQuery := `
 	CREATE TABLE IF NOT EXISTS post_reactions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		user_id TEXT NOT NULL,          -- User who reacted
+		user_id TEXT,          -- User who reacted
 		post_id INTEGER NOT NULL,          -- ID of the thread or reply
 		reaction_type TEXT NOT NULL,       -- 'like' or 'dislike'
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
 		UNIQUE (user_id, post_id)  -- Prevents duplicate reactions for the same post type (no simultaneous like and dislike)
 	);`
 	if _, err := db.Exec(createReactionsTableQuery); err != nil {
@@ -105,12 +106,12 @@ func makeTables() {
 CREATE TABLE IF NOT EXISTS images (
 	id TEXT PRIMARY KEY,  -- includes file extension (like [UUID].jpg)
 	post_id INTEGER DEFAULT NULL,  -- if NOT NULL it is a post image, 
-	user_id INTEGER NOT NULL,
+	user_id INTEGER,
 	original_name TEXT,
 	file_size INT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );`
 	if _, err := db.Exec(createImagesTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
