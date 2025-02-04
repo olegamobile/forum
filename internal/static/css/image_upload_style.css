@@ -91,4 +91,8 @@
     display: none;
   }
 
-  
+ #submitButton:disabled {
+    background-color: #dddddd91;
+    color: var(--light1);
+    cursor: not-allowed;
+}
