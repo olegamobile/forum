@@ -1,12 +1,10 @@
-package main
+package db
 
 import (
 	"fmt"
-	"log"
-	"time"
 )
 
-func makeTables() {
+func MakeTables() {
 
 	// Create posts table if it doesn't exist
 	createPostsTableQuery := `
@@ -21,7 +19,7 @@ func makeTables() {
 			parent_id INTEGER DEFAULT 0,
 			FOREIGN KEY (authorID) REFERENCES users(id) ON DELETE SET NULL
 		);`
-	if _, err := db.Exec(createPostsTableQuery); err != nil {
+	if _, err := DB.Exec(createPostsTableQuery); err != nil {
 		fmt.Println("Error creating posts table:", err)
 		return
 	}
@@ -35,7 +33,7 @@ func makeTables() {
 		password TEXT NOT NULL,  -- Hashed passwords
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
-	if _, err := db.Exec(createUsersTableQuery); err != nil {
+	if _, err := DB.Exec(createUsersTableQuery); err != nil {
 		fmt.Println("Error creating users table:", err)
 		return
 	}
@@ -50,7 +48,7 @@ func makeTables() {
 		expires_at DATETIME NOT NULL,
 		FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 	);`
-	if _, err := db.Exec(createSessionsTableQuery); err != nil {
+	if _, err := DB.Exec(createSessionsTableQuery); err != nil {
 		fmt.Println("Error creating sessions table:", err)
 		return
 	}
@@ -67,7 +65,7 @@ func makeTables() {
 		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
 		UNIQUE (user_id, post_id)  -- Prevents duplicate reactions for the same post type (no simultaneous like and dislike)
 	);`
-	if _, err := db.Exec(createReactionsTableQuery); err != nil {
+	if _, err := DB.Exec(createReactionsTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
 		return
 	}
@@ -80,7 +78,7 @@ func makeTables() {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		UNIQUE (name)  -- Prevents duplicate categories
 	);`
-	if _, err := db.Exec(createCategoriesTableQuery); err != nil {
+	if _, err := DB.Exec(createCategoriesTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
 		return
 	}
@@ -96,7 +94,7 @@ func makeTables() {
 		FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
 		UNIQUE (post_id, category_id) 
 	);`
-	if _, err := db.Exec(createPostsCategoriesTableQuery); err != nil {
+	if _, err := DB.Exec(createPostsCategoriesTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
 		return
 	}
@@ -113,38 +111,9 @@ CREATE TABLE IF NOT EXISTS images (
 	FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
 	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );`
-	if _, err := db.Exec(createImagesTableQuery); err != nil {
+	if _, err := DB.Exec(createImagesTableQuery); err != nil {
 		fmt.Println("Error creating reactions table:", err)
 		return
 	}
 
-}
-
-// removeExpiredSessions deletes all expired sessions, runs with dataCleanup()
-func removeExpiredSessions() {
-	_, err := db.Exec("DELETE FROM sessions WHERE expires_at < ?", time.Now())
-	if err != nil {
-		log.Printf("Error deleting expired sessions: %v\n", err.Error())
-	}
-}
-
-// removeUnusedCategories deletes unused categories, runs with dataCleanup()
-func removeUnusedCategories() {
-	delUnusedCatsQuery := `DELETE FROM categories WHERE id NOT IN (SELECT DISTINCT category_id	FROM posts_categories);`
-	_, err := db.Exec(delUnusedCatsQuery)
-	if err != nil {
-		log.Printf("Error deleting unused categories: %v\n", err.Error())
-	}
-}
-
-// dataCleanup removes expired sessions or unused categories every given time interval
-func dataCleanup(interval time.Duration, f func(), name string) {
-	ticker := time.NewTicker(interval)
-	f() // run cleanup at the start
-	go func() {
-		for range ticker.C {
-			log.Println("Running", name, "cleanup...")
-			f()
-		}
-	}()
 }
