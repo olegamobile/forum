@@ -15,27 +15,31 @@ var (
 
 func InitTemplates() {
 	var err error
-	IndexTmpl, err = template.ParseFiles("templates/index.html", "templates/header.html", "templates/footer.html")
+
+	head := "internal/static/templates/header.html"
+	foot := "internal/static/templates/footer.html"
+
+	IndexTmpl, err = template.ParseFiles("internal/static/templates/index.html", head, foot)
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	ThreadTmpl, err = template.ParseFiles("templates/thread.html", "templates/header.html", "templates/reply.html", "templates/footer.html")
+	ThreadTmpl, err = template.ParseFiles("internal/static/templates/thread.html", head, "internal/static/templates/reply.html", foot)
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	LogTmpl, err = template.ParseFiles("templates/login.html", "templates/header.html", "templates/footer.html")
+	LogTmpl, err = template.ParseFiles("internal/static/templates/login.html", head, foot)
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	RegisterTmpl, err = template.ParseFiles("templates/registerUser.html", "templates/header.html", "templates/footer.html")
+	RegisterTmpl, err = template.ParseFiles("internal/static/templates/registerUser.html", head, foot)
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return
 	}
-	ErrorTmpl, err = template.ParseFiles("templates/error.html", "templates/header.html", "templates/footer.html")
+	ErrorTmpl, err = template.ParseFiles("internal/static/templates/error.html", head, foot)
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		return

@@ -35,7 +35,7 @@ func uniqueFileName(file string) (string, error) {
 
 func saveImageData(fileID string, postID int64, userID, originalName string, fileSize int, w http.ResponseWriter, uploadedFile multipart.File) (string, error) {
 
-	imageUploadDir := "images"
+	imageUploadDir := "internal/static/images"
 	err := os.MkdirAll(imageUploadDir, 0777)
 	if err != nil {
 		log.Println("Error creating directory:", err)
@@ -90,7 +90,7 @@ func getThreadImageURL(threadID int) ([]string, error) {
 			log.Println("Error scanning image ID:", err)
 			return nil, err
 		}
-		imageURL := "/images/" + imageID
+		imageURL := "/internal/static/images/" + imageID
 		images = append(images, imageURL)
 	}
 	return images, nil

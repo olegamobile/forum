@@ -8,11 +8,11 @@ import (
 func SetHandlers() {
 
 	fileServer := http.FileServer(http.Dir("./"))
-	http.Handle("/static/", fileServer)
-	http.Handle("/images/", fileServer)
+	http.Handle("/internal/static/", fileServer)
+	http.Handle("/internal/static/images/", fileServer)
 
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "static/favicon.ico")
+		http.ServeFile(w, r, "internal/static/favicon.ico")
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
