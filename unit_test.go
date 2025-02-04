@@ -1,6 +1,8 @@
 package main
 
 import (
+	"forum/internal/db"
+	"forum/internal/handlers"
 	"testing"
 	"time"
 
@@ -10,7 +12,8 @@ import (
 
 func TestCheckUsername(t *testing.T) {
 	Testinit()
-	defer db.Close()
+
+	defer db.DB.Close()
 	tests := []struct {
 		input    string
 		expected bool
@@ -22,7 +25,7 @@ func TestCheckUsername(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := checkUsername(test.input)
+		result := handlers.CheckUsername(test.input)
 		if result != test.expected {
 			t.Errorf("checkUsername(%v) = %v; want %v", test.input, result, test.expected)
 		}
@@ -31,7 +34,7 @@ func TestCheckUsername(t *testing.T) {
 
 func TestCheckPassword(t *testing.T) {
 	Testinit()
-	defer db.Close()
+	defer db.DB.Close()
 	tests := []struct {
 		input    string
 		expected bool
@@ -43,7 +46,7 @@ func TestCheckPassword(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := checkPassword(test.input)
+		result := handlers.CheckPassword(test.input)
 		if result != test.expected {
 			t.Errorf("checkUsername(%v) = %v; want %v", test.input, result, test.expected)
 		}
@@ -52,28 +55,28 @@ func TestCheckPassword(t *testing.T) {
 
 func TestNameOrEmailExists(t *testing.T) {
 	Testinit()
-	defer db.Close()
+	defer db.DB.Close()
 
 	// Create users table
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL);`)
+	_, err := db.DB.Exec(`CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL);`)
 	if err != nil {
 		t.Fatalf("failed to create users table: %v", err)
 	}
 
 	// Insert a test user
-	_, err = db.Exec(`INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?);`, "test-id", "testuser@example.com", "testuser", "password")
+	_, err = db.DB.Exec(`INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?);`, "test-id", "testuser@example.com", "testuser", "password")
 	if err != nil {
 		t.Fatalf("failed to insert test user: %v", err)
 	}
 
-	result := nameOremailExists(db, "testuser")
+	result := handlers.NameOremailExists("testuser")
 	if !result {
 		t.Errorf("nameOremailExists returned false; want true")
 	}
 }
 
 func TestCreateSession(t *testing.T) {
-	sessionToken, err := createSession()
+	sessionToken, err := handlers.CreateSession()
 	if err != nil {
 		t.Fatalf("createSession returned error: %v", err)
 	}
@@ -86,15 +89,15 @@ func TestCreateSession(t *testing.T) {
 func TestSaveSession(t *testing.T) {
 	// Use in-memory SQLite database
 	Testinit()
-	defer db.Close()
+	defer db.DB.Close()
 
 	// Create sessions table
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, username TEXT, session_token TEXT UNIQUE NOT NULL, expires_at DATETIME NOT NULL);`)
+	_, err := db.DB.Exec(`CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, username TEXT, session_token TEXT UNIQUE NOT NULL, expires_at DATETIME NOT NULL);`)
 	if err != nil {
 		t.Fatalf("failed to create sessions table: %v", err)
 	}
 
-	err = saveSession("userID", "username", "sessionToken", time.Now())
+	err = handlers.SaveSession("userID", "username", "sessionToken", time.Now())
 	if err != nil {
 		t.Errorf("saveSession returned error: %v", err)
 	}

@@ -2,6 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"forum/cmd/router"
+	"forum/internal/db"
+	"forum/internal/handlers"
+	"forum/internal/templates"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,20 +17,20 @@ import (
 
 func Testinit() {
 	// Setup: create in-mem db; db is temp and lost upon prog termination
-	db, _ = sql.Open("sqlite3", ":memory:")
+	db.DB, _ = sql.Open("sqlite3", ":memory:")
 
 	// Run our program
-	makeTables()
-	initTemplates()
+	db.MakeTables()
+	templates.InitTemplates()
 
 	// Clear existing handlers to avoid duplicate route registration
 	http.DefaultServeMux = new(http.ServeMux)
-	setHandlers()
+	router.SetHandlers()
 }
 
 func TestIndexHandler(t *testing.T) {
 	Testinit()
-	defer db.Close()
+	defer db.DB.Close()
 
 	tests := []struct {
 		name     string
@@ -109,7 +113,7 @@ func TestIndexHandler(t *testing.T) {
 			// Record the response
 			rr := httptest.NewRecorder()
 			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				indexHandler(w, r, "")
+				handlers.IndexHandler(w, r, "")
 			})
 			handler.ServeHTTP(rr, req)
 
@@ -124,7 +128,7 @@ func TestIndexHandler(t *testing.T) {
 
 func TestRegisterHandler(t *testing.T) {
 	Testinit()
-	defer db.Close()
+	defer db.DB.Close()
 
 	tests := []struct {
 		name       string
@@ -183,7 +187,7 @@ func TestRegisterHandler(t *testing.T) {
 
 			// Record the response
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(registerHandler)
+			handler := http.HandlerFunc(handlers.RegisterHandler)
 			handler.ServeHTTP(rr, req)
 
 			// Check the status code
@@ -194,7 +198,7 @@ func TestRegisterHandler(t *testing.T) {
 			// Verify if user was added to the db for successful POST
 			if tt.method == "POST" && tt.wantCode == http.StatusSeeOther && tt.wantResult != "" {
 				var username string
-				err = db.QueryRow("SELECT username FROM users WHERE username = ?", tt.wantResult).Scan(&username)
+				err = db.DB.QueryRow("SELECT username FROM users WHERE username = ?", tt.wantResult).Scan(&username)
 				if err != nil {
 					t.Errorf("user not found in database: %v", err)
 				}
@@ -208,7 +212,7 @@ func TestRegisterHandler(t *testing.T) {
 
 func TestLogUserInHandler(t *testing.T) {
 	Testinit()
-	defer db.Close()
+	defer db.DB.Close()
 
 	tests := []struct {
 		name     string
@@ -250,7 +254,7 @@ func TestLogUserInHandler(t *testing.T) {
 
 	// Add a test user to the database
 	hashPass, _ := bcrypt.GenerateFromPassword([]byte("testpass"), bcrypt.DefaultCost)
-	db.Exec("INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?)", "testid", "test@example.com", "testuser", string(hashPass))
+	db.DB.Exec("INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?)", "testid", "test@example.com", "testuser", string(hashPass))
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -269,7 +273,7 @@ func TestLogUserInHandler(t *testing.T) {
 
 			// Record the response
 			rr := httptest.NewRecorder()
-			handler := http.HandlerFunc(logUserInHandler)
+			handler := http.HandlerFunc(handlers.LogUserInHandler)
 			handler.ServeHTTP(rr, req)
 
 			// Check the status code
@@ -280,7 +284,7 @@ func TestLogUserInHandler(t *testing.T) {
 			// Check if the session was created for POST requests
 			if tt.method == "POST" && tt.wantCode == http.StatusSeeOther {
 				var sessionToken string
-				err = db.QueryRow("SELECT session_token FROM sessions WHERE user_id = ?", "testid").Scan(&sessionToken)
+				err = db.DB.QueryRow("SELECT session_token FROM sessions WHERE user_id = ?", "testid").Scan(&sessionToken)
 				if err != nil {
 					t.Errorf("session not found in database: %v", err)
 				}
