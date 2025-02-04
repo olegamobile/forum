@@ -78,8 +78,8 @@
                             
                             {{if .Images}}
                             <div class="images">
-                                {{range .Images}}
-                                <img src="{{.}}" alt="Thread Image" class="thread-image" style="max-width: 100%; margin: 10px 0;">
+                                {{range $imageURL, $originalName := .Images}}
+                                <img src="{{$imageURL}}" alt="{{$originalName}}" title="{{$originalName}}" class="thread-image" style="max-width: 100%; margin: 10px 0;">
                                 {{end}}
                             </div>
                             {{end}}

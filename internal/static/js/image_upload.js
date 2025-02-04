@@ -57,16 +57,8 @@ function updateFileList() {
     reader.readAsDataURL(file);
   }
 
-  // input.value = "";
+checkFileSize();
 
-  if (totalSize > maxTotalSize) {
-    showElement("warning");
-    warning.textContent = "Total file size exceeds 20 MB. Please remove some files.";
-    submitButton.disabled = true;
-  } else {
-    warning.textContent = "";
-    submitButton.disabled = false;
-  }
 }
 
 function deleteFile(fileName, previewDiv) {
@@ -76,17 +68,8 @@ function deleteFile(fileName, previewDiv) {
   }
   previewDiv.remove();
 
-  const warning = document.getElementById("warning");
-  const submitButton = document.getElementById("submitButton");
+  checkFileSize();
 
-  if (totalSize > maxTotalSize) {
-    showElement("warning");
-    warning.textContent = "Total file size exceeds 20 MB. Please delete some files.";
-    submitButton.disabled = true;
-  } else {
-    warning.textContent = "";
-    submitButton.disabled = false;
-  }
 }
 
 function formatSize(bytes) {
@@ -106,4 +89,14 @@ function truncateFileName(name) {
   const extension = parts.pop();
   const baseName = parts.join(".");
   return baseName.length > 10 ? `${baseName.substring(0, 10)}...${extension}` : name;
+}
+
+function checkFileSize() {
+  if (totalSize > maxTotalSize) {
+    warning.textContent = "Total files size exceeds 20 MB. Please delete some files.";
+    submitButton.disabled = true;
+  } else {
+    warning.textContent = "";
+    submitButton.disabled = false;
+  }
 }
