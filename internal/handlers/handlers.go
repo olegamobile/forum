@@ -48,6 +48,7 @@ type PageData struct {
 	CategoriesMaxLen int
 	LoginURL         string
 	CategoriesList   []string
+	TopTenCategories []string
 }
 
 type errorData struct {
@@ -140,7 +141,12 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 	sortByRecentInteraction(&threads, w, r)
 
 	categories := strings.Fields(fetchCategories(-1))
-
+	topTen := []string{}
+	if len(categories) < 10 {
+		topTen = categories
+	} else {
+		topTen = categories[:10]
+	}
 	data := PageData{
 		Threads:          threads,
 		ValidSes:         validSes,
@@ -155,6 +161,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, msg string) {
 		CategoriesMaxLen: categoriesMaxLen,
 		LoginURL:         "/login",
 		CategoriesList:   categories,
+		TopTenCategories: topTen,
 	}
 	templates.IndexTmpl.Execute(w, data)
 }

@@ -109,7 +109,7 @@ h1 a:hover {
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
-
+    text-align: center;
     padding: 2rem;
     max-width: 100%;
     border-top: 1px solid lightgrey;
@@ -123,14 +123,6 @@ h1 a:hover {
     color: var(--light5);
 }
 
-.footer ul {
-    list-style-type: none;
-    grid-auto-flow: column;
-    overflow: hidden;
-    position: sticky;
-    max-height: fit-content;
-}
-
 .footer li {
     float: left;
     display: flex;
@@ -139,11 +131,16 @@ h1 a:hover {
     align-items: center;
 }
 
-#author-container {
+.author-container {
     padding-top: 1px solid lightgrey;
     display: flex;
     justify-content: center;
-    gap: 20px;
+    list-style-type: none;
+    grid-auto-flow: column;
+    overflow: hidden;
+    position: sticky;
+    max-height: fit-content;
+    flex-wrap: wrap;
 }
 
 .authors {

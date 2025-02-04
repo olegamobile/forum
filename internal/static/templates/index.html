@@ -14,12 +14,12 @@
 
         <div class="container">
             <div class="leftnav">
-                <h2>Categories</h2>
+                <h2>Top 10 categories</h2>
 
                 <form method="POST" action="/">
                     <input type="hidden" name="searchcat" value="search">
                     <div class="tags">
-                        {{range .CategoriesList}}
+                        {{range .TopTenCategories}}
                         <button type="submit" class="tag" name="usersearch"
                             value="{{.}}">{{.}}</button>
                             {{ end }}
