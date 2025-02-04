@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +13,7 @@ import (
 )
 
 func imageType(file string) bool {
-	extensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webm"}
+	extensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webm"}
 	imageExtensions := make(map[string]bool)
 	for _, ext := range extensions {
 		imageExtensions[ext] = true
@@ -33,9 +32,12 @@ func uniqueFileName(file string) (string, error) {
 	return fileID, nil
 }
 
-func saveImageData(fileID string, postID int64, userID, originalName string, fileSize int, w http.ResponseWriter, uploadedFile multipart.File) (string, error) {
+func saveImageData(fileID string, postID int64, userID string, fileHeader *multipart.FileHeader, uploadedFile multipart.File) (string, error) {
 
+	originalName := fileHeader.Filename
+	fileSize := int(fileHeader.Size)
 	imageUploadDir := "internal/static/images"
+
 	err := os.MkdirAll(imageUploadDir, 0777)
 	if err != nil {
 		log.Println("Error creating directory:", err)
@@ -76,22 +78,23 @@ func saveImageData(fileID string, postID int64, userID, originalName string, fil
 	}
 	return "", nil
 }
-func getThreadImageURL(threadID int) ([]string, error) {
-	rows, err := db.DB.Query(`SELECT id FROM images WHERE post_id = ?`, threadID)
+func getThreadImageURL(threadID int) (map[string]string, error) {
+	rows, err := db.DB.Query(`SELECT id, original_name FROM images WHERE post_id = ?`, threadID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var images []string
+	images := make(map[string]string)
+
 	for rows.Next() {
-		var imageID string
-		err := rows.Scan(&imageID)
+		var imageID, originalName string
+		err := rows.Scan(&imageID, &originalName)
 		if err != nil {
 			log.Println("Error scanning image ID:", err)
 			return nil, err
 		}
 		imageURL := "/internal/static/images/" + imageID
-		images = append(images, imageURL)
+		images[imageURL] = originalName
 	}
 	return images, nil
 }
