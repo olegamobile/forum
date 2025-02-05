@@ -43,7 +43,7 @@ function updateFileList() {
       const deleteButton = document.createElement("div");
       deleteButton.textContent = "×";
       deleteButton.classList.add("delete-button");
-      deleteButton.onclick = () => deleteFile(file.name, previewDiv);
+      deleteButton.onclick = () => deleteFile(file.name, previewDiv, input);
 
       infoBox.appendChild(title);
       infoBox.appendChild(size);
@@ -61,12 +61,21 @@ checkFileSize();
 
 }
 
-function deleteFile(fileName, previewDiv) {
+function deleteFile(fileName, previewDiv, input) {
   if (selectedFiles.has(fileName)) {
     totalSize -= selectedFiles.get(fileName);
     selectedFiles.delete(fileName);
   }
   previewDiv.remove();
+
+  // Remove the file from the input.files array
+  const fileList = Array.from(input.files);
+  const updatedFiles = fileList.filter(file => file.name !== fileName);
+  
+  // Update the input element's files list
+  const dataTransfer = new DataTransfer();
+  updatedFiles.forEach(file => dataTransfer.items.add(file));
+  input.files = dataTransfer.files;
 
   checkFileSize();
 

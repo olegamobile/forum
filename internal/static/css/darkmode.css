@@ -37,6 +37,10 @@
     color: var(--dark-text);
 }
 
+.dark-mode h1 a:hover {
+    color: var(--light4) !important;
+}
+
 .dark-mode .thread {
 background-color: var(--dark-shadow);
 }

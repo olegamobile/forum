@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,7 +14,7 @@ import (
 )
 
 func imageTypeCorrect(file string) bool {
-	extensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webm"}
+	extensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"}
 	imageExtensions := make(map[string]bool)
 	for _, ext := range extensions {
 		imageExtensions[ext] = true
@@ -105,4 +106,9 @@ func getThreadImageURL(threadID int) (map[string]string, error) {
 		images[imageURL] = originalName
 	}
 	return images, nil
+}
+
+func checkRequestSize(r *http.Request) bool {
+	maxTotalSize := int(20 * 1024 * 1024) // 20 MB
+	return r.ContentLength <= int64(maxTotalSize)
 }

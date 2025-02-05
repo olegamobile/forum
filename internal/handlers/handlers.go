@@ -353,15 +353,13 @@ func DislikeHandler(w http.ResponseWriter, r *http.Request) {
 	likeOrDislike(w, r, "dislike")
 }
 
-// Image upldoad
-
-func checkRequestSize(r *http.Request) bool {
-	maxTotalSize := int(20 * 1024 * 1024) // 20 MB
-	return r.ContentLength <= int64(maxTotalSize)
-}
-
 func ImageUploadHandler(r *http.Request, postID int64, userID string) (string, error) {
 	errMsg := ""
+	maxTotalSize := int(20 * 1024 * 1024)            // 20 MB
+	err := r.ParseMultipartForm(int64(maxTotalSize)) // required to run for MultipartForm
+	if err != nil {
+		return "Files size is too big", err
+	}
 	files := r.MultipartForm.File["files"]
 
 	for _, fileHeader := range files {
