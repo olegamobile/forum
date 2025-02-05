@@ -12,7 +12,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-func imageType(file string) bool {
+func imageTypeCorrect(file string) bool {
 	extensions := []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webm"}
 	imageExtensions := make(map[string]bool)
 	for _, ext := range extensions {
@@ -32,7 +32,8 @@ func uniqueFileName(file string) (string, error) {
 	return fileID, nil
 }
 
-func saveImageData(fileID string, postID int64, userID string, fileHeader *multipart.FileHeader, uploadedFile multipart.File) (string, error) {
+func saveImageData(postID int64, userID string,
+	fileHeader *multipart.FileHeader, uploadedFile multipart.File) (string, error) {
 
 	originalName := fileHeader.Filename
 	fileSize := int(fileHeader.Size)
@@ -44,6 +45,13 @@ func saveImageData(fileID string, postID int64, userID string, fileHeader *multi
 		errMsg := "Internal error"
 		return errMsg, err
 	}
+
+	fileID, err := uniqueFileName(fileHeader.Filename)
+	if err != nil {
+		errMsg := "Error while generating file name."
+		return errMsg, err
+	}
+
 	filePath := filepath.Join(imageUploadDir, fileID)
 	os.Chmod(filePath, 0644)
 	savedFile, err := os.Create(filePath)

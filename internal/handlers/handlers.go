@@ -187,7 +187,12 @@ func AddThreadHandler(w http.ResponseWriter, r *http.Request) {
 			goToErrorPage("Request size too large", http.StatusRequestEntityTooLarge, w, r)
 			return
 		}
-		if len(title) > titleMaxLen || len(content) > contentMaxLen || len(rawCats) > categoriesMaxLen || title == "" || content == "" || rawCats == "" { // User may try to force a long or short input
+		if len(title) > titleMaxLen ||
+			len(content) > contentMaxLen ||
+			len(rawCats) > categoriesMaxLen ||
+			title == "" ||
+			content == "" ||
+			rawCats == "" { // User may try to force a long or short input
 			goToErrorPage("Bad request, input length not supported", http.StatusBadRequest, w, r)
 			return
 		}
@@ -195,7 +200,8 @@ func AddThreadHandler(w http.ResponseWriter, r *http.Request) {
 		catsList := removeDuplicates(strings.Fields(cleanString(rawCats)))
 		threadUrl := "/"
 
-		threadResult, err := db.DB.Exec(`INSERT INTO posts (author, authorID, title, content) VALUES (?, ?, ?, ?);`, author, authID, title, content)
+		threadResult, err := db.DB.Exec(`INSERT INTO posts (author, authorID, title, content) 
+										 VALUES (?, ?, ?, ?);`, author, authID, title, content)
 		if err != nil {
 			fmt.Println("Adding:", err.Error())
 			goToErrorPage("Error adding thread", http.StatusInternalServerError, w, r)
@@ -217,7 +223,8 @@ func AddThreadHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			_, err = db.DB.Exec(`INSERT OR IGNORE INTO posts_categories (post_id, category_id) VALUES (?, (SELECT id FROM categories WHERE name=?));`, threadID, category)
+			_, err = db.DB.Exec(`INSERT OR IGNORE INTO posts_categories (post_id, category_id) 
+								 VALUES (?, (SELECT id FROM categories WHERE name=?));`, threadID, category)
 			if err != nil {
 				fmt.Println("Adding:", err.Error())
 				goToErrorPage("Error adding posts-categories relations", http.StatusInternalServerError, w, r)
@@ -225,7 +232,7 @@ func AddThreadHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		errMsg, err := ImageUploadHandler(r, threadID, authID, w)
+		errMsg, err := ImageUploadHandler(r, threadID, authID)
 		if err != nil {
 			fmt.Println(errMsg, err.Error())
 			goToErrorPage(errMsg, http.StatusInternalServerError, w, r)
@@ -234,7 +241,9 @@ func AddThreadHandler(w http.ResponseWriter, r *http.Request) {
 
 		//easteregg error 418 teapot
 		if title == "tea" && content == "tea" && rawCats == "tea" {
-			goToErrorPage(`<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/418">I'm a teapot. I refuse to brew coffee!</a>`, http.StatusTeapot, w, r)
+			errMsg := `<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/418">
+			I'm a teapot. I refuse to brew coffee!</a>`
+			goToErrorPage(errMsg, http.StatusTeapot, w, r)
 			return
 		}
 
@@ -270,7 +279,8 @@ func AddReplyHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if content != "" {
-			_, err := db.DB.Exec(`INSERT INTO posts (base_id, author, authorID, content, parent_id) VALUES (?, ?, ?, ?, ?);`, baseId, author, authID, content, parId)
+			_, err := db.DB.Exec(`INSERT INTO posts (base_id, author, authorID, content, parent_id) 
+								  VALUES (?, ?, ?, ?, ?);`, baseId, author, authID, content, parId)
 			if err != nil {
 				fmt.Println("Replying:", err.Error())
 				goToErrorPage("Error adding reply", http.StatusInternalServerError, w, r)
@@ -306,7 +316,8 @@ func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
 	}
 
 	// Try to delete the exact same row from the table (when already liked/disliked)
-	res, _ := db.DB.Exec(`DELETE FROM post_reactions WHERE user_id = ? AND post_id = ? AND reaction_type = ?;`, userID, postId, opinion)
+	res, _ := db.DB.Exec(`DELETE FROM post_reactions 
+						  WHERE user_id = ? AND post_id = ? AND reaction_type = ?;`, userID, postId, opinion)
 
 	// Check if any row was deleted
 	rowsAffected, err := res.RowsAffected()
@@ -316,7 +327,10 @@ func likeOrDislike(w http.ResponseWriter, r *http.Request, opinion string) {
 
 	// Add like/dislike: Update with current value on conflict
 	if rowsAffected == 0 {
-		_, err2 := db.DB.Exec(`INSERT INTO post_reactions (user_id, post_id, reaction_type) VALUES (?, ?, ?) ON CONFLICT (user_id, post_id) DO UPDATE SET reaction_type = excluded.reaction_type;`, userID, postId, opinion)
+		_, err2 := db.DB.Exec(`INSERT INTO post_reactions (user_id, post_id, reaction_type) 
+							   VALUES (?, ?, ?) 
+							   ON CONFLICT (user_id, post_id) 
+							   DO UPDATE SET reaction_type = excluded.reaction_type;`, userID, postId, opinion)
 		if err2 != nil {
 			fmt.Println("Adding like or dislike:", err2.Error())
 			goToErrorPage("Error adding like or dislike", http.StatusInternalServerError, w, r)
@@ -342,26 +356,21 @@ func checkRequestSize(r *http.Request) bool {
 	return r.ContentLength <= int64(maxTotalSize)
 }
 
-func ImageUploadHandler(r *http.Request, postID int64, userID string, w http.ResponseWriter) (string, error) {
+func ImageUploadHandler(r *http.Request, postID int64, userID string) (string, error) {
 	errMsg := ""
-
 	files := r.MultipartForm.File["files"]
+
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
 			errMsg = "File cannot be opened."
 			return errMsg, err
 		}
-		if !imageType(fileHeader.Filename) {
+		if !imageTypeCorrect(fileHeader.Filename) {
 			errMsg = "Invalid file type."
 			return errMsg, err
 		}
-		fileID, err := uniqueFileName(fileHeader.Filename)
-		if err != nil {
-			errMsg = "Error while saving file"
-			return errMsg, err
-		}
-		saveImageData(fileID, postID, userID, fileHeader, file)
+		saveImageData(postID, userID, fileHeader, file)
 		defer file.Close()
 	}
 	return "", nil
@@ -433,7 +442,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err = db.DB.Exec(`INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?);`, userId, email, name, string(hashPass))
+		_, err = db.DB.Exec(`INSERT INTO users (id, email, username, password) 
+						    VALUES (?, ?, ?, ?);`, userId, email, name, string(hashPass))
 		if err != nil {
 			fmt.Println("Adding:", err.Error())
 			goToErrorPage("Error adding user", http.StatusInternalServerError, w, r)
