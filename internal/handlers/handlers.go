@@ -5,6 +5,7 @@ import (
 	"forum/internal/db"
 	"forum/internal/templates"
 	"html"
+	"io"
 	"net/http"
 	"net/mail"
 	"strings"
@@ -184,6 +185,7 @@ func AddThreadHandler(w http.ResponseWriter, r *http.Request) {
 		content := html.EscapeString(strings.TrimSpace(r.FormValue("content")))
 		rawCats := html.EscapeString(strings.ToLower(r.FormValue("categories")))
 		if !checkRequestSize(r) {
+			io.Copy(io.Discard, r.Body) // Discard body, so client doesn't try to resend
 			goToErrorPage("Request size too large", http.StatusRequestEntityTooLarge, w, r)
 			return
 		}
@@ -252,6 +254,7 @@ func AddThreadHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !valid {
 		// Session perhaps expired during writing
+		io.Copy(io.Discard, r.Body) // Discard body, so client doesn't try to resend
 		http.Redirect(w, r, "/expired", http.StatusSeeOther)
 	}
 }
@@ -292,6 +295,7 @@ func AddReplyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if !valid {
 		// Session maybe expired during writing
+		io.Copy(io.Discard, r.Body) // Discard body, so client doesn't try to resend
 		http.Redirect(w, r, "/expired", http.StatusSeeOther)
 	}
 }
