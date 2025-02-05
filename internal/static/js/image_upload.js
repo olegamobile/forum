@@ -1,6 +1,7 @@
 const selectedFiles = new Map();
 const maxTotalSize = 20 * 1024 * 1024; // 20 MB
 let totalSize = 0;
+let fileArray = [];
 
 function updateFileList() {
   const input = document.getElementById("files");
@@ -55,7 +56,12 @@ function updateFileList() {
       previewContainer.appendChild(previewDiv);
     };
     reader.readAsDataURL(file);
+    fileArray.push(file);
   }
+
+  const dataTransfer = new DataTransfer();
+  fileArray.forEach(file => dataTransfer.items.add(file));
+  input.files = dataTransfer.files;
 
 checkFileSize();
 
@@ -76,6 +82,7 @@ function deleteFile(fileName, previewDiv, input) {
   const dataTransfer = new DataTransfer();
   updatedFiles.forEach(file => dataTransfer.items.add(file));
   input.files = dataTransfer.files;
+  fileArray = updatedFiles;
 
   checkFileSize();
 
